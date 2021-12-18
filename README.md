@@ -5,9 +5,9 @@
 [![](https://img.shields.io/badge/mail-0078D4?style=for-the-badge&logo=microsoft-outlook&logoColor=white)](mailto:daanrosendal@outlook.com)
 [![](https://img.shields.io/badge/resume-yellowgreen?&style=for-the-badge)](https://daanrosendal.com/portfolio)
 
-![GitHub overview](https://github.com/KnlnKS/KnlnKS/blob/main/generated/overview.svg)
+[![My GitHub Stats](https://github-readme-stats.vercel.app/api?username=kevin51jiang)](https://github.com/kevin51jiang)
 
-[![KnlnKS's LeetCode stats](https://leetcode-stats-six.vercel.app/api?username=DaanRosendal&theme=midnight)](https://github.com/KnlnKS/leetcode-stats)
+[![My LeetCode Stats](https://leetcode-stats-six.vercel.app/api?username=DaanRosendal&theme=midnight)](https://github.com/KnlnKS/leetcode-stats)
 
 <!--
 **DaanRosendal/DaanRosendal** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
