@@ -1,9 +1,9 @@
 ### Hi there 👋, I'm Daan Rosendal
 
-[![](https://img.shields.io/badge/resume-yellowgreen?&style=for-the-badge)](https://daanrosendal.com/Resume_DaanRosendal.pdf)
+[![](https://img.shields.io/badge/resume-black?&style=for-the-badge)](https://daanrosendal.com/Resume_DaanRosendal.pdf)
 [![](https://img.shields.io/badge/linkedin-%230077B5.svg?&style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/daanrosendal)
 [![](https://img.shields.io/badge/mail-0078D4?style=for-the-badge&logo=microsoft-outlook&logoColor=white)](mailto:daanrosendal@outlook.com)
-[![](https://img.shields.io/badge/portfolio-yellow?&style=for-the-badge)](https://daanrosendal.com/portfolio)
+[![](https://img.shields.io/badge/portfolio-brown?&style=for-the-badge)](https://daanrosendal.com/portfolio)
 
 [![My GitHub Stats](https://github-readme-stats.vercel.app/api?username=DaanRosendal)](#)
 
