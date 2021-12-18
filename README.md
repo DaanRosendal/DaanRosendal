@@ -1,8 +1,10 @@
 ### Hi there 👋, I'm Daan Rosendal
 
-[![](https://img.shields.io/badge/resume-lightgrey?&style=for-the-badge)](https://daanrosendal.com/Resume_DaanRosendal.pdf)
+[![](https://img.shields.io/badge/resume-yellowgreen?&style=for-the-badge)](https://daanrosendal.com/Resume_DaanRosendal.pdf)
 [![](https://img.shields.io/badge/linkedin-%230077B5.svg?&style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/daanrosendal)
 [![](https://img.shields.io/badge/mail-0078D4?style=for-the-badge&logo=microsoft-outlook&logoColor=white)](mailto:daanrosendal@outlook.com)
+[![](https://img.shields.io/badge/resume-yellowgreen?&style=for-the-badge)](https://daanrosendal.com/portfolio)
+
 
 <!--
 **DaanRosendal/DaanRosendal** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
