@@ -6,18 +6,8 @@
 [![](https://img.shields.io/badge/portfolio-lightblue?&style=for-the-badge)](https://daanrosendal.com/portfolio)
 
 ### GitHub Stats
-<!-- [![My GitHub Stats](https://github-readme-stats.vercel.app/api?username=DaanRosendal&theme=apprentice&hide=stars,issues&show_icons=true&count_private=true&hide_title=true&include_all_commits=true)](#) -->
-
-### LeetCode Stats
-[![My LeetCode Stats](https://leetcode-stats-six.vercel.app/api?username=DaanRosendal&theme=dark)](https://github.com/KnlnKS/leetcode-stats)
-
-### GitHub Stats
-<a href="https://github.com/JacobLinCool?tab=repositories">
-  <img title="JacobLinCool's Github Stats" alt="JacobLinCool's Github Stats" src="https://github-readme-stats.vercel.app/api?username=DaanRosendal&theme=apprentice&hide=stars,issues&show_icons=true&count_private=true&hide_title=true&include_all_commits=true" />
-</a>
-
-<a href="https://github.com/JacobLinCool#user-activity-overview">
-  <img title="JacobLinCool's Github Streak" alt="JacobLinCool's Streak" src="https://github-readme-streak-stats.herokuapp.com/?user=DaanRosendal" />
+<a href="https://github.com/DaanRosendal?tab=repositories">
+  <img title="DaanRosendal's Github Stats" alt="JacobLinCool's Github Stats" src="https://github-readme-stats.vercel.app/api?username=DaanRosendal&theme=apprentice&hide=stars,issues&show_icons=true&count_private=true&hide_title=true&include_all_commits=true" />
 </a>
 
 ### LeetCode Stats
