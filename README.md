@@ -11,8 +11,22 @@
 ### LeetCode Stats
 [![My LeetCode Stats](https://leetcode-stats-six.vercel.app/api?username=DaanRosendal&theme=dark)](https://github.com/KnlnKS/leetcode-stats)
 
-### Most Used Languages
-[![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=daanrosendal&layout=compact)](https://github.com/anuraghazra/github-readme-stats)
+
+<!-- Some Cards -->
+<p align="center">
+  <a href="https://github.com/JacobLinCool?tab=repositories">
+    <img title="JacobLinCool's Github Stats" alt="JacobLinCool's Github Stats" src="https://github-readme-stats.vercel.app/api?   username=JacobLinCool&show_icons=true&count_private=true&hide=stars&include_all_commits=false&custom_title=GitHub%20Stats" />
+  </a>
+  
+  <a href="https://github.com/JacobLinCool#user-activity-overview">
+    <img title="JacobLinCool's Github Streak" alt="JacobLinCool's Streak" src="https://github-readme-streak-stats.herokuapp.com/?user=JacobLinCool" />
+  </a>
+  <br />
+  <a href="https://leetcode.com/DaanRosendal">
+    <img title="Daan Rosendal's LeetCode Stats" alt="Daan Rosendal's LeetCode Stats" src="https://leetcode.card.workers.dev/?username=DaanRosendal&border=0.5&style=auto&font=Baloo%202&width=498&r=0" />
+  </a>
+</p>
+  
 
 <!--
 **DaanRosendal/DaanRosendal** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
