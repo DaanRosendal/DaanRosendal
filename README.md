@@ -6,7 +6,7 @@
 [![](https://img.shields.io/badge/portfolio-lightblue?&style=for-the-badge)](https://daanrosendal.com/portfolio)
 
 ### GitHub Stats
-[![My GitHub Stats](https://github-readme-stats.vercel.app/api?username=DaanRosendal&theme=dark&hide=stars,issues&show_icons=true&count_private=true&hide_title=true)](#)
+[![My GitHub Stats](https://github-readme-stats.vercel.app/api?username=DaanRosendal&theme=apprentice&hide=stars,issues&show_icons=true&count_private=true&hide_title=true&include_all_commits=true)](#)
 
 ### LeetCode Stats
 [![My LeetCode Stats](https://leetcode-stats-six.vercel.app/api?username=DaanRosendal&theme=dark)](https://github.com/KnlnKS/leetcode-stats)
