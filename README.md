@@ -7,7 +7,7 @@
 
 ### GitHub Stats
 <a href="https://github.com/DaanRosendal?tab=repositories">
-  <img title="DaanRosendal's Github Stats" alt="DaanRosendal's Github Stats" src="https://github-readme-stats.vercel.app/api?username=DaanRosendal&theme=dark&show_icons=true&count_private=true&hide_title=true&include_all_commits=true&hide_rank=true&bg_color=00000000&show=reviews,discussions_started,discussions_answered,prs_merged,prs_merged_percentage" />
+  <img title="DaanRosendal's Github Stats" alt="DaanRosendal's Github Stats" src="https://github-readme-stats.vercel.app/api?username=DaanRosendal&theme=dark&show_icons=true&count_private=true&hide_title=true&include_all_commits=true&hide_rank=true&bg_color=00000000&show=reviews,prs_merged,prs_merged_percentage&hide=stars" />
 </a>
 
 ### LeetCode Stats
