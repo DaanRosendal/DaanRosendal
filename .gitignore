@@ -20,6 +20,17 @@ pnpm-debug.log*
 .env
 .env.production
 
+# LaTeX secrets (PII — phone, email)
+resume/secrets.tex
+
+# LaTeX build artifacts
+resume/*.aux
+resume/*.fdb_latexmk
+resume/*.fls
+resume/*.log
+resume/*.out
+resume/*.synctex.gz
+
 # macOS-specific files
 .DS_Store
 
