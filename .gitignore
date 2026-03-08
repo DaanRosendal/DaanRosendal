@@ -24,6 +24,7 @@ pnpm-debug.log*
 resume/secrets.tex
 
 # LaTeX build artifacts
+resume/*.pdf
 resume/*.aux
 resume/*.fdb_latexmk
 resume/*.fls
