@@ -1,27 +1,147 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { Building2, FileText, Mail, MapPin } from '@lucide/astro';
+
+const experiences = [
+  {
+    role: 'Software Engineer',
+    type: 'Full-time',
+    company: 'Lakera',
+    dates: 'Sep 2025 – Present',
+    location: 'Zurich, Switzerland',
+    logo: '/logos/lakera-black.png',
+    logoDark: '/logos/lakera-white.png',
+  },
+  {
+    role: 'Cloud Solution Architect',
+    type: 'Intern',
+    company: 'Microsoft',
+    dates: 'Feb 2025 – Aug 2025',
+    location: 'Amsterdam, The Netherlands',
+    logo: '/logos/microsoft.png',
+  },
+  {
+    role: 'Full-Stack Software Engineer',
+    type: 'Intern',
+    company: 'CERN',
+    dates: 'Feb 2023 – Mar 2024',
+    location: 'Geneva, Switzerland',
+    logo: '/logos/cern.png',
+  },
+  {
+    role: 'Owner',
+    type: 'Side Hustle',
+    company: 'Rocket League Training Service',
+    dates: 'Jan 2017 – Jan 2024',
+    location: 'Remote, The Netherlands/Switzerland',
+    logo: '/logos/rocket-league.png',
+  },
+  {
+    role: 'Full-Stack Software Engineer',
+    type: 'Part-time',
+    company: 'Print.one',
+    dates: 'Dec 2021 – Jan 2023',
+    location: 'Zwolle, The Netherlands',
+    logo: '/logos/print-one.jpeg',
+    rounded: true,
+  },
+  {
+    role: 'Software Engineer',
+    type: 'Part-time',
+    company: 'Univé',
+    dates: 'Apr 2021 – Dec 2021',
+    location: 'Zwolle, The Netherlands',
+    logo: '/logos/unive.png',
+  },
+  {
+    role: 'Software Engineer',
+    type: 'Intern',
+    company: 'Deltion College',
+    dates: 'Feb 2020 – Jul 2020',
+    location: 'Zwolle, The Netherlands',
+    logo: '/logos/deltion.png',
+  },
+  {
+    role: 'Software Engineer',
+    type: 'Intern',
+    company: 'GWBO',
+    dates: 'Aug 2019 – Jan 2020',
+    location: 'Kampen, The Netherlands',
+    logo: '/logos/gwbo.png',
+  },
+];
 ---
 <Layout title="Daan Rosendal">
-  <header class="mb-12">
-    <h1 class="text-4xl font-bold mb-2">Daan Rosendal</h1>
-    <p class="text-gray-500">Software Engineer</p>
+  <header class="mb-10">
+    <h1 class="text-4xl font-bold mb-3">Daan Rosendal</h1>
+    <div class="flex justify-between items-center mb-3 text-sm text-gray-500 dark:text-zinc-400">
+      <p>Software Engineer</p>
+      <span class="flex items-center gap-1">
+        <MapPin size={13} />
+        Zurich, Switzerland
+      </span>
+    </div>
+    <nav class="flex justify-between items-center text-sm text-gray-500 dark:text-zinc-400">
+    <a href="/Daan_Rosendal_Resume.pdf" class="flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
+      <FileText size={14} />
+      <span>Resume</span>
+    </a>
+    <a href="https://linkedin.com/in/daanrosendal" class="flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+      </svg>
+      <span>LinkedIn</span>
+    </a>
+    <a href="https://github.com/DaanRosendal" class="flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+      </svg>
+      <span>GitHub</span>
+    </a>
+    <a href="mailto:contact@daanrosendal.com" class="flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-white transition-colors">
+      <Mail size={14} />
+      <span>Email</span>
+    </a>
+  </nav>
   </header>
 
   <section class="mb-10">
-    <h2 class="text-xl font-semibold mb-4">About</h2>
-    <p class="text-gray-700 leading-relaxed">
-      Software engineer at Lakera. Former intern at Microsoft and CERN.
-    </p>
-  </section>
-
-  <section class="mb-10">
-    <h2 class="text-xl font-semibold mb-4">Links</h2>
-    <ul class="space-y-2 text-gray-700">
-      <li><a href="/Daan_Rosendal_Resume.pdf" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">Resume</a></li>
-      <li><a href="https://linkedin.com/in/daanrosendal" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
-      <li><a href="https://github.com/DaanRosendal" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-      <li><a href="mailto:contact@daanrosendal.com" class="text-blue-600 hover:underline">Email</a></li>
-      {/* <li><a href="/blog" class="text-blue-600 hover:underline">Blog</a></li> */}
+    <h2 class="text-xl font-semibold mb-6">Professional Experience</h2>
+    <ul>
+      {experiences.map((exp, i) => (
+        <li class="flex gap-4">
+          <div class="w-10 flex flex-col items-center">
+            <div class="w-10 h-10 shrink-0 flex items-center justify-center overflow-hidden">
+              {exp.logo
+                ? exp.logoDark
+                  ? <>
+                      <img src={exp.logo}     alt={exp.company} class={`w-full h-full object-contain dark:hidden ${exp.rounded ? 'rounded-sm' : ''}`} />
+                      <img src={exp.logoDark} alt={exp.company} class={`w-full h-full object-contain hidden dark:block ${exp.rounded ? 'rounded-sm' : ''}`} />
+                    </>
+                  : <img src={exp.logo} alt={exp.company} class={`w-full h-full object-contain ${exp.rounded ? 'rounded-sm' : ''}`} />
+                : <Building2 size={20} class="text-gray-400 dark:text-zinc-500" />
+              }
+            </div>
+            {i < experiences.length - 1 && (
+              <div class="w-px bg-gray-200 dark:bg-zinc-700 flex-1 my-1.5"></div>
+            )}
+          </div>
+          <div class={`flex-1 min-w-0 ${i < experiences.length - 1 ? 'pb-8' : ''}`}>
+            <div class="h-10 flex flex-col justify-center">
+              <div class="flex justify-between items-baseline gap-4">
+                <span class="font-medium text-gray-900 dark:text-white">{exp.role}</span>
+                <span class="hidden sm:inline text-sm text-gray-400 dark:text-zinc-500 whitespace-nowrap shrink-0">{exp.dates}</span>
+              </div>
+              <div class="flex justify-between items-baseline gap-4 mt-0.5">
+                <span class="text-sm text-gray-500 dark:text-zinc-400">
+                  {exp.company}{exp.type && <span class="text-gray-300 dark:text-zinc-600"> · </span>}{exp.type && <span>{exp.type}</span>}
+                </span>
+                <span class="hidden sm:inline text-sm text-gray-400 dark:text-zinc-500 whitespace-nowrap shrink-0">{exp.location}</span>
+              </div>
+            </div>
+          </div>
+        </li>
+      ))}
     </ul>
   </section>
 </Layout>

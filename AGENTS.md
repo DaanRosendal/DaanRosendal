@@ -41,6 +41,12 @@ npm run preview  # Preview production build locally
 └── README.md              # ⚠️ DO NOT MODIFY — GitHub Profile README
 ```
 
+## Styling Conventions
+
+- **Dark mode** is system-preference only (`prefers-color-scheme`) — no toggle, no JS. Tailwind v4 handles this automatically via `dark:` utilities.
+- **Use `zinc-*` for all dark mode color variants** — Tailwind v4's `gray-*` has a blue tint in oklch color space. Light mode can use `gray-*` as normal.
+- **Icons**: `@lucide/astro` for UI icons. Brand icons (GitHub, LinkedIn) must be inline SVGs with `fill="currentColor"` — Lucide removed brand logos due to trademark concerns.
+
 ## Hard Constraints
 
 - **NEVER modify, overwrite, or delete `README.md`** — it is the GitHub Profile README and controls the public profile page.
