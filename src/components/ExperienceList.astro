@@ -1,5 +1,5 @@
 ---
-import { Building2 } from '@lucide/astro';
+import { Building2, ChevronDown } from '@lucide/astro';
 
 interface Experience {
   role: string;
@@ -13,6 +13,8 @@ interface Experience {
   logo?: string;
   logoDark?: string;
   rounded?: boolean;
+  description?: string;
+  bullets?: string[];
 }
 
 const experiences: Experience[] = [
@@ -25,6 +27,11 @@ const experiences: Experience[] = [
     locationShort: 'Zurich, CH',
     logo: '/logos/lakera-black.png',
     logoDark: '/logos/lakera-white.png',
+    description: 'AI security startup, acquired by Check Point for $300M',
+    bullets: [
+      'Developing Lakera Guard, an AI security API protecting agents and applications by screening for prompt injections, data leakage, and content violations at sub-50ms latency for Fortune 500 clients, using Python, Go, and Kubernetes',
+      'Identified and engineered a 75% reduction in Kafka infrastructure costs through compression and batching, cutting projected annualised spend from $800K to $200K for a single 5k RPS client and saving millions across all clients',
+    ],
   },
   {
     role: 'Cloud Solution Architect',
@@ -35,6 +42,11 @@ const experiences: Experience[] = [
     location: 'Amsterdam, The Netherlands',
     locationShort: 'Amsterdam, NL',
     logo: '/logos/microsoft.png',
+    description: 'Big Tech company empowering billions of users',
+    bullets: [
+      'Designed and implemented cloud architectures for enterprise clients to create Azure solutions with high availability, security, and scalability, using Azure, Python, C#, PostgreSQL, Kubernetes, Docker, RabbitMQ and GitHub Actions',
+      'Developed a multi-agent MCP solution for an enterprise client, using Python, Azure AI Foundry, and Semantic Kernel',
+    ],
   },
   {
     role: 'Software Engineer',
@@ -44,6 +56,13 @@ const experiences: Experience[] = [
     location: 'Geneva, Switzerland',
     locationShort: 'Geneva, CH',
     logo: '/logos/cern.png',
+    description: 'European Organisation for Nuclear Research',
+    bullets: [
+      'Built a system that improves on-demand production and publishing of the particle accelerator\'s open data streams, allowing physicists all over the world to access 55 petabytes of LHCb data, using Go, JavaScript, React and npm packaging',
+      'Enhanced REANA with workflow-sharing functionality in the web UI and CLI, earning a Poster Award by popular vote at the 2024 Conference on Computing in High Energy and Nuclear Physics; used Python, Flask, Go, Conda and React',
+      'Set up 3 robust DevOps pipelines with automatic redeployment using Kubernetes, Docker, Helm, and GitLab CI/CD',
+      'Received consistent praise for excellent performance in both technical and social competencies across 5 evaluations',
+    ],
   },
   {
     role: 'Owner',
@@ -54,6 +73,10 @@ const experiences: Experience[] = [
     location: 'Remote, The Netherlands/Switzerland',
     locationShort: 'Remote, NL/CH',
     logo: '/logos/rocket-league.png',
+    bullets: [
+      'Leveraged my Rocket League skills as a top 50 player worldwide to help clients all over the globe obtain their desired rank',
+      'Created and maintained a Discord server with over 500 customers which led to a 200% increase in orders',
+    ],
   },
   {
     role: 'Software Engineer',
@@ -64,6 +87,11 @@ const experiences: Experience[] = [
     locationShort: 'Zwolle, NL',
     logo: '/logos/print-one.jpeg',
     rounded: true,
+    description: 'Direct mail automation startup',
+    bullets: [
+      'Developed a scalable microservice architecture that is capable of handling 10,000+ simultaneous requests to automate printing and sending personalised postcards, using TypeScript, React, Next.js, Tailwind, C#, GCP, Docker and Terraform',
+      'Measured the performance of different database management systems that are compatible with GCP and Prisma, and found that PostgreSQL was 2 times more efficient for this project\'s use case than the used DBMS (MySQL)',
+    ],
   },
   {
     role: 'Software Engineer',
@@ -73,6 +101,11 @@ const experiences: Experience[] = [
     location: 'Zwolle, The Netherlands',
     locationShort: 'Zwolle, NL',
     logo: '/logos/unive.png',
+    description: 'Insurance company with over two million clients',
+    bullets: [
+      'Saved paralegals 20 hours per week by developing various single-page applications (SPAs) for the legal aid department (e.g., registering a legal case, adding documents to a legal case, filing complaints), using TypeScript and Angular',
+      'Created and led application presentations and sprint reviews to keep investors and stakeholders informed',
+    ],
   },
   {
     role: 'Software Engineer',
@@ -82,6 +115,11 @@ const experiences: Experience[] = [
     location: 'Zwolle, The Netherlands',
     locationShort: 'Zwolle, NL',
     logo: '/logos/deltion.png',
+    description: 'Educational institution with over 20,000 students',
+    bullets: [
+      'Built a Progressive Web App (PWA) for the faculty of technology to replace the outdated WordPress website which led to a mobile traffic increase of 200% and a user satisfaction improvement of 75%, using PHP, Laravel and MySQL',
+      'Led the system design process of building an infrastructure with features like load-balancing, failover, and multi-master replication, which resulted in 99.99% server availability, using Linux, HAProxy, MySQL, and UML',
+    ],
   },
   {
     role: 'Software Engineer',
@@ -91,6 +129,10 @@ const experiences: Experience[] = [
     location: 'Kampen, The Netherlands',
     locationShort: 'Kampen, NL',
     logo: '/logos/gwbo.png',
+    description: 'Architectural engineering consultancy company',
+    bullets: [
+      'Achieved a 400% improvement in architectural drafting efficiency by building two VBA applications that automated the engineering process of translating complex physics calculations to code',
+    ],
   },
 ];
 ---
@@ -98,49 +140,265 @@ const experiences: Experience[] = [
 <section class="mb-10">
   <h2 class="text-xl font-semibold mb-6">Professional Experience</h2>
   <ul>
-    {experiences.map((exp, i) => (
-      <li class="flex gap-4">
-        <div class="w-10 flex flex-col items-center">
-          <div class="w-10 h-10 shrink-0 flex items-center justify-center overflow-hidden">
-            {exp.logo
-              ? exp.logoDark
-                ? <>
-                    <img src={exp.logo}     alt={exp.company} class={`w-full h-full object-contain dark:hidden ${exp.rounded ? 'rounded-sm' : ''}`} />
-                    <img src={exp.logoDark} alt={exp.company} class={`w-full h-full object-contain hidden dark:block ${exp.rounded ? 'rounded-sm' : ''}`} />
-                  </>
-                : <img src={exp.logo} alt={exp.company} class={`w-full h-full object-contain ${exp.rounded ? 'rounded-sm' : ''}`} />
-              : <Building2 size={20} class="text-gray-400 dark:text-neutral-500" />
-            }
-          </div>
-          {i < experiences.length - 1 && (
-            <div class="w-px bg-gray-200 dark:bg-neutral-700 flex-1 my-1.5"></div>
-          )}
-        </div>
-        <div class={`flex-1 min-w-0 ${i < experiences.length - 1 ? 'pb-8' : ''}`}>
-          <div class="h-10 flex flex-col justify-center">
-            <div class="flex justify-between items-baseline gap-4">
-              <span class="font-medium text-gray-900 dark:text-white">
-                {exp.shortRole ? <><span class="hidden sm:inline">{exp.role}</span><span class="sm:hidden">{exp.shortRole}</span></> : exp.role}
-              </span>
-              <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">{exp.dates}</span>
+    {experiences.map((exp, i) => {
+      const hasContent = !!(exp.description || (exp.bullets && exp.bullets.length > 0));
+      return (
+        <li class="flex gap-4">
+          <div class="w-10 flex flex-col items-center">
+            <div class="w-10 h-10 shrink-0 flex items-center justify-center overflow-hidden">
+              {exp.logo
+                ? exp.logoDark
+                  ? <>
+                      <img data-exp-logo src={exp.logo}     alt={exp.company} class={`w-full h-full object-contain dark:hidden ${exp.rounded ? 'rounded-sm' : ''}`} />
+                      <img data-exp-logo src={exp.logoDark} alt={exp.company} class={`w-full h-full object-contain hidden dark:block ${exp.rounded ? 'rounded-sm' : ''}`} />
+                    </>
+                  : <img data-exp-logo src={exp.logo} alt={exp.company} class={`w-full h-full object-contain ${exp.rounded ? 'rounded-sm' : ''}`} />
+                : <Building2 size={20} class="text-gray-400 dark:text-neutral-500" />
+              }
             </div>
-            <div class="flex justify-between items-baseline gap-4 mt-0.5">
-              <span class="text-sm text-gray-500 dark:text-neutral-400">
-                {exp.companyShort
-                  ? <><span class="sm:hidden">{exp.companyShort}</span><span class="hidden sm:inline">{exp.company}</span></>
-                  : exp.company
-                }{exp.type && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{exp.type && <span>{exp.type}</span>}
-              </span>
-              <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
-                {exp.locationShort
-                  ? <><span class="sm:hidden">{exp.locationShort}</span><span class="hidden sm:inline">{exp.location}</span></>
-                  : exp.location
-                }
-              </span>
-            </div>
+            {i < experiences.length - 1 && (
+              <div data-exp-bar class="w-px bg-gray-200 dark:bg-neutral-700 flex-1 my-1.5"></div>
+            )}
           </div>
-        </div>
-      </li>
-    ))}
+          <div class={`flex-1 min-w-0 ${i < experiences.length - 1 ? 'pb-8' : ''}`}>
+            {hasContent ? (
+              <details class="group">
+                <summary class="list-none cursor-pointer">
+                  <div class="h-10 flex flex-col justify-center">
+                    <div class="flex justify-between items-baseline gap-4">
+                      <span class="font-medium text-gray-900 dark:text-white flex items-center gap-1.5">
+                        {exp.shortRole ? <><span class="hidden sm:inline">{exp.role}</span><span class="sm:hidden">{exp.shortRole}</span></> : exp.role}
+                        <ChevronDown size={14} class="text-gray-300 dark:text-neutral-600 transition-transform duration-200 group-open:rotate-180 shrink-0 translate-y-px" />
+                      </span>
+                      <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">{exp.dates}</span>
+                    </div>
+                    <div class="flex justify-between items-baseline gap-4 mt-0.5">
+                      <span class="text-sm text-gray-500 dark:text-neutral-400">
+                        {exp.companyShort
+                          ? <><span class="sm:hidden">{exp.companyShort}</span><span class="hidden sm:inline">{exp.company}</span></>
+                          : exp.company
+                        }{exp.type && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{exp.type && <span>{exp.type}</span>}
+                      </span>
+                      <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                        {exp.locationShort
+                          ? <><span class="sm:hidden">{exp.locationShort}</span><span class="hidden sm:inline">{exp.location}</span></>
+                          : exp.location
+                        }
+                      </span>
+                    </div>
+                  </div>
+                </summary>
+                <div class="exp-fade">
+                  <div class="overflow-hidden">
+                    <div class="pt-2.5 pb-1 space-y-2.5">
+                      {exp.description && (
+                        <p class="text-sm text-gray-400 dark:text-neutral-500 italic">{exp.description}</p>
+                      )}
+                      {exp.bullets && exp.bullets.length > 0 && (
+                        <ul class="space-y-2">
+                          {exp.bullets.map((bullet) => (
+                            <li class="flex gap-2.5 text-sm text-gray-600 dark:text-neutral-400">
+                              <span class="mt-2 w-1 h-1 rounded-full bg-gray-300 dark:bg-neutral-600 shrink-0"></span>
+                              <span class="text-justify">{bullet}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </details>
+            ) : (
+              <div class="h-10 flex flex-col justify-center">
+                <div class="flex justify-between items-baseline gap-4">
+                  <span class="font-medium text-gray-900 dark:text-white">
+                    {exp.shortRole ? <><span class="hidden sm:inline">{exp.role}</span><span class="sm:hidden">{exp.shortRole}</span></> : exp.role}
+                  </span>
+                  <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">{exp.dates}</span>
+                </div>
+                <div class="flex justify-between items-baseline gap-4 mt-0.5">
+                  <span class="text-sm text-gray-500 dark:text-neutral-400">
+                    {exp.companyShort
+                      ? <><span class="sm:hidden">{exp.companyShort}</span><span class="hidden sm:inline">{exp.company}</span></>
+                      : exp.company
+                    }{exp.type && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{exp.type && <span>{exp.type}</span>}
+                  </span>
+                  <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                    {exp.locationShort
+                      ? <><span class="sm:hidden">{exp.locationShort}</span><span class="hidden sm:inline">{exp.location}</span></>
+                      : exp.location
+                    }
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </li>
+      );
+    })}
   </ul>
 </section>
+
+<script>
+  import gsap from 'gsap';
+
+  /** Find the logo img that is currently visible (handles dark/light mode swap). */
+  function getVisibleLogo(li: HTMLElement): HTMLImageElement | null {
+    const imgs = li.querySelectorAll<HTMLImageElement>('[data-exp-logo]');
+    for (const img of imgs) {
+      if (img.getBoundingClientRect().width > 0) return img;
+    }
+    return imgs[0] ?? null;
+  }
+
+  /**
+   * Spawn one particle: a fixed-position clone of the logo that bursts outward,
+   * rotates, shrinks, and fades — then removes itself.
+   */
+  function spawnParticle(src: string, originX: number, originY: number) {
+    const el = document.createElement('img');
+    el.src = src;
+    el.style.cssText = `
+      position: fixed;
+      left: ${originX}px;
+      top: ${originY}px;
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      pointer-events: none;
+      z-index: 9999;
+    `;
+    document.body.appendChild(el);
+
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 50 + Math.random() * 75;
+
+    gsap.fromTo(
+      el,
+      { xPercent: -50, yPercent: -50, scale: 0.9, opacity: 0.8 },
+      {
+        x: Math.cos(angle) * dist,
+        y: Math.sin(angle) * dist,
+        scale: 0.05,
+        opacity: 0,
+        rotation: (Math.random() - 0.5) * 400,
+        duration: 0.75 + Math.random() * 0.45,
+        ease: 'power2.out',
+        onComplete: () => el.remove(),
+      }
+    );
+  }
+
+  /**
+   * Fire several waves of particles from the bar's current bottom edge.
+   * Because the bar instantly snaps to full height when details opens, we
+   * spread the origin Y across the bar's full length to create the
+   * "trailing exhaust along the bar" effect.
+   */
+  function runExhaust(logo: HTMLImageElement, bar: HTMLElement | null) {
+    const src = logo.src;
+    const WAVES = 5;
+    const INTERVAL_MS = 165;
+
+    for (let w = 0; w < WAVES; w++) {
+      setTimeout(() => {
+        let x: number, y: number;
+
+        if (bar) {
+          const r = bar.getBoundingClientRect();
+          // Progress from top → bottom of bar across waves, so particles
+          // trail downward giving the impression of a growing exhaust.
+          const progress = w / (WAVES - 1);
+          x = r.left + r.width / 2;
+          y = r.top + r.height * progress;
+        } else {
+          // No bar on last entry — burst from logo center.
+          const r = logo.getBoundingClientRect();
+          x = r.left + r.width / 2;
+          y = r.top + r.height / 2;
+        }
+
+        const count = w === 0 ? 5 : 3;
+        for (let i = 0; i < count; i++) spawnParticle(src, x, y);
+      }, w * INTERVAL_MS);
+    }
+  }
+
+  // Stores each bar's height in the closed state so the close animation
+  // can return to exactly that height rather than collapsing to zero.
+  const barBaseHeights = new WeakMap<HTMLElement, number>();
+
+  document.querySelectorAll<HTMLDetailsElement>('details').forEach((details) => {
+    const summary = details.querySelector('summary');
+    if (!summary) return;
+
+    summary.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      const li = details.closest('li');
+      if (!li) return;
+
+      const bar     = li.querySelector<HTMLElement>('[data-exp-bar]');
+      const content = details.querySelector<HTMLElement>('.exp-fade');
+
+      if (!details.open) {
+        // ── OPEN ──────────────────────────────────────────────────────────
+        // Snapshot the bar's current (base) height before content appears.
+        const baseH = bar ? bar.getBoundingClientRect().height : 0;
+        if (bar) barBaseHeights.set(bar, baseH);
+
+        details.open = true;
+
+        if (bar) {
+          const fullH = bar.getBoundingClientRect().height;
+          gsap.fromTo(bar,
+            { height: baseH },
+            { height: fullH, duration: 0.8, ease: 'power2.inOut', clearProps: 'height' }
+          );
+        }
+
+        if (content) {
+          gsap.from(content, {
+            height: 0,
+            overflow: 'hidden',
+            duration: 0.8,
+            ease: 'power2.inOut',
+            clearProps: 'height,overflow',
+          });
+        }
+
+        const logo = getVisibleLogo(li);
+        if (logo) runExhaust(logo, bar);
+
+      } else {
+        // ── CLOSE ─────────────────────────────────────────────────────────
+        // Return the bar to its pre-open height rather than zero.
+        const baseH = bar ? (barBaseHeights.get(bar) ?? bar.getBoundingClientRect().height) : 0;
+
+        const tl = gsap.timeline({
+          onComplete: () => {
+            details.open = false;
+            if (bar)     gsap.set(bar,     { clearProps: 'height' });
+            if (content) gsap.set(content, { clearProps: 'height,overflow' });
+          },
+        });
+
+        if (content) tl.to(content, { height: 0, overflow: 'hidden', duration: 0.6, ease: 'power2.inOut' }, 0);
+        if (bar)     tl.to(bar,     { height: baseH,                  duration: 0.6, ease: 'power2.inOut' }, 0);
+      }
+    });
+  });
+</script>
+
+<style>
+  .exp-fade {
+    opacity: 1;
+    transition: opacity 0.8s ease;
+  }
+
+  @starting-style {
+    .exp-fade {
+      opacity: 0;
+    }
+  }
+</style>
