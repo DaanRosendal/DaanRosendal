@@ -255,15 +255,22 @@ const experiences: Experience[] = [
    * Spawn one particle: a fixed-position clone of the logo that bursts outward,
    * rotates, shrinks, and fades — then removes itself.
    */
-  function spawnParticle(src: string, originX: number, originY: number) {
+  function spawnParticle(
+    src: string,
+    originX: number,
+    originY: number,
+    options?: { size?: number; durationScale?: number }
+  ) {
+    const size = options?.size ?? 24;
+    const durationScale = options?.durationScale ?? 1;
     const el = document.createElement('img');
     el.src = src;
     el.style.cssText = `
       position: fixed;
       left: ${originX}px;
       top: ${originY}px;
-      width: 24px;
-      height: 24px;
+      width: ${size}px;
+      height: ${size}px;
       object-fit: contain;
       pointer-events: none;
       z-index: 9999;
@@ -282,7 +289,7 @@ const experiences: Experience[] = [
         scale: 0.05,
         opacity: 0,
         rotation: (Math.random() - 0.5) * 400,
-        duration: 0.75 + Math.random() * 0.45,
+        duration: (0.75 + Math.random() * 0.45) * 1.5 * durationScale,
         ease: 'power2.out',
         onComplete: () => el.remove(),
       }
@@ -297,8 +304,12 @@ const experiences: Experience[] = [
    */
   function runExhaust(logo: HTMLImageElement, bar: HTMLElement | null) {
     const src = logo.src;
+    const isCern = src.includes('/logos/cern.png');
     const WAVES = 5;
     const INTERVAL_MS = 165;
+    const particleOptions = isCern
+      ? { size: 34, durationScale: 2 }
+      : undefined;
 
     for (let w = 0; w < WAVES; w++) {
       setTimeout(() => {
@@ -319,7 +330,7 @@ const experiences: Experience[] = [
         }
 
         const count = w === 0 ? 5 : 3;
-        for (let i = 0; i < count; i++) spawnParticle(src, x, y);
+        for (let i = 0; i < count; i++) spawnParticle(src, x, y, particleOptions);
       }, w * INTERVAL_MS);
     }
   }
