@@ -1,87 +1,19 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Building2, FileText, Mail, MapPin } from '@lucide/astro';
-
-const experiences = [
-  {
-    role: 'Software Engineer',
-    type: 'Full-time',
-    company: 'Lakera',
-    dates: 'Sep 2025 – Present',
-    location: 'Zurich, Switzerland',
-    logo: '/logos/lakera-black.png',
-    logoDark: '/logos/lakera-white.png',
-  },
-  {
-    role: 'Cloud Solution Architect',
-    type: 'Intern',
-    company: 'Microsoft',
-    dates: 'Feb 2025 – Aug 2025',
-    location: 'Amsterdam, The Netherlands',
-    logo: '/logos/microsoft.png',
-  },
-  {
-    role: 'Full-Stack Software Engineer',
-    type: 'Intern',
-    company: 'CERN',
-    dates: 'Feb 2023 – Mar 2024',
-    location: 'Geneva, Switzerland',
-    logo: '/logos/cern.png',
-  },
-  {
-    role: 'Owner',
-    type: 'Side Hustle',
-    company: 'Rocket League Training Service',
-    dates: 'Jan 2017 – Jan 2024',
-    location: 'Remote, The Netherlands/Switzerland',
-    logo: '/logos/rocket-league.png',
-  },
-  {
-    role: 'Full-Stack Software Engineer',
-    type: 'Part-time',
-    company: 'Print.one',
-    dates: 'Dec 2021 – Jan 2023',
-    location: 'Zwolle, The Netherlands',
-    logo: '/logos/print-one.jpeg',
-    rounded: true,
-  },
-  {
-    role: 'Software Engineer',
-    type: 'Part-time',
-    company: 'Univé',
-    dates: 'Apr 2021 – Dec 2021',
-    location: 'Zwolle, The Netherlands',
-    logo: '/logos/unive.png',
-  },
-  {
-    role: 'Software Engineer',
-    type: 'Intern',
-    company: 'Deltion College',
-    dates: 'Feb 2020 – Jul 2020',
-    location: 'Zwolle, The Netherlands',
-    logo: '/logos/deltion.png',
-  },
-  {
-    role: 'Software Engineer',
-    type: 'Intern',
-    company: 'GWBO',
-    dates: 'Aug 2019 – Jan 2020',
-    location: 'Kampen, The Netherlands',
-    logo: '/logos/gwbo.png',
-  },
-];
+import ExperienceList from '../components/ExperienceList.astro';
+import { FileText, Mail, MapPin } from '@lucide/astro';
 ---
 <Layout title="Daan Rosendal">
   <header class="mb-10">
     <h1 class="text-4xl font-bold mb-3">Daan Rosendal</h1>
-    <div class="flex justify-between items-center mb-3 text-sm text-gray-500 dark:text-zinc-400">
+    <div class="flex justify-between items-center mb-3 text-sm text-gray-500 dark:text-neutral-400">
       <p>Software Engineer</p>
       <span class="flex items-center gap-1">
         <MapPin size={13} />
         Zurich, Switzerland
       </span>
     </div>
-    <nav class="flex justify-between items-center text-sm text-gray-500 dark:text-zinc-400">
+    <nav class="flex justify-between items-center text-sm text-gray-500 dark:text-neutral-400">
     <a href="/Daan_Rosendal_Resume.pdf" class="flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
       <FileText size={14} />
       <span>Resume</span>
@@ -105,43 +37,5 @@ const experiences = [
   </nav>
   </header>
 
-  <section class="mb-10">
-    <h2 class="text-xl font-semibold mb-6">Professional Experience</h2>
-    <ul>
-      {experiences.map((exp, i) => (
-        <li class="flex gap-4">
-          <div class="w-10 flex flex-col items-center">
-            <div class="w-10 h-10 shrink-0 flex items-center justify-center overflow-hidden">
-              {exp.logo
-                ? exp.logoDark
-                  ? <>
-                      <img src={exp.logo}     alt={exp.company} class={`w-full h-full object-contain dark:hidden ${exp.rounded ? 'rounded-sm' : ''}`} />
-                      <img src={exp.logoDark} alt={exp.company} class={`w-full h-full object-contain hidden dark:block ${exp.rounded ? 'rounded-sm' : ''}`} />
-                    </>
-                  : <img src={exp.logo} alt={exp.company} class={`w-full h-full object-contain ${exp.rounded ? 'rounded-sm' : ''}`} />
-                : <Building2 size={20} class="text-gray-400 dark:text-zinc-500" />
-              }
-            </div>
-            {i < experiences.length - 1 && (
-              <div class="w-px bg-gray-200 dark:bg-zinc-700 flex-1 my-1.5"></div>
-            )}
-          </div>
-          <div class={`flex-1 min-w-0 ${i < experiences.length - 1 ? 'pb-8' : ''}`}>
-            <div class="h-10 flex flex-col justify-center">
-              <div class="flex justify-between items-baseline gap-4">
-                <span class="font-medium text-gray-900 dark:text-white">{exp.role}</span>
-                <span class="hidden sm:inline text-sm text-gray-400 dark:text-zinc-500 whitespace-nowrap shrink-0">{exp.dates}</span>
-              </div>
-              <div class="flex justify-between items-baseline gap-4 mt-0.5">
-                <span class="text-sm text-gray-500 dark:text-zinc-400">
-                  {exp.company}{exp.type && <span class="text-gray-300 dark:text-zinc-600"> · </span>}{exp.type && <span>{exp.type}</span>}
-                </span>
-                <span class="hidden sm:inline text-sm text-gray-400 dark:text-zinc-500 whitespace-nowrap shrink-0">{exp.location}</span>
-              </div>
-            </div>
-          </div>
-        </li>
-      ))}
-    </ul>
-  </section>
+  <ExperienceList />
 </Layout>

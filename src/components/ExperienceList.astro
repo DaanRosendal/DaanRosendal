@@ -1,0 +1,146 @@
+---
+import { Building2 } from '@lucide/astro';
+
+interface Experience {
+  role: string;
+  shortRole?: string;
+  type?: string;
+  company: string;
+  companyShort?: string;
+  dates: string;
+  location: string;
+  locationShort?: string;
+  logo?: string;
+  logoDark?: string;
+  rounded?: boolean;
+}
+
+const experiences: Experience[] = [
+  {
+    role: 'Software Engineer',
+    type: 'Full-time',
+    company: 'Lakera',
+    dates: 'Sep 2025 – Present',
+    location: 'Zurich, Switzerland',
+    locationShort: 'Zurich, CH',
+    logo: '/logos/lakera-black.png',
+    logoDark: '/logos/lakera-white.png',
+  },
+  {
+    role: 'Cloud Solution Architect',
+    shortRole: 'Solution Architect',
+    type: 'Intern',
+    company: 'Microsoft',
+    dates: 'Feb 2025 – Aug 2025',
+    location: 'Amsterdam, The Netherlands',
+    locationShort: 'Amsterdam, NL',
+    logo: '/logos/microsoft.png',
+  },
+  {
+    role: 'Software Engineer',
+    type: 'Intern',
+    company: 'CERN',
+    dates: 'Feb 2023 – Mar 2024',
+    location: 'Geneva, Switzerland',
+    locationShort: 'Geneva, CH',
+    logo: '/logos/cern.png',
+  },
+  {
+    role: 'Owner',
+    type: 'Side Hustle',
+    company: 'Rocket League Trainer',
+    companyShort: 'RL Trainer',
+    dates: 'Jan 2017 – Jan 2024',
+    location: 'Remote, The Netherlands/Switzerland',
+    locationShort: 'Remote, NL/CH',
+    logo: '/logos/rocket-league.png',
+  },
+  {
+    role: 'Software Engineer',
+    type: 'Part-time',
+    company: 'Print.one',
+    dates: 'Dec 2021 – Jan 2023',
+    location: 'Zwolle, The Netherlands',
+    locationShort: 'Zwolle, NL',
+    logo: '/logos/print-one.jpeg',
+    rounded: true,
+  },
+  {
+    role: 'Software Engineer',
+    type: 'Part-time',
+    company: 'Univé',
+    dates: 'Apr 2021 – Dec 2021',
+    location: 'Zwolle, The Netherlands',
+    locationShort: 'Zwolle, NL',
+    logo: '/logos/unive.png',
+  },
+  {
+    role: 'Software Engineer',
+    type: 'Intern',
+    company: 'Deltion College',
+    dates: 'Feb 2020 – Jul 2020',
+    location: 'Zwolle, The Netherlands',
+    locationShort: 'Zwolle, NL',
+    logo: '/logos/deltion.png',
+  },
+  {
+    role: 'Software Engineer',
+    type: 'Intern',
+    company: 'GWBO',
+    dates: 'Aug 2019 – Jan 2020',
+    location: 'Kampen, The Netherlands',
+    locationShort: 'Kampen, NL',
+    logo: '/logos/gwbo.png',
+  },
+];
+---
+
+<section class="mb-10">
+  <h2 class="text-xl font-semibold mb-6">Professional Experience</h2>
+  <ul>
+    {experiences.map((exp, i) => (
+      <li class="flex gap-4">
+        <div class="w-10 flex flex-col items-center">
+          <div class="w-10 h-10 shrink-0 flex items-center justify-center overflow-hidden">
+            {exp.logo
+              ? exp.logoDark
+                ? <>
+                    <img src={exp.logo}     alt={exp.company} class={`w-full h-full object-contain dark:hidden ${exp.rounded ? 'rounded-sm' : ''}`} />
+                    <img src={exp.logoDark} alt={exp.company} class={`w-full h-full object-contain hidden dark:block ${exp.rounded ? 'rounded-sm' : ''}`} />
+                  </>
+                : <img src={exp.logo} alt={exp.company} class={`w-full h-full object-contain ${exp.rounded ? 'rounded-sm' : ''}`} />
+              : <Building2 size={20} class="text-gray-400 dark:text-neutral-500" />
+            }
+          </div>
+          {i < experiences.length - 1 && (
+            <div class="w-px bg-gray-200 dark:bg-neutral-700 flex-1 my-1.5"></div>
+          )}
+        </div>
+        <div class={`flex-1 min-w-0 ${i < experiences.length - 1 ? 'pb-8' : ''}`}>
+          <div class="h-10 flex flex-col justify-center">
+            <div class="flex justify-between items-baseline gap-4">
+              <span class="font-medium text-gray-900 dark:text-white">
+                {exp.shortRole ? <><span class="hidden sm:inline">{exp.role}</span><span class="sm:hidden">{exp.shortRole}</span></> : exp.role}
+              </span>
+              <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">{exp.dates}</span>
+            </div>
+            <div class="flex justify-between items-baseline gap-4 mt-0.5">
+              <span class="text-sm text-gray-500 dark:text-neutral-400">
+                {exp.companyShort
+                  ? <><span class="sm:hidden">{exp.companyShort}</span><span class="hidden sm:inline">{exp.company}</span></>
+                  : exp.company
+                }{exp.type && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{exp.type && <span>{exp.type}</span>}
+              </span>
+              <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                {exp.locationShort
+                  ? <><span class="sm:hidden">{exp.locationShort}</span><span class="hidden sm:inline">{exp.location}</span></>
+                  : exp.location
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+      </li>
+    ))}
+  </ul>
+</section>

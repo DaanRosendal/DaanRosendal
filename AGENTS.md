@@ -44,7 +44,7 @@ npm run preview  # Preview production build locally
 ## Styling Conventions
 
 - **Dark mode** is system-preference only (`prefers-color-scheme`) — no toggle, no JS. Tailwind v4 handles this automatically via `dark:` utilities.
-- **Use `zinc-*` for all dark mode color variants** — Tailwind v4's `gray-*` has a blue tint in oklch color space. Light mode can use `gray-*` as normal.
+- **Use `neutral-*` for all dark mode color variants** — Tailwind v4's `gray-*` and `zinc-*` both have a blue/cool tint in oklch color space. `neutral-*` is truly colorless. Light mode can use `gray-*` as normal.
 - **Icons**: `@lucide/astro` for UI icons. Brand icons (GitHub, LinkedIn) must be inline SVGs with `fill="currentColor"` — Lucide removed brand logos due to trademark concerns.
 
 ## Hard Constraints
