@@ -19,6 +19,11 @@ npm run build    # Build to ./dist
 npm run preview  # Preview production build locally
 ```
 
+## Git
+
+- Use **Conventional Commits** for every new commit (for example: `feat: ...`, `fix: ...`, `chore: ...`, `docs: ...`).
+- When rewriting history, preserve commit contents and metadata unless the task explicitly requires changing them.
+
 ## Project Structure
 
 ```text
