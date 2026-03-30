@@ -156,9 +156,13 @@ const experiences: Experience[] = [
                 : <Building2 size={20} class="text-gray-400 dark:text-neutral-500" />
               }
             </div>
-            {i < experiences.length - 1 && (
-              <div data-exp-bar class="w-px bg-gray-200 dark:bg-neutral-700 flex-1 my-1.5"></div>
-            )}
+            <div
+              data-exp-bar
+              class={`w-px bg-gray-200 dark:bg-neutral-700 flex-1 my-1.5 ${
+                i < experiences.length - 1 ? '' : 'invisible'
+              }`}
+              aria-hidden="true"
+            ></div>
           </div>
           <div class={`flex-1 min-w-0 ${i < experiences.length - 1 ? 'pb-8' : ''}`}>
             {hasContent ? (
@@ -323,7 +327,7 @@ const experiences: Experience[] = [
           x = r.left + r.width / 2;
           y = r.top + r.height * progress;
         } else {
-          // No bar on last entry — burst from logo center.
+          // Fallback if a row ever renders without a bar.
           const r = logo.getBoundingClientRect();
           x = r.left + r.width / 2;
           y = r.top + r.height / 2;
