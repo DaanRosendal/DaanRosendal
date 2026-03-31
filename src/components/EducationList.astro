@@ -1,0 +1,49 @@
+---
+import TimelineList, { type TimelineItem } from './TimelineList.astro';
+
+const education: TimelineItem[] = [
+  {
+    title: 'Master of Science in Software Engineering',
+    titleShort: 'MSc. Software Engineering',
+    subtitle: 'University of Amsterdam',
+    dates: 'Sep 2024 – Jul 2025',
+    datesShort: '2024 – 2025',
+    location: 'Amsterdam, The Netherlands',
+    locationShort: 'Amsterdam, NL',
+    logo: '/logos/uva.png',
+    description: 'Top 5% of 80 students',
+    bullets: [
+      'Thesis within Distributed ML: Resolution Strategies for Client-Level Disagreements in Federated Learning',
+      'Courses: Distributed Computing, Software Maintainability, Requirements Engineering, Embedded Systems Design',
+    ],
+  },
+  {
+    title: 'Bachelor of Science in Software Engineering',
+    titleShort: 'BSc. Software Engineering',
+    subtitle: 'Windesheim University',
+    dates: 'Sep 2020 – Jul 2024',
+    datesShort: '2020 – 2024',
+    location: 'Zwolle, The Netherlands',
+    locationShort: 'Zwolle, NL',
+    logo: '/logos/windesheim.png',
+    description: 'Top 1% of 500 students',
+    bullets: [
+      'Won Swisscom\'s LauzHack 2023 challenge at EPFL with a customisable chatbot capable of leveraging self-hosted LLMs',
+      'Courses: Data Structures & Algorithms, Design Patterns, Operating Systems, Discrete Mathematics, Statistics',
+    ],
+  },
+  {
+    title: 'Intermediate Vocational Degree in Software Development',
+    titleShort: 'Software Development',
+    subtitle: 'Deltion College',
+    dates: 'Sep 2018 – Jul 2020',
+    datesShort: '2018 – 2020',
+    location: 'Zwolle, The Netherlands',
+    locationShort: 'Zwolle, NL',
+    logo: '/logos/deltion.png',
+    description: 'Top 1% of 200 students',
+  },
+];
+---
+
+<TimelineList heading="Education" items={education} largeBreak />
