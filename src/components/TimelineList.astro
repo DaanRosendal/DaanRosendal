@@ -22,16 +22,21 @@ interface Props {
   heading: string;
   items: TimelineItem[];
   largeBreak?: boolean;
+  visibleCount?: number;
 }
 
-const { heading, items, largeBreak = false } = Astro.props;
+const { heading, items, largeBreak = false, visibleCount = items.length } = Astro.props;
+const visibleItems = items.slice(0, visibleCount);
+const overflowItems = items.slice(visibleCount);
+const hasOverflow = overflowItems.length > 0;
 ---
 
 <section class="mb-10">
   <h2 class="text-xl font-semibold mb-6">{heading}</h2>
   <ul>
-    {items.map((item, i) => {
+    {visibleItems.map((item, i) => {
       const hasContent = !!(item.description || (item.bullets && item.bullets.length > 0));
+      const showBar = i < visibleItems.length - 1 || hasOverflow;
       return (
         <li class="flex gap-4">
           <div class="w-10 flex flex-col items-center">
@@ -48,13 +53,11 @@ const { heading, items, largeBreak = false } = Astro.props;
             </div>
             <div
               data-exp-bar
-              class={`w-px bg-gray-200 dark:bg-neutral-700 flex-1 my-1.5 ${
-                i < items.length - 1 ? '' : 'invisible'
-              }`}
+              class={`w-px bg-gray-200 dark:bg-neutral-700 flex-1 my-1.5 ${showBar ? '' : 'invisible'}`}
               aria-hidden="true"
             ></div>
           </div>
-          <div class={`flex-1 min-w-0 ${i < items.length - 1 ? 'pb-8' : ''}`}>
+          <div class={`flex-1 min-w-0 ${showBar ? 'pb-8' : ''}`}>
             {hasContent ? (
               <details class="group">
                 <summary class="list-none cursor-pointer">
@@ -140,7 +143,139 @@ const { heading, items, largeBreak = false } = Astro.props;
         </li>
       );
     })}
+
+    {hasOverflow && (
+      <li class="flex justify-center pt-2 pb-8">
+        <button
+          data-exp-toggle
+          class="flex items-center gap-2 text-sm text-gray-400 dark:text-neutral-500 hover:text-gray-600 dark:hover:text-neutral-300 transition-colors cursor-pointer"
+        >
+          <ChevronDown
+            data-exp-toggle-chevron
+            size={14}
+            class="transition-transform duration-300 shrink-0"
+          />
+          <span data-exp-toggle-label>{overflowItems.length} more</span>
+        </button>
+      </li>
+    )}
   </ul>
+
+  {hasOverflow && (
+    <div data-exp-overflow style="height: 0; overflow: hidden;">
+      <ul>
+        {overflowItems.map((item, i) => {
+          const hasContent = !!(item.description || (item.bullets && item.bullets.length > 0));
+          const showBar = i < overflowItems.length - 1;
+          return (
+            <li class="flex gap-4">
+              <div class="w-10 flex flex-col items-center">
+                <div class="w-10 h-10 shrink-0 flex items-center justify-center overflow-hidden">
+                  {item.logo
+                    ? item.logoDark
+                      ? <>
+                          <img data-exp-logo src={item.logo}     alt={item.subtitle} class={`w-full h-full object-contain dark:hidden ${item.rounded ? 'rounded-sm' : ''}`} />
+                          <img data-exp-logo src={item.logoDark} alt={item.subtitle} class={`w-full h-full object-contain hidden dark:block ${item.rounded ? 'rounded-sm' : ''}`} />
+                        </>
+                      : <img data-exp-logo src={item.logo} alt={item.subtitle} class={`w-full h-full object-contain ${item.rounded ? 'rounded-sm' : ''}`} />
+                    : <Building2 size={20} class="text-gray-400 dark:text-neutral-500" />
+                  }
+                </div>
+                <div
+                  data-exp-bar
+                  class={`w-px bg-gray-200 dark:bg-neutral-700 flex-1 my-1.5 ${showBar ? '' : 'invisible'}`}
+                  aria-hidden="true"
+                ></div>
+              </div>
+              <div class={`flex-1 min-w-0 ${showBar ? 'pb-8' : ''}`}>
+                {hasContent ? (
+                  <details class="group">
+                    <summary class="list-none cursor-pointer">
+                      <div class="h-10 flex flex-col justify-center">
+                        <div class="flex justify-between items-baseline gap-4">
+                          <span class="font-medium text-gray-900 dark:text-white flex items-center gap-1.5">
+                            {item.titleShort ? <><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.title}</span><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.titleShort}</span></> : item.title}
+                            <ChevronDown size={14} class="text-gray-300 dark:text-neutral-600 transition-transform duration-200 group-open:rotate-180 shrink-0 translate-y-px" />
+                          </span>
+                          <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                            {item.datesShort
+                              ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.datesShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.dates}</span></>
+                              : item.dates
+                            }
+                          </span>
+                        </div>
+                        <div class="flex justify-between items-baseline gap-4 mt-0.5">
+                          <span class="text-sm text-gray-500 dark:text-neutral-400">
+                            {item.subtitleShort
+                              ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
+                              : item.subtitle
+                            }{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
+                          </span>
+                          <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                            {item.locationShort
+                              ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.locationShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.location}</span></>
+                              : item.location
+                            }
+                          </span>
+                        </div>
+                      </div>
+                    </summary>
+                    <div class="exp-fade">
+                      <div class="overflow-hidden">
+                        <div class="pt-2.5 pb-1 space-y-2.5">
+                          {item.description && (
+                            <p class="text-sm text-gray-400 dark:text-neutral-500 italic">{item.description}</p>
+                          )}
+                          {item.bullets && item.bullets.length > 0 && (
+                            <ul class="space-y-2">
+                              {item.bullets.map((bullet) => (
+                                <li class="flex gap-2.5 text-sm text-gray-600 dark:text-neutral-400">
+                                  <span class="mt-2 w-1 h-1 rounded-full bg-gray-300 dark:bg-neutral-600 shrink-0"></span>
+                                  <span class="text-justify">{bullet}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </details>
+                ) : (
+                  <div class="h-10 flex flex-col justify-center">
+                    <div class="flex justify-between items-baseline gap-4">
+                      <span class="font-medium text-gray-900 dark:text-white">
+                        {item.titleShort ? <><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.title}</span><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.titleShort}</span></> : item.title}
+                      </span>
+                      <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                        {item.datesShort
+                          ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.datesShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.dates}</span></>
+                          : item.dates
+                        }
+                      </span>
+                    </div>
+                    <div class="flex justify-between items-baseline gap-4 mt-0.5">
+                      <span class="text-sm text-gray-500 dark:text-neutral-400">
+                        {item.subtitleShort
+                          ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
+                          : item.subtitle
+                        }{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
+                      </span>
+                      <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                        {item.locationShort
+                          ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.locationShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.location}</span></>
+                          : item.location
+                        }
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  )}
 </section>
 
 <script>
@@ -239,6 +374,55 @@ const { heading, items, largeBreak = false } = Astro.props;
     }
   }
 
+  function spawnDotParticle(originX: number, originY: number) {
+    const el = document.createElement('div');
+    el.style.cssText = `
+      position: fixed;
+      left: ${originX}px;
+      top: ${originY}px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      color: #9ca3af;
+      pointer-events: none;
+      z-index: 9999;
+    `;
+    document.body.appendChild(el);
+
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 50 + Math.random() * 75;
+
+    gsap.fromTo(
+      el,
+      { xPercent: -50, yPercent: -50, scale: 0.9, opacity: 0.8 },
+      {
+        x: Math.cos(angle) * dist,
+        y: Math.sin(angle) * dist,
+        scale: 0.05,
+        opacity: 0,
+        rotation: (Math.random() - 0.5) * 400,
+        duration: (0.75 + Math.random() * 0.45) * 1.5,
+        ease: 'power2.out',
+        onComplete: () => el.remove(),
+      }
+    );
+  }
+
+  function runToggleExhaust(overflowEl: HTMLElement) {
+    const WAVES = 5;
+    const INTERVAL_MS = 165;
+    for (let w = 0; w < WAVES; w++) {
+      setTimeout(() => {
+        const r = overflowEl.getBoundingClientRect();
+        const x = r.left + r.width / 2;
+        const y = r.bottom;
+        const count = w === 0 ? 5 : 3;
+        for (let i = 0; i < count; i++) spawnDotParticle(x + (Math.random() - 0.5) * r.width * 0.6, y);
+      }, w * INTERVAL_MS);
+    }
+  }
+
   // Stores each bar's height in the closed state so the close animation
   // can return to exactly that height rather than collapsing to zero.
   const barBaseHeights = new WeakMap<HTMLElement, number>();
@@ -300,6 +484,47 @@ const { heading, items, largeBreak = false } = Astro.props;
 
         if (content) tl.to(content, { height: 0, overflow: 'hidden', duration: 0.6, ease: 'power2.inOut' }, 0);
         if (bar)     tl.to(bar,     { height: baseH,                  duration: 0.6, ease: 'power2.inOut' }, 0);
+      }
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-exp-toggle]').forEach((btn) => {
+    const section = btn.closest('section');
+    if (!section) return;
+    const overflow = section.querySelector<HTMLElement>('[data-exp-overflow]');
+    const chevron  = btn.querySelector<HTMLElement>('[data-exp-toggle-chevron]');
+    const label    = btn.querySelector<HTMLElement>('[data-exp-toggle-label]');
+    if (!overflow || !chevron || !label) return;
+
+    const originalLabel = label.textContent ?? '';
+    let isOpen = false;
+
+    btn.addEventListener('click', () => {
+      gsap.killTweensOf(overflow);
+      gsap.killTweensOf(chevron);
+
+      if (!isOpen) {
+        isOpen = true;
+        // Measure natural height before animating (temporarily unconstrain to measure)
+        gsap.set(overflow, { height: 'auto', overflow: 'visible' });
+        const targetH = overflow.getBoundingClientRect().height;
+        gsap.set(overflow, { height: 0, overflow: 'hidden' });
+        gsap.to(overflow, {
+          height: targetH,
+          duration: 0.8,
+          ease: 'power2.inOut',
+          onComplete: () => gsap.set(overflow, { height: 'auto', overflow: 'visible' }),
+        });
+        gsap.to(chevron, { rotation: 180, duration: 0.3, ease: 'power2.inOut' });
+        label.textContent = 'view less';
+        runToggleExhaust(overflow);
+      } else {
+        isOpen = false;
+        const currentH = overflow.getBoundingClientRect().height;
+        gsap.set(overflow, { height: currentH, overflow: 'hidden' });
+        gsap.to(overflow, { height: 0, duration: 0.6, ease: 'power2.inOut' });
+        gsap.to(chevron, { rotation: 0, duration: 0.3, ease: 'power2.inOut' });
+        label.textContent = originalLabel;
       }
     });
   });
