@@ -40,3 +40,7 @@ resume/*.synctex.gz
 
 # project briefs / scratch files
 tmp.txt
+
+# Claude local tooling state
+.claude/settings.local.json
+.claude/worktrees/
