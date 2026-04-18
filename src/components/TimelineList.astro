@@ -38,7 +38,7 @@ const hasOverflow = overflowItems.length > 0;
       const hasContent = !!(item.description || (item.bullets && item.bullets.length > 0));
       const showBar = i < visibleItems.length - 1;
       const isLastVisible = hasOverflow && i === visibleItems.length - 1;
-      const showPad = showBar;
+      const padClass = showBar || hasOverflow ? 'pb-8' : '';
       return (
         <li class="flex gap-4">
           <div class="w-10 flex flex-col items-center">
@@ -60,7 +60,7 @@ const hasOverflow = overflowItems.length > 0;
               aria-hidden="true"
             ></div>
           </div>
-          <div class={`flex-1 min-w-0 ${showPad ? 'pb-8' : ''}`}>
+          <div class={`flex-1 min-w-0 ${padClass}`}>
             {hasContent ? (
               <details class="group">
                 <summary class="list-none cursor-pointer">
@@ -151,10 +151,11 @@ const hasOverflow = overflowItems.length > 0;
 
   {hasOverflow && (
     <div data-exp-overflow style="height: 0; overflow: hidden;">
-      <ul class="pt-8">
+      <ul>
         {overflowItems.map((item, i) => {
           const hasContent = !!(item.description || (item.bullets && item.bullets.length > 0));
           const showBar = i < overflowItems.length - 1;
+          const padClass = 'pb-8';
           return (
             <li class="flex gap-4">
               <div class="w-10 flex flex-col items-center">
@@ -175,7 +176,7 @@ const hasOverflow = overflowItems.length > 0;
                   aria-hidden="true"
                 ></div>
               </div>
-              <div class={`flex-1 min-w-0 ${showBar ? 'pb-8' : ''}`}>
+              <div class={`flex-1 min-w-0 ${padClass}`}>
                 {hasContent ? (
                   <details class="group">
                     <summary class="list-none cursor-pointer">
@@ -266,7 +267,7 @@ const hasOverflow = overflowItems.length > 0;
   )}
 
   {hasOverflow && (
-    <div class="flex justify-center mt-8 py-2">
+    <div class="flex justify-center -mt-4 py-2">
       <button
         data-exp-toggle
         class="flex items-center gap-2 text-sm text-gray-400 dark:text-neutral-500 hover:text-gray-600 dark:hover:text-neutral-300 transition-colors cursor-pointer"
