@@ -36,7 +36,9 @@ const hasOverflow = overflowItems.length > 0;
   <ul>
     {visibleItems.map((item, i) => {
       const hasContent = !!(item.description || (item.bullets && item.bullets.length > 0));
-      const showBar = i < visibleItems.length - 1 || hasOverflow;
+      const showBar = i < visibleItems.length - 1;
+      const isLastVisible = hasOverflow && i === visibleItems.length - 1;
+      const showPad = showBar;
       return (
         <li class="flex gap-4">
           <div class="w-10 flex flex-col items-center">
@@ -53,11 +55,12 @@ const hasOverflow = overflowItems.length > 0;
             </div>
             <div
               data-exp-bar
+              {...(isLastVisible ? { 'data-exp-toggle-bar': '' } : {})}
               class={`w-px bg-gray-200 dark:bg-neutral-700 flex-1 my-1.5 ${showBar ? '' : 'invisible'}`}
               aria-hidden="true"
             ></div>
           </div>
-          <div class={`flex-1 min-w-0 ${showBar ? 'pb-8' : ''}`}>
+          <div class={`flex-1 min-w-0 ${showPad ? 'pb-8' : ''}`}>
             {hasContent ? (
               <details class="group">
                 <summary class="list-none cursor-pointer">
@@ -144,26 +147,11 @@ const hasOverflow = overflowItems.length > 0;
       );
     })}
 
-    {hasOverflow && (
-      <li class="flex justify-center pt-2 pb-8">
-        <button
-          data-exp-toggle
-          class="flex items-center gap-2 text-sm text-gray-400 dark:text-neutral-500 hover:text-gray-600 dark:hover:text-neutral-300 transition-colors cursor-pointer"
-        >
-          <ChevronDown
-            data-exp-toggle-chevron
-            size={14}
-            class="transition-transform duration-300 shrink-0"
-          />
-          <span data-exp-toggle-label>{overflowItems.length} more</span>
-        </button>
-      </li>
-    )}
   </ul>
 
   {hasOverflow && (
     <div data-exp-overflow style="height: 0; overflow: hidden;">
-      <ul>
+      <ul class="pt-8">
         {overflowItems.map((item, i) => {
           const hasContent = !!(item.description || (item.bullets && item.bullets.length > 0));
           const showBar = i < overflowItems.length - 1;
@@ -274,6 +262,22 @@ const hasOverflow = overflowItems.length > 0;
           );
         })}
       </ul>
+    </div>
+  )}
+
+  {hasOverflow && (
+    <div class="flex justify-center mt-8 py-2">
+      <button
+        data-exp-toggle
+        class="flex items-center gap-2 text-sm text-gray-400 dark:text-neutral-500 hover:text-gray-600 dark:hover:text-neutral-300 transition-colors cursor-pointer"
+      >
+        <ChevronDown
+          data-exp-toggle-chevron
+          size={14}
+          class="transition-transform duration-300 shrink-0"
+        />
+        <span data-exp-toggle-label>{overflowItems.length} more</span>
+      </button>
     </div>
   )}
 </section>
@@ -497,6 +501,7 @@ const hasOverflow = overflowItems.length > 0;
     if (!overflow || !chevron || !label) return;
 
     const originalLabel = label.textContent ?? '';
+    const toggleBar = section.querySelector<HTMLElement>('[data-exp-toggle-bar]');
     let isOpen = false;
 
     btn.addEventListener('click', () => {
@@ -505,6 +510,7 @@ const hasOverflow = overflowItems.length > 0;
 
       if (!isOpen) {
         isOpen = true;
+        toggleBar?.classList.remove('invisible');
         // Measure natural height before animating (temporarily unconstrain to measure)
         gsap.set(overflow, { height: 'auto', overflow: 'visible' });
         const targetH = overflow.getBoundingClientRect().height;
@@ -520,6 +526,7 @@ const hasOverflow = overflowItems.length > 0;
         runToggleExhaust(overflow);
       } else {
         isOpen = false;
+        toggleBar?.classList.add('invisible');
         const currentH = overflow.getBoundingClientRect().height;
         gsap.set(overflow, { height: currentH, overflow: 'hidden' });
         gsap.to(overflow, { height: 0, duration: 0.6, ease: 'power2.inOut' });
