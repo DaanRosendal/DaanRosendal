@@ -7,6 +7,7 @@ export interface TimelineItem {
   badge?: string;
   subtitle: string;
   subtitleShort?: string;
+  subtitleUrl?: string;
   description?: string;
   dates: string;
   datesShort?: string;
@@ -79,10 +80,22 @@ const hasOverflow = overflowItems.length > 0;
                     </div>
                     <div class="flex justify-between items-baseline gap-4 mt-0.5">
                       <span class="text-sm text-gray-500 dark:text-neutral-400">
-                        {item.subtitleShort
-                          ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
-                          : item.subtitle
-                        }{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
+                        {item.subtitleUrl ? (
+                          <a
+                            data-exp-link
+                            href={item.subtitleUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
+                          >{item.subtitleShort
+                              ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
+                              : item.subtitle
+                            }</a>
+                        ) : (
+                          item.subtitleShort
+                            ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
+                            : item.subtitle
+                        )}{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
                       </span>
                       <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
                         {item.locationShort
@@ -128,10 +141,22 @@ const hasOverflow = overflowItems.length > 0;
                 </div>
                 <div class="flex justify-between items-baseline gap-4 mt-0.5">
                   <span class="text-sm text-gray-500 dark:text-neutral-400">
-                    {item.subtitleShort
-                      ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
-                      : item.subtitle
-                    }{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
+                    {item.subtitleUrl ? (
+                      <a
+                        data-exp-link
+                        href={item.subtitleUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
+                      >{item.subtitleShort
+                          ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
+                          : item.subtitle
+                        }</a>
+                    ) : (
+                      item.subtitleShort
+                        ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
+                        : item.subtitle
+                    )}{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
                   </span>
                   <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
                     {item.locationShort
@@ -195,10 +220,22 @@ const hasOverflow = overflowItems.length > 0;
                         </div>
                         <div class="flex justify-between items-baseline gap-4 mt-0.5">
                           <span class="text-sm text-gray-500 dark:text-neutral-400">
-                            {item.subtitleShort
-                              ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
-                              : item.subtitle
-                            }{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
+                            {item.subtitleUrl ? (
+                              <a
+                                data-exp-link
+                                href={item.subtitleUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
+                              >{item.subtitleShort
+                                  ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
+                                  : item.subtitle
+                                }</a>
+                            ) : (
+                              item.subtitleShort
+                                ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
+                                : item.subtitle
+                            )}{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
                           </span>
                           <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
                             {item.locationShort
@@ -244,10 +281,22 @@ const hasOverflow = overflowItems.length > 0;
                     </div>
                     <div class="flex justify-between items-baseline gap-4 mt-0.5">
                       <span class="text-sm text-gray-500 dark:text-neutral-400">
-                        {item.subtitleShort
-                          ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
-                          : item.subtitle
-                        }{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
+                        {item.subtitleUrl ? (
+                          <a
+                            data-exp-link
+                            href={item.subtitleUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
+                          >{item.subtitleShort
+                              ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
+                              : item.subtitle
+                            }</a>
+                        ) : (
+                          item.subtitleShort
+                            ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
+                            : item.subtitle
+                        )}{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
                       </span>
                       <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
                         {item.locationShort
@@ -437,6 +486,9 @@ const hasOverflow = overflowItems.length > 0;
     if (!summary) return;
 
     summary.addEventListener('click', (e) => {
+      const target = e.target;
+      if (target instanceof Element && target.closest('[data-exp-link]')) return;
+
       e.preventDefault();
 
       const li = details.closest('li');
