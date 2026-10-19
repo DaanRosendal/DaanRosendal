@@ -1,4 +1,5 @@
 import type { CollectionEntry } from 'astro:content';
+import { formatCount, roundDown } from './count';
 
 const MARKETPLACE_ENDPOINT = 'https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery';
 const OPEN_VSX_API = 'https://open-vsx.org/api';
@@ -51,25 +52,20 @@ const fetchOpenVsxDownloads = (id: string) =>
     return typeof downloadCount === 'number' ? downloadCount : null;
   });
 
-// Rounds down so the number stays true between builds: 742 -> 740, 4,482 -> 4,400.
-function roundDown(count: number): number {
-  if (count < 100) return count;
-  const step = count < 1000 ? 10 : 100;
-  return Math.floor(count / step) * step;
-}
-
-export function formatCount(count: number): string {
-  const rounded = roundDown(count);
-  return count < 100 ? String(rounded) : `${rounded.toLocaleString('en-US')}+`;
-}
-
 type Entry = CollectionEntry<'achievements'>;
 
 // Fills {installs} (Marketplace), {downloads} (Open VSX) and {total} (both added together) in an entry's summary and
-// stat, and returns `fill` for the same substitution in other text such as the rendered body. {asOf} becomes " as of today" only when every configured source answered, and is dropped otherwise.
+// stat, with the counts from the build (or the fallbacks when a source did not answer). {asOf} stays empty here: the
+// browser fills it with " as of today" once it has fetched the live counts itself (see src/scripts/live-counts.ts).
+//
+// Returns plain text (`summary`, `stat`, `fill`) and an HTML variant (`summaryHtml`, `statHtml`, `fillHtml`) in which every
+// filled value sits in a <span data-live="..."> that the browser can update.
 export async function resolveAchievementText(entry: Entry) {
   const { summary, stat, marketplace, installsFallback, openVsx, downloadsFallback } = entry.data;
-  if (!marketplace && !openVsx) return { summary, stat, fill: (text: string) => text };
+  const plain = (text: string) => text;
+  if (!marketplace && !openVsx) {
+    return { summary, stat, fill: plain, summaryHtml: summary, statHtml: stat, fillHtml: plain };
+  }
 
   const [liveInstalls, liveDownloads] = await Promise.all([
     marketplace ? fetchInstalls(marketplace) : null,
@@ -77,13 +73,19 @@ export async function resolveAchievementText(entry: Entry) {
   ]);
   const installs = marketplace ? (liveInstalls ?? installsFallback) : undefined;
   const downloads = openVsx ? (liveDownloads ?? downloadsFallback) : undefined;
-  const isLive = (!marketplace || liveInstalls !== null) && (!openVsx || liveDownloads !== null);
 
-  const tokens: Record<string, string> = { asOf: isLive ? ' as of today' : '' };
+  const tokens: Record<string, string> = { asOf: '' };
   if (installs !== undefined) tokens.installs = formatCount(installs);
   if (downloads !== undefined) tokens.downloads = formatCount(downloads);
   if (installs !== undefined && downloads !== undefined) tokens.total = formatCount(roundDown(installs) + roundDown(downloads));
 
+  const source = `${marketplace ? ` data-marketplace="${marketplace}"` : ''}${openVsx ? ` data-open-vsx="${openVsx}"` : ''}`;
+  // The invisible " as of today" reserves its space, so showing it later does not move the text below it.
+  const html = (key: string) => (key === 'asOf'
+    ? `<span data-live="asOf"${source} class="invisible"> as of today</span>`
+    : `<span data-live="${key}"${source}>${tokens[key]}</span>`);
+
   const fill = (text: string) => text.replace(/\{(\w+)\}/g, (token, key) => tokens[key] ?? token);
-  return { summary: fill(summary), stat: fill(stat), fill };
+  const fillHtml = (text: string) => text.replace(/\{(\w+)\}/g, (token, key) => (key in tokens ? html(key) : token));
+  return { summary: fill(summary), stat: fill(stat), fill, summaryHtml: fillHtml(summary), statHtml: fillHtml(stat), fillHtml };
 }

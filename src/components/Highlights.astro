@@ -1,6 +1,7 @@
 ---
 import { getCollection, type CollectionEntry } from 'astro:content';
 import AchievementCard from './AchievementCard.astro';
+import LiveCounts from './LiveCounts.astro';
 
 // 'importance' sorts by each entry's `order` (lowest first).
 // 'date' sorts newest first by `date`, with undated entries last, falling back to `order`.
@@ -33,3 +34,5 @@ const tracks = [
     );
   })}
 </section>
+
+<LiveCounts />

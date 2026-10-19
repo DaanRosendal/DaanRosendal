@@ -69,6 +69,10 @@ npm run preview  # Preview production build locally
 - Muted text uses `text-gray-500 dark:text-neutral-400` or darker, so contrast stays at 4.5:1 or better. Do not use `gray-400` or `neutral-500` for text.
 - Use a hyphen, not an en or em dash, in copy, titles and dates.
 
+## Live install counts
+
+- `{installs}`, `{downloads}`, `{total}` and `{asOf}` in an achievement entry are filled at build time by `src/lib/marketplace.ts` (with fallbacks from the frontmatter) and wrapped in `<span data-live>`. `src/scripts/live-counts.ts` refreshes them in the visitor's browser from the Marketplace and Open VSX, and only then shows " as of today". Both APIs allow cross-origin requests. If a request fails the numbers from the build stay.
+
 ## Hard Constraints
 
 - **NEVER modify, overwrite, or delete `README.md`** — it is the GitHub Profile README and controls the public profile page.
