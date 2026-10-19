@@ -4,6 +4,7 @@ import AchievementVideo from '../../components/AchievementVideo.astro';
 import AchievementGallery from '../../components/AchievementGallery.astro';
 import { getCollection } from 'astro:content';
 import { resolveAchievementText } from '../../lib/marketplace';
+import { imageSize } from '../../lib/image';
 import { ArrowLeft, ArrowUpRight } from '@lucide/astro';
 
 export async function getStaticPaths() {
@@ -16,12 +17,13 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { title, when, youtube, thumbnail, gallery, galleryVideo, links } = entry.data;
-const { stat, fill } = await resolveAchievementText(entry);
+const { stat, summary, fill } = await resolveAchievementText(entry);
 const body = fill(entry.rendered?.html ?? '');
+const thumbnailSize = thumbnail ? await imageSize(thumbnail) : undefined;
 ---
-<Layout title={`${title} — Daan Rosendal`}>
+<Layout title={`${title} - Daan Rosendal`} description={summary}>
   <nav class="mb-12 text-sm">
-    <a href="/" class="inline-flex items-center gap-1.5 text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+    <a href="/" class="inline-flex items-center gap-1.5 text-gray-600 dark:text-neutral-300 hover:text-gray-900 dark:hover:text-white transition-colors">
       <ArrowLeft size={14} />
       Home
     </a>
@@ -29,7 +31,7 @@ const body = fill(entry.rendered?.html ?? '');
 
   <article>
     <header class="mb-8">
-      <p class="text-sm text-gray-400 dark:text-neutral-500 mb-2">{stat} · {when}</p>
+      <p class="text-sm text-gray-500 dark:text-neutral-400 mb-2">{stat} · {when}</p>
       <h1 class="text-4xl font-bold">{title}</h1>
     </header>
 
@@ -46,7 +48,13 @@ const body = fill(entry.rendered?.html ?? '');
         <img
           src={thumbnail}
           alt={`Screenshot: ${title}`}
-          class="mx-auto max-h-[28rem] w-auto rounded-xl border border-gray-200 dark:border-neutral-700"
+          width={thumbnailSize?.width}
+          height={thumbnailSize?.height}
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          style={thumbnailSize && `width: min(100%, ${(28 * thumbnailSize.width / thumbnailSize.height).toFixed(2)}rem); aspect-ratio: ${thumbnailSize.width} / ${thumbnailSize.height}`}
+          class="mx-auto block h-auto rounded-xl border border-gray-200 dark:border-neutral-700"
         />
       </div>
     )}
@@ -63,7 +71,7 @@ const body = fill(entry.rendered?.html ?? '');
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-1 text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              class="inline-flex items-center gap-1 text-gray-600 dark:text-neutral-300 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               {link.label}
               <ArrowUpRight size={13} />

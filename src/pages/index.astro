@@ -5,17 +5,20 @@ import EducationList from '../components/EducationList.astro';
 import Highlights from '../components/Highlights.astro';
 import { FileText, Mail, MapPin } from '@lucide/astro';
 ---
-<Layout title="Daan Rosendal">
+<Layout
+  title="Daan Rosendal"
+  description="Daan Rosendal is a software engineer in Zürich. Highlights from building, competing and research, plus experience and education."
+>
   <header class="mb-10">
     <h1 class="text-4xl font-bold mb-3">Daan Rosendal</h1>
-    <div class="flex justify-between items-center mb-3 text-sm text-gray-500 dark:text-neutral-400">
+    <div class="flex justify-between items-center mb-3 text-sm text-gray-600 dark:text-neutral-300">
       <p>Software Engineer</p>
       <span class="flex items-center gap-1">
         <MapPin size={13} />
         Zürich, Switzerland
       </span>
     </div>
-    <nav class="flex justify-between items-center text-sm text-gray-500 dark:text-neutral-400">
+    <nav class="flex justify-between items-center text-sm text-gray-600 dark:text-neutral-300">
     <a href="/Daan_Rosendal_Resume.pdf" class="flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
       <FileText size={14} />
       <span>Resume</span>

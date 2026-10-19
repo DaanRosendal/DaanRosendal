@@ -1,5 +1,6 @@
 ---
 import { ChevronLeft, ChevronRight, Play, X } from '@lucide/astro';
+import { imageSize } from '../lib/image';
 
 interface Photo {
   src: string;
@@ -15,6 +16,14 @@ interface Props {
 
 const { photos, video } = Astro.props;
 const [lead, ...rest] = photos;
+const sizes = await Promise.all(photos.map((photo) => imageSize(photo.src)));
+// Every tile has a smaller "-sm" copy for phones: the browser picks the one that fits the tile's width.
+const smallSrc = (src: string) => src.replace(/\.webp$/, '-sm.webp');
+const smallSizes = await Promise.all(photos.map((photo) => imageSize(smallSrc(photo.src))));
+const srcset = (i: number) => smallSizes[i] && sizes[i] ? `${smallSrc(photos[i].src)} ${smallSizes[i]!.width}w, ${photos[i].src} ${sizes[i]!.width}w` : undefined;
+// Tile width: a quarter of the four-column grid, which is at most 720px wide. The lead photo spans two columns.
+const tileWidth = 'calc((min(100vw, 768px) - 72px) / 4)';
+const leadWidth = 'calc((min(100vw, 768px) - 72px) / 2 + 8px)';
 // A single photo, often a portrait, floats beside the text instead of forming a collage.
 const single = photos.length === 1 && !video;
 const tile = 'group relative block overflow-hidden rounded-lg bg-gray-100 dark:bg-neutral-800 aspect-[3/2]';
@@ -30,16 +39,16 @@ const img = 'w-full h-full object-cover transition-transform duration-300 group-
     rel="noopener noreferrer"
     class="group relative mx-auto mb-6 block w-full max-w-60 overflow-hidden rounded-lg bg-gray-100 dark:bg-neutral-800 md:float-right md:mb-4 md:ml-8 md:w-60"
   >
-    <img src={lead.src} alt={lead.alt} loading="lazy" class="block h-auto w-full transition-transform duration-300 group-hover:scale-105" />
+    <img src={lead.src} alt={lead.alt} width={sizes[0]?.width} height={sizes[0]?.height} loading="eager" fetchpriority="high" decoding="async" class="block h-auto w-full transition-transform duration-300 group-hover:scale-105" />
   </a>
 ) : (
 <div class="grid grid-cols-4 gap-2">
   <a href={lead.full ?? lead.src} data-lightbox="0" target="_blank" rel="noopener noreferrer" class={`${tile} col-span-2 row-span-2 aspect-auto`}>
-    <img src={lead.src} alt={lead.alt} loading="lazy" class={`${img} absolute inset-0`} style={lead.position && `object-position: ${lead.position}`} />
+    <img src={lead.src} alt={lead.alt} srcset={srcset(0)} sizes={leadWidth} width={sizes[0]?.width} height={sizes[0]?.height} loading="eager" fetchpriority="high" decoding="async" class={`${img} absolute inset-0`} style={lead.position && `object-position: ${lead.position}`} />
   </a>
   {rest.map((photo, i) => (
     <a href={photo.full ?? photo.src} data-lightbox={i + 1} target="_blank" rel="noopener noreferrer" class={tile}>
-      <img src={photo.src} alt={photo.alt} loading="lazy" class={img} style={photo.position && `object-position: ${photo.position}`} />
+      <img src={photo.src} alt={photo.alt} srcset={srcset(i + 1)} sizes={tileWidth} width={sizes[i + 1]?.width} height={sizes[i + 1]?.height} loading="lazy" decoding="async" class={img} style={photo.position && `object-position: ${photo.position}`} />
     </a>
   ))}
   {video && (

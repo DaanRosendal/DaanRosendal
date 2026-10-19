@@ -51,11 +51,16 @@ const fetchOpenVsxDownloads = (id: string) =>
     return typeof downloadCount === 'number' ? downloadCount : null;
   });
 
-// Rounds down so the number stays true between builds: 742 -> "740+", 4,482 -> "4,400+".
-export function formatCount(count: number): string {
-  if (count < 100) return String(count);
+// Rounds down so the number stays true between builds: 742 -> 740, 4,482 -> 4,400.
+function roundDown(count: number): number {
+  if (count < 100) return count;
   const step = count < 1000 ? 10 : 100;
-  return `${(Math.floor(count / step) * step).toLocaleString('en-US')}+`;
+  return Math.floor(count / step) * step;
+}
+
+export function formatCount(count: number): string {
+  const rounded = roundDown(count);
+  return count < 100 ? String(rounded) : `${rounded.toLocaleString('en-US')}+`;
 }
 
 type Entry = CollectionEntry<'achievements'>;
@@ -77,7 +82,7 @@ export async function resolveAchievementText(entry: Entry) {
   const tokens: Record<string, string> = { asOf: isLive ? ' as of today' : '' };
   if (installs !== undefined) tokens.installs = formatCount(installs);
   if (downloads !== undefined) tokens.downloads = formatCount(downloads);
-  if (installs !== undefined && downloads !== undefined) tokens.total = formatCount(installs + downloads);
+  if (installs !== undefined && downloads !== undefined) tokens.total = formatCount(roundDown(installs) + roundDown(downloads));
 
   const fill = (text: string) => text.replace(/\{(\w+)\}/g, (token, key) => tokens[key] ?? token);
   return { summary: fill(summary), stat: fill(stat), fill };

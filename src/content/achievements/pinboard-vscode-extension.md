@@ -10,8 +10,8 @@ installsFallback: 742
 openVsx: daanrosendal/pinboard
 downloadsFallback: 4400
 date: 2026-03-14
-thumbnail: /achievements/pinboard.png
-thumbnailPosition: top
+thumbnail: /achievements/pinboard.webp
+cardImage: /achievements/pinboard-card.webp
 links:
   - label: Marketplace
     url: https://marketplace.visualstudio.com/items?itemName=DaanRosendal.pinboard

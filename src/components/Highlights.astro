@@ -27,7 +27,7 @@ const tracks = [
       <div>
         <h2 class="mb-3 text-center text-lg font-semibold">{label}</h2>
         <div class="space-y-3">
-          {items.map((entry) => <AchievementCard entry={entry} />)}
+          {items.map((entry, index) => <AchievementCard entry={entry} priority={index === 0} />)}
         </div>
       </div>
     );

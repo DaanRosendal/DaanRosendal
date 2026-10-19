@@ -6,7 +6,8 @@ stat: "Best university team in Europe"
 summary: "Founded a three-player team at Windesheim, won the University Rocketeers Winter Cup as the best university team in Europe at the time, and qualified directly for the European championship."
 order: 2
 date: 2021-12-05
-thumbnail: /achievements/rocket-league-wintercup.jpg
+thumbnail: /achievements/rocket-league-wintercup.webp
+cardImage: /achievements/rocket-league-card.webp
 youtube: 1Duswxs5mig
 links:
   - label: Liquipedia

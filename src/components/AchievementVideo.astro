@@ -22,7 +22,9 @@ const poster = thumbnail ?? (youtube ? `https://i.ytimg.com/vi/${youtube}/hqdefa
       <img
         src={poster}
         alt=""
-        loading="lazy"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
         class="w-full h-full object-cover"
       />
       <span class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
@@ -34,7 +36,7 @@ const poster = thumbnail ?? (youtube ? `https://i.ytimg.com/vi/${youtube}/hqdefa
   ) : (
     <>
       {poster && <img src={poster} alt="" class="w-full h-full object-cover" />}
-      <div class={`absolute inset-0 flex flex-col items-center justify-center gap-2 ${poster ? 'bg-black/40 text-white' : 'text-gray-400 dark:text-neutral-500'}`}>
+      <div class={`absolute inset-0 flex flex-col items-center justify-center gap-2 ${poster ? 'bg-black/40 text-white' : 'text-gray-500 dark:text-neutral-400'}`}>
         <Play size={28} />
         <span class="text-sm">Video coming soon</span>
       </div>

@@ -51,7 +51,7 @@ const hasOverflow = overflowItems.length > 0;
                       <img data-exp-logo src={item.logoDark} alt={item.subtitle} class={`w-full h-full object-contain hidden dark:block ${item.rounded ? 'rounded-sm' : ''}`} />
                     </>
                   : <img data-exp-logo src={item.logo} alt={item.subtitle} class={`w-full h-full object-contain ${item.rounded ? 'rounded-sm' : ''}`} />
-                : <Building2 size={20} class="text-gray-400 dark:text-neutral-500" />
+                : <Building2 size={20} class="text-gray-500 dark:text-neutral-400" />
               }
             </div>
             <div
@@ -71,7 +71,7 @@ const hasOverflow = overflowItems.length > 0;
                         {item.titleShort ? <><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.title}</span><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.titleShort}</span></> : item.title}
                         <ChevronDown size={14} class="text-gray-300 dark:text-neutral-600 transition-transform duration-200 group-open:rotate-180 shrink-0 translate-y-px" />
                       </span>
-                      <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                      <span class="text-sm text-gray-500 dark:text-neutral-400 whitespace-nowrap shrink-0">
                         {item.datesShort
                           ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.datesShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.dates}</span></>
                           : item.dates
@@ -79,14 +79,14 @@ const hasOverflow = overflowItems.length > 0;
                       </span>
                     </div>
                     <div class="flex justify-between items-baseline gap-4 mt-0.5">
-                      <span class="text-sm text-gray-500 dark:text-neutral-400">
+                      <span class="text-sm text-gray-600 dark:text-neutral-300">
                         {item.subtitleUrl ? (
                           <a
                             data-exp-link
                             href={item.subtitleUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
+                            class="inline-block py-0.5 -my-0.5 underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
                           >{item.subtitleShort
                               ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
                               : item.subtitle
@@ -97,7 +97,7 @@ const hasOverflow = overflowItems.length > 0;
                             : item.subtitle
                         )}{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
                       </span>
-                      <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                      <span class="text-sm text-gray-500 dark:text-neutral-400 whitespace-nowrap shrink-0">
                         {item.locationShort
                           ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.locationShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.location}</span></>
                           : item.location
@@ -110,7 +110,7 @@ const hasOverflow = overflowItems.length > 0;
                   <div class="overflow-hidden">
                     <div class="pt-2.5 pb-1 space-y-2.5">
                       {item.description && (
-                        <p class="text-sm text-gray-400 dark:text-neutral-500 italic">{item.description}</p>
+                        <p class="text-sm text-gray-500 dark:text-neutral-400 italic">{item.description}</p>
                       )}
                       {item.bullets && item.bullets.length > 0 && (
                         <ul class="space-y-2">
@@ -132,7 +132,7 @@ const hasOverflow = overflowItems.length > 0;
                   <span class="font-medium text-gray-900 dark:text-white">
                     {item.titleShort ? <><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.title}</span><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.titleShort}</span></> : item.title}
                   </span>
-                  <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                  <span class="text-sm text-gray-500 dark:text-neutral-400 whitespace-nowrap shrink-0">
                     {item.datesShort
                       ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.datesShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.dates}</span></>
                       : item.dates
@@ -140,14 +140,14 @@ const hasOverflow = overflowItems.length > 0;
                   </span>
                 </div>
                 <div class="flex justify-between items-baseline gap-4 mt-0.5">
-                  <span class="text-sm text-gray-500 dark:text-neutral-400">
+                  <span class="text-sm text-gray-600 dark:text-neutral-300">
                     {item.subtitleUrl ? (
                       <a
                         data-exp-link
                         href={item.subtitleUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
+                        class="inline-block py-0.5 -my-0.5 underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
                       >{item.subtitleShort
                           ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
                           : item.subtitle
@@ -158,7 +158,7 @@ const hasOverflow = overflowItems.length > 0;
                         : item.subtitle
                     )}{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
                   </span>
-                  <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                  <span class="text-sm text-gray-500 dark:text-neutral-400 whitespace-nowrap shrink-0">
                     {item.locationShort
                       ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.locationShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.location}</span></>
                       : item.location
@@ -192,7 +192,7 @@ const hasOverflow = overflowItems.length > 0;
                           <img data-exp-logo src={item.logoDark} alt={item.subtitle} class={`w-full h-full object-contain hidden dark:block ${item.rounded ? 'rounded-sm' : ''}`} />
                         </>
                       : <img data-exp-logo src={item.logo} alt={item.subtitle} class={`w-full h-full object-contain ${item.rounded ? 'rounded-sm' : ''}`} />
-                    : <Building2 size={20} class="text-gray-400 dark:text-neutral-500" />
+                    : <Building2 size={20} class="text-gray-500 dark:text-neutral-400" />
                   }
                 </div>
                 <div
@@ -211,7 +211,7 @@ const hasOverflow = overflowItems.length > 0;
                             {item.titleShort ? <><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.title}</span><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.titleShort}</span></> : item.title}
                             <ChevronDown size={14} class="text-gray-300 dark:text-neutral-600 transition-transform duration-200 group-open:rotate-180 shrink-0 translate-y-px" />
                           </span>
-                          <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                          <span class="text-sm text-gray-500 dark:text-neutral-400 whitespace-nowrap shrink-0">
                             {item.datesShort
                               ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.datesShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.dates}</span></>
                               : item.dates
@@ -219,14 +219,14 @@ const hasOverflow = overflowItems.length > 0;
                           </span>
                         </div>
                         <div class="flex justify-between items-baseline gap-4 mt-0.5">
-                          <span class="text-sm text-gray-500 dark:text-neutral-400">
+                          <span class="text-sm text-gray-600 dark:text-neutral-300">
                             {item.subtitleUrl ? (
                               <a
                                 data-exp-link
                                 href={item.subtitleUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
+                                class="inline-block py-0.5 -my-0.5 underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
                               >{item.subtitleShort
                                   ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
                                   : item.subtitle
@@ -237,7 +237,7 @@ const hasOverflow = overflowItems.length > 0;
                                 : item.subtitle
                             )}{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
                           </span>
-                          <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                          <span class="text-sm text-gray-500 dark:text-neutral-400 whitespace-nowrap shrink-0">
                             {item.locationShort
                               ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.locationShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.location}</span></>
                               : item.location
@@ -250,7 +250,7 @@ const hasOverflow = overflowItems.length > 0;
                       <div class="overflow-hidden">
                         <div class="pt-2.5 pb-1 space-y-2.5">
                           {item.description && (
-                            <p class="text-sm text-gray-400 dark:text-neutral-500 italic">{item.description}</p>
+                            <p class="text-sm text-gray-500 dark:text-neutral-400 italic">{item.description}</p>
                           )}
                           {item.bullets && item.bullets.length > 0 && (
                             <ul class="space-y-2">
@@ -272,7 +272,7 @@ const hasOverflow = overflowItems.length > 0;
                       <span class="font-medium text-gray-900 dark:text-white">
                         {item.titleShort ? <><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.title}</span><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.titleShort}</span></> : item.title}
                       </span>
-                      <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                      <span class="text-sm text-gray-500 dark:text-neutral-400 whitespace-nowrap shrink-0">
                         {item.datesShort
                           ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.datesShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.dates}</span></>
                           : item.dates
@@ -280,14 +280,14 @@ const hasOverflow = overflowItems.length > 0;
                       </span>
                     </div>
                     <div class="flex justify-between items-baseline gap-4 mt-0.5">
-                      <span class="text-sm text-gray-500 dark:text-neutral-400">
+                      <span class="text-sm text-gray-600 dark:text-neutral-300">
                         {item.subtitleUrl ? (
                           <a
                             data-exp-link
                             href={item.subtitleUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
+                            class="inline-block py-0.5 -my-0.5 underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
                           >{item.subtitleShort
                               ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.subtitleShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.subtitle}</span></>
                               : item.subtitle
@@ -298,7 +298,7 @@ const hasOverflow = overflowItems.length > 0;
                             : item.subtitle
                         )}{item.badge && <span class="text-gray-300 dark:text-neutral-600"> · </span>}{item.badge && <span>{item.badge}</span>}
                       </span>
-                      <span class="text-sm text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
+                      <span class="text-sm text-gray-500 dark:text-neutral-400 whitespace-nowrap shrink-0">
                         {item.locationShort
                           ? <><span class={largeBreak ? 'min-[750px]:hidden' : 'sm:hidden'}>{item.locationShort}</span><span class={largeBreak ? 'hidden min-[750px]:inline' : 'hidden sm:inline'}>{item.location}</span></>
                           : item.location
@@ -319,7 +319,7 @@ const hasOverflow = overflowItems.length > 0;
     <div class="flex justify-center -mt-4 py-2">
       <button
         data-exp-toggle
-        class="flex items-center gap-2 text-sm text-gray-400 dark:text-neutral-500 hover:text-gray-600 dark:hover:text-neutral-300 transition-colors cursor-pointer"
+        class="flex items-center gap-2 text-sm text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
       >
         <ChevronDown
           data-exp-toggle-chevron
@@ -346,7 +346,7 @@ const hasOverflow = overflowItems.length > 0;
 
   /**
    * Spawn one particle: a fixed-position clone of the logo that bursts outward,
-   * rotates, shrinks, and fades — then removes itself.
+   * rotates, shrinks, and fades, then removes itself.
    */
   function spawnParticle(
     src: string,

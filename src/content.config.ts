@@ -27,6 +27,8 @@ const achievements = defineCollection({
     openVsx: z.string().optional(),
     downloadsFallback: z.number().optional(),
     thumbnail: z.string().optional(),
+    // A small 16:9 image for the card on the home page. Falls back to the thumbnail.
+    cardImage: z.string().optional(),
     thumbnailPosition: z.string().default('center'),
     gallery: z
       .array(z.object({ src: z.string(), alt: z.string(), full: z.string().optional(), position: z.string().optional() }))

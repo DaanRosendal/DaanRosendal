@@ -6,20 +6,21 @@ stat: "Built in 24 hours in Lausanne"
 summary: "Won Swisscom's challenge at EPFL's LauzHack hackathon with Lauzcom Assistant, a customisable chatbot built in 24 hours with Carmen Marcos."
 order: 1
 date: 2023-12-03
-thumbnail: /achievements/lauzhack/team.jpg
+thumbnail: /achievements/lauzhack/team.webp
+cardImage: /achievements/lauzhack/card.webp
 galleryVideo: a53WW_K6Pf8
 gallery:
-  - src: /achievements/lauzhack/team.jpg
-    full: /achievements/lauzhack/full/team.jpg
+  - src: /achievements/lauzhack/team.webp
+    full: /achievements/lauzhack/full/team.webp
     alt: Four people on stage in front of the Swisscom slide at EPFL, two holding small prizes
-  - src: /achievements/lauzhack/hacking.jpg
-    full: /achievements/lauzhack/full/hacking.jpg
+  - src: /achievements/lauzhack/hacking.webp
+    full: /achievements/lauzhack/full/hacking.webp
     alt: Participants working at laptops during the 24-hour hackathon
-  - src: /achievements/lauzhack/hall.jpg
-    full: /achievements/lauzhack/full/hall.jpg
+  - src: /achievements/lauzhack/hall.webp
+    full: /achievements/lauzhack/full/hall.webp
     alt: A full EPFL lecture hall applauding at the LauzHack opening
-  - src: /achievements/lauzhack/briefing.jpg
-    full: /achievements/lauzhack/full/briefing.jpg
+  - src: /achievements/lauzhack/briefing.webp
+    full: /achievements/lauzhack/full/briefing.webp
     alt: A speaker briefing seated participants at LauzHack
 links:
   - label: Demo

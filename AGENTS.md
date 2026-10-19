@@ -60,6 +60,15 @@ npm run preview  # Preview production build locally
 - **Use `neutral-*` for all dark mode color variants** — Tailwind v4's `gray-*` and `zinc-*` both have a blue/cool tint in oklch color space. `neutral-*` is truly colorless. Light mode can use `gray-*` as normal.
 - **Icons**: `@lucide/astro` for UI icons. Brand icons (GitHub, LinkedIn) must be inline SVGs with `fill="currentColor"` — Lucide removed brand logos due to trademark concerns.
 
+## Images and performance
+
+- The site is tuned for a Lighthouse score of 100 on every page (mobile and desktop, light and dark). Re-check with `npx lighthouse <url>` after changes to layout, images or colors.
+- Photos live in `public/achievements/` as **WebP**. Per photo keep three sizes: `name.webp` (about 420 px wide, or 600-800 px for a lead photo), `name-sm.webp` (200 px, or 360 px for a lead photo, used by `srcset` on phones) and `full/name.webp` (up to 2400 px, opened in the photo viewer). Strip metadata (EXIF, location) before adding a photo.
+- Cards on the home page use a baked 16:9 crop of 560 x 315 set with `cardImage` in the entry's frontmatter.
+- Give every `<img>` a `width` and `height` (see `src/lib/image.ts`) and load the first image on a page eagerly with `fetchpriority="high"`.
+- Muted text uses `text-gray-500 dark:text-neutral-400` or darker, so contrast stays at 4.5:1 or better. Do not use `gray-400` or `neutral-500` for text.
+- Use a hyphen, not an en or em dash, in copy, titles and dates.
+
 ## Hard Constraints
 
 - **NEVER modify, overwrite, or delete `README.md`** — it is the GitHub Profile README and controls the public profile page.
