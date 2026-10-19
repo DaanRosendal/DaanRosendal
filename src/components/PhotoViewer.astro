@@ -1,0 +1,346 @@
+---
+import { ChevronLeft, ChevronRight, X } from '@lucide/astro';
+
+// A dark disc with a light ring stays visible on bright and dark photos alike. z-10 keeps the buttons above the photo.
+const control = 'z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white shadow-lg ring-1 ring-white/50 backdrop-blur-sm transition-colors hover:bg-black/80';
+---
+
+<!-- Enlarged photo and video view. Without JavaScript the links to the photos still open them in a new tab. -->
+<dialog
+  data-lightbox-dialog
+  aria-label="Photo and video viewer"
+  class="m-0 h-full max-h-none w-full max-w-none cursor-zoom-out touch-pan-y touch-pinch-zoom flex-col items-center justify-center overflow-hidden overscroll-contain bg-transparent p-4 open:flex md:px-20"
+>
+  <button type="button" data-lightbox-close aria-label="Close" class={`${control} absolute right-4 top-4`}>
+    <X size={20} />
+  </button>
+  <button type="button" data-lightbox-prev aria-label="Previous photo" class={`${control} absolute left-4 top-1/2 -translate-y-1/2`}>
+    <ChevronLeft size={22} />
+  </button>
+  <button type="button" data-lightbox-next aria-label="Next photo" class={`${control} absolute right-4 top-1/2 -translate-y-1/2`}>
+    <ChevronRight size={22} />
+  </button>
+  <img data-lightbox-image alt="" class="max-w-full cursor-default rounded-lg object-contain" />
+  <iframe
+    data-lightbox-video
+    hidden
+    title="Demo video"
+    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+    allowfullscreen
+    class="aspect-video rounded-lg"
+  ></iframe>
+  <p data-lightbox-status class="sr-only" aria-live="polite"></p>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox-dialog]');
+  const tiles = [...document.querySelectorAll<HTMLAnchorElement>('[data-lightbox]')];
+
+  if (dialog && tiles.length > 0) {
+    const image = dialog.querySelector<HTMLImageElement>('[data-lightbox-image]')!;
+    const status = dialog.querySelector<HTMLElement>('[data-lightbox-status]')!;
+    let frame = dialog.querySelector<HTMLIFrameElement>('[data-lightbox-video]')!;
+    const several = tiles.length > 1;
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    let current = 0;
+    // Bumped on every close, so an animation that is still running knows the viewer was closed in the meantime.
+    let session = 0;
+
+    if (!several) dialog.querySelectorAll<HTMLElement>('[data-lightbox-prev], [data-lightbox-next]').forEach((button) => (button.style.display = 'none'));
+
+    // The YouTube player is a fresh iframe each time (so it adds nothing to the browser history) and is removed again
+    // when the viewer moves on or closes.
+    function setFrame(url?: string) {
+      const fresh = frame.cloneNode() as HTMLIFrameElement;
+      fresh.hidden = !url;
+      if (url) fresh.src = url;
+      else fresh.removeAttribute('src');
+      frame.replaceWith(fresh);
+      frame = fresh;
+    }
+
+    const show = (index: number) => {
+      current = (index + tiles.length) % tiles.length;
+      const tile = tiles[current];
+      const photo = tile.querySelector('img')!;
+      const videoId = tile.dataset.video;
+      image.hidden = Boolean(videoId);
+      if (videoId) setFrame(`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`);
+      else {
+        if (frame.getAttribute('src')) setFrame();
+        image.src = tile.href;
+        image.alt = photo.alt;
+      }
+      status.textContent = several ? `${current + 1} of ${tiles.length}: ${photo.alt || 'video'}` : photo.alt;
+    };
+
+    const clearInline = () => {
+      image.style.transition = '';
+      image.style.transform = '';
+      image.style.opacity = '';
+    };
+
+    // Opens the viewer on a photo. The previous photo is hidden until the new one has loaded.
+    async function open(index: number) {
+      const mine = session;
+      show(index);
+      if (!tiles[current].dataset.video) image.style.opacity = '0';
+      dialog!.showModal();
+      if (!tiles[current].dataset.video) {
+        await Promise.race([image.decode().catch(() => undefined), wait(4000)]);
+        if (mine === session) image.style.opacity = '';
+      }
+    }
+
+    // A plain click opens the viewer; a click with a modifier key keeps the normal link behaviour (a new tab).
+    const isPlainClick = (event: MouseEvent) => event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+
+    tiles.forEach((tile, index) =>
+      tile.addEventListener('click', (event) => {
+        if (!isPlainClick(event)) return;
+        event.preventDefault();
+        void open(index);
+      }),
+    );
+
+    // A link in the text with data-lightbox-open="<photo number>" opens that photo in the viewer. Without JavaScript it opens the photo in a new tab.
+    document.querySelectorAll<HTMLAnchorElement>('[data-lightbox-open]').forEach((link) => {
+      const index = Number(link.dataset.lightboxOpen || NaN);
+      if (!Number.isInteger(index) || index < 0 || index >= tiles.length) return;
+      link.setAttribute('aria-haspopup', 'dialog');
+      link.addEventListener('click', (event) => {
+        if (!isPlainClick(event)) return;
+        event.preventDefault();
+        void open(index);
+      });
+    });
+
+    dialog.querySelector('[data-lightbox-close]')!.addEventListener('click', () => dialog.close());
+    dialog.querySelector('[data-lightbox-prev]')?.addEventListener('click', () => void go(-1));
+    dialog.querySelector('[data-lightbox-next]')?.addEventListener('click', () => void go(1));
+
+    // A click on the dimmed area around the photo closes it, but only when the press started there as well, so
+    // dragging from the photo to the dimmed area (or back) does not close it. A swipe never closes it.
+    let pressedOnBackdrop = false;
+    let suppressClick = false;
+    dialog.addEventListener('pointerdown', (event) => {
+      pressedOnBackdrop = event.target === dialog;
+      suppressClick = false;
+    });
+    dialog.addEventListener('click', (event) => {
+      const closes = event.target === dialog && pressedOnBackdrop && !suppressClick;
+      pressedOnBackdrop = false;
+      suppressClick = false;
+      if (closes) dialog.close();
+    });
+
+    // Moving between photos: the current photo slides out, the next one slides in. Without animation when the visitor
+    // prefers reduced motion or when a video is involved. One extra step is remembered while a slide is running.
+    const SLIDE_MS = 280;
+    const SLIDE_DISTANCE = 80;
+    let busy = false;
+    let queued: 1 | -1 | 0 = 0;
+
+    async function go(direction: 1 | -1, outDistance = SLIDE_DISTANCE) {
+      if (!several) return;
+      if (busy) {
+        queued = direction;
+        return;
+      }
+      const next = (current + direction + tiles.length) % tiles.length;
+      if (reducedMotion.matches || tiles[current].dataset.video || tiles[next].dataset.video) {
+        clearInline();
+        show(next);
+        if (!tiles[next].dataset.video) {
+          image.style.opacity = '0';
+          const mine = session;
+          await Promise.race([image.decode().catch(() => undefined), wait(4000)]);
+          if (mine === session) image.style.opacity = '';
+        }
+        return;
+      }
+      busy = true;
+      const mine = session;
+      image.style.transition = `transform ${SLIDE_MS}ms ease-in, opacity ${SLIDE_MS}ms ease-in`;
+      image.style.transform = `translateX(${-direction * outDistance}px)`;
+      image.style.opacity = '0';
+      await wait(SLIDE_MS);
+      if (mine !== session) return;
+      show(next);
+      await Promise.race([image.decode().catch(() => undefined), wait(4000)]);
+      if (mine !== session) return;
+      image.style.transition = 'none';
+      image.style.transform = `translateX(${direction * SLIDE_DISTANCE}px)`;
+      void image.offsetWidth;
+      image.style.transition = `transform ${SLIDE_MS}ms ease-out, opacity ${SLIDE_MS}ms ease-out`;
+      image.style.transform = 'translateX(0)';
+      image.style.opacity = '1';
+      await wait(SLIDE_MS);
+      if (mine !== session) return;
+      clearInline();
+      busy = false;
+      if (queued) {
+        const again = queued;
+        queued = 0;
+        void go(again);
+      }
+    }
+
+    // On touch screens the photo follows the finger. Letting go far enough slides to the next or previous photo,
+    // otherwise it springs back. A second finger (pinch-zoom) cancels the drag, and so does a touch right at the edge
+    // of the screen, where the browser's own back gesture lives.
+    const EDGE = 24;
+    const pointers = new Set<number>();
+    let drag: { id: number; x: number; y: number; dx: number; moved: boolean } | null = null;
+
+    const springBack = () => {
+      const mine = session;
+      image.style.transition = 'transform 300ms ease-out, opacity 300ms ease-out';
+      image.style.transform = 'translateX(0)';
+      image.style.opacity = '1';
+      setTimeout(() => mine === session && !drag && !busy && clearInline(), 300);
+    };
+
+    dialog.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse') return;
+      pointers.add(event.pointerId);
+      if (pointers.size > 1) {
+        if (drag?.moved) springBack();
+        drag = null;
+        return;
+      }
+      const atEdge = event.clientX < EDGE || event.clientX > window.innerWidth - EDGE;
+      const onPhoto = several && !busy && !atEdge && !tiles[current].dataset.video && !(event.target as HTMLElement).closest('button');
+      drag = onPhoto ? { id: event.pointerId, x: event.clientX, y: event.clientY, dx: 0, moved: false } : null;
+    });
+
+    dialog.addEventListener('pointermove', (event) => {
+      if (!drag || event.pointerId !== drag.id) return;
+      const dx = event.clientX - drag.x;
+      const dy = event.clientY - drag.y;
+      if (!drag.moved) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        if (Math.abs(dy) > Math.abs(dx)) {
+          drag = null;
+          return;
+        }
+        drag.moved = true;
+        image.style.transition = 'none';
+      }
+      drag.dx = dx;
+      image.style.transform = `translateX(${dx}px)`;
+      image.style.opacity = String(1 - Math.min(Math.abs(dx) / (window.innerWidth * 0.8), 0.6));
+    });
+
+    // pointerup and pointercancel are listened for on the document, so a finger that is lifted outside the dialog
+    // does not leave a stale pointer behind.
+    document.addEventListener('pointerup', (event) => {
+      pointers.delete(event.pointerId);
+      if (!drag || event.pointerId !== drag.id) return;
+      const { dx, moved } = drag;
+      drag = null;
+      if (!moved) return;
+      suppressClick = true;
+      if (Math.abs(dx) > Math.min(100, window.innerWidth * 0.2)) void go(dx < 0 ? 1 : -1, Math.max(window.innerWidth * 0.5, Math.abs(dx) + 100));
+      else springBack();
+    });
+
+    document.addEventListener('pointercancel', (event) => {
+      pointers.delete(event.pointerId);
+      if (drag?.id === event.pointerId && drag.moved) springBack();
+      if (drag?.id === event.pointerId) drag = null;
+    });
+
+    // Arrow keys work while the viewer is open, wherever the focus is inside the page (but not inside the video).
+    document.addEventListener('keydown', (event) => {
+      if (!dialog.open || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        void go(event.key === 'ArrowLeft' ? -1 : 1);
+      }
+    });
+
+    // Closing resets everything that an animation or a gesture may have left behind. The video is removed once the
+    // fade-out is over, so it does not flash empty while the viewer fades away.
+    dialog.addEventListener('close', () => {
+      session += 1;
+      busy = false;
+      queued = 0;
+      drag = null;
+      pointers.clear();
+      pressedOnBackdrop = false;
+      suppressClick = false;
+      clearInline();
+      setTimeout(() => {
+        if (!dialog.open && frame.getAttribute('src')) setFrame();
+      }, 350);
+    });
+  }
+</script>
+
+<style is:global>
+  dialog[data-lightbox-dialog]::backdrop {
+    background-color: rgb(0 0 0 / 0.85);
+  }
+
+  /* The photo and the video use the dynamic viewport height where it exists, so they fit above the browser toolbar on phones. */
+  dialog[data-lightbox-dialog] > img {
+    max-height: 85vh;
+    max-height: 85dvh;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+  dialog[data-lightbox-dialog] > iframe {
+    width: min(90vw, calc(85vh * 16 / 9));
+    width: min(90vw, calc(85dvh * 16 / 9));
+  }
+
+  /* A short fade and zoom (0.3 s) when the viewer opens and closes. Browsers without support just show and hide it at once. */
+  @media (prefers-reduced-motion: no-preference) {
+    dialog[data-lightbox-dialog] {
+      opacity: 0;
+      transition: opacity 0.3s ease-out, display 0.3s allow-discrete, overlay 0.3s allow-discrete;
+    }
+    dialog[data-lightbox-dialog][open] {
+      opacity: 1;
+    }
+    dialog[data-lightbox-dialog]::backdrop {
+      background-color: rgb(0 0 0 / 0);
+      transition: background-color 0.3s ease-out, display 0.3s allow-discrete, overlay 0.3s allow-discrete;
+    }
+    dialog[data-lightbox-dialog][open]::backdrop {
+      background-color: rgb(0 0 0 / 0.85);
+    }
+    dialog[data-lightbox-dialog] > img,
+    dialog[data-lightbox-dialog] > iframe {
+      transform: scale(0.96);
+      transition: transform 0.3s ease-out;
+    }
+    dialog[data-lightbox-dialog][open] > img,
+    dialog[data-lightbox-dialog][open] > iframe {
+      transform: scale(1);
+    }
+    @starting-style {
+      dialog[data-lightbox-dialog][open] {
+        opacity: 0;
+      }
+      dialog[data-lightbox-dialog][open]::backdrop {
+        background-color: rgb(0 0 0 / 0);
+      }
+      dialog[data-lightbox-dialog][open] > img,
+      dialog[data-lightbox-dialog][open] > iframe {
+        transform: scale(0.96);
+      }
+    }
+  }
+
+  /* Safari can fade the dialog but not keep the backdrop (the `overlay` property), which makes a fade-out look broken.
+     There the viewer fades in and closes at once. */
+  @supports not (overlay: auto) {
+    dialog[data-lightbox-dialog]:not([open]),
+    dialog[data-lightbox-dialog]:not([open])::backdrop {
+      transition-duration: 0s;
+    }
+  }
+</style>

@@ -16,3 +16,8 @@
 body:has(dialog[open]) {
   overflow: hidden;
 }
+
+/* Keeps the page from shifting sideways when a modal dialog hides the scrollbar. */
+html {
+  scrollbar-gutter: stable;
+}

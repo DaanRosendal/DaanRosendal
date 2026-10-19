@@ -31,7 +31,7 @@ npm run preview  # Preview production build locally
 ```text
 /
 ├── src/
-│   ├── components/        # Highlights, achievement cards, gallery, timelines
+│   ├── components/        # Highlights, achievement cards, gallery, photo viewer, timelines
 │   ├── content/
 │   │   ├── achievements/  # Highlight entries (Build / Compete / Research), one Markdown file each
 │   │   └── blog/        # Markdown blog posts

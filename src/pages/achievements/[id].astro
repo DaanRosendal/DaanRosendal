@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import AchievementVideo from '../../components/AchievementVideo.astro';
 import AchievementGallery from '../../components/AchievementGallery.astro';
+import PhotoViewer from '../../components/PhotoViewer.astro';
 import LiveCounts from '../../components/LiveCounts.astro';
 import { getCollection } from 'astro:content';
 import { resolveAchievementText } from '../../lib/marketplace';
@@ -46,17 +47,26 @@ const thumbnailSize = thumbnail ? await imageSize(thumbnail) : undefined;
       </div>
     ) : thumbnail && (
       <div class="mb-8">
-        <img
-          src={thumbnail}
-          alt={`Screenshot: ${title}`}
-          width={thumbnailSize?.width}
-          height={thumbnailSize?.height}
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
+        <a
+          href={thumbnail}
+          data-lightbox="0"
+          target="_blank"
+          rel="noopener noreferrer"
           style={thumbnailSize && `width: min(100%, ${(28 * thumbnailSize.width / thumbnailSize.height).toFixed(2)}rem); aspect-ratio: ${thumbnailSize.width} / ${thumbnailSize.height}`}
-          class="mx-auto block h-auto rounded-xl border border-gray-200 dark:border-neutral-700"
-        />
+          class="mx-auto block cursor-zoom-in"
+        >
+          <img
+            src={thumbnail}
+            alt={`Screenshot: ${title}`}
+            width={thumbnailSize?.width}
+            height={thumbnailSize?.height}
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            class="block h-auto w-full rounded-xl border border-gray-200 dark:border-neutral-700"
+          />
+        </a>
+        <PhotoViewer />
       </div>
     )}
 
