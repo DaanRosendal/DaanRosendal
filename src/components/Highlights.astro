@@ -1,0 +1,35 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import AchievementCard from './AchievementCard.astro';
+
+// 'importance' sorts by each entry's `order` (lowest first).
+// 'date' sorts newest first by `date`, with undated entries last, falling back to `order`.
+const SORT_BY: 'importance' | 'date' = 'importance';
+
+const byImportance = (a: Entry, b: Entry) => a.data.order - b.data.order;
+const byDate = (a: Entry, b: Entry) =>
+  (b.data.date?.valueOf() ?? -Infinity) - (a.data.date?.valueOf() ?? -Infinity) || byImportance(a, b);
+
+type Entry = CollectionEntry<'achievements'>;
+const entries = (await getCollection('achievements')).sort(SORT_BY === 'date' ? byDate : byImportance);
+
+const tracks = [
+  { id: 'build', label: 'Build' },
+  { id: 'compete', label: 'Compete' },
+  { id: 'research', label: 'Research' },
+] as const;
+---
+
+<section class="mb-14 grid gap-10 md:grid-cols-3 md:gap-5">
+  {tracks.map(({ id, label }) => {
+    const items = entries.filter((e) => e.data.track === id);
+    return items.length > 0 && (
+      <div>
+        <h2 class="mb-3 text-center text-lg font-semibold">{label}</h2>
+        <div class="space-y-3">
+          {items.map((entry) => <AchievementCard entry={entry} />)}
+        </div>
+      </div>
+    );
+  })}
+</section>

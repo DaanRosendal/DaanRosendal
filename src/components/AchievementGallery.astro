@@ -1,0 +1,179 @@
+---
+import { ChevronLeft, ChevronRight, Play, X } from '@lucide/astro';
+
+interface Photo {
+  src: string;
+  alt: string;
+  full?: string;
+  position?: string;
+}
+
+interface Props {
+  photos: Photo[];
+  video?: string;
+}
+
+const { photos, video } = Astro.props;
+const [lead, ...rest] = photos;
+// A single photo, often a portrait, floats beside the text instead of forming a collage.
+const single = photos.length === 1 && !video;
+const tile = 'group relative block overflow-hidden rounded-lg bg-gray-100 dark:bg-neutral-800 aspect-[3/2]';
+const control = 'flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20';
+const img = 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-105';
+---
+
+{single ? (
+  <a
+    href={lead.full ?? lead.src}
+    data-lightbox="0"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="group relative mx-auto mb-6 block w-full max-w-60 overflow-hidden rounded-lg bg-gray-100 dark:bg-neutral-800 md:float-right md:mb-4 md:ml-8 md:w-60"
+  >
+    <img src={lead.src} alt={lead.alt} loading="lazy" class="block h-auto w-full transition-transform duration-300 group-hover:scale-105" />
+  </a>
+) : (
+<div class="grid grid-cols-4 gap-2">
+  <a href={lead.full ?? lead.src} data-lightbox="0" target="_blank" rel="noopener noreferrer" class={`${tile} col-span-2 row-span-2 aspect-auto`}>
+    <img src={lead.src} alt={lead.alt} loading="lazy" class={`${img} absolute inset-0`} style={lead.position && `object-position: ${lead.position}`} />
+  </a>
+  {rest.map((photo, i) => (
+    <a href={photo.full ?? photo.src} data-lightbox={i + 1} target="_blank" rel="noopener noreferrer" class={tile}>
+      <img src={photo.src} alt={photo.alt} loading="lazy" class={img} style={photo.position && `object-position: ${photo.position}`} />
+    </a>
+  ))}
+  {video && (
+    <a
+      href={`https://youtu.be/${video}`}
+      data-lightbox={photos.length}
+      data-video={video}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Watch the demo video on YouTube"
+      class={tile}
+    >
+      <img src={`https://i.ytimg.com/vi/${video}/hqdefault.jpg`} alt="" loading="lazy" class={img} />
+      <span class="absolute inset-0 flex items-center justify-center bg-black/30">
+        <Play size={18} fill="currentColor" class="text-white" />
+      </span>
+    </a>
+  )}
+</div>
+)}
+
+<!-- Enlarged photo and video view. Without JavaScript the tiles above still open the photo or YouTube in a new tab. -->
+<dialog
+  data-lightbox-dialog
+  aria-label="Photo and video viewer"
+  class="m-0 h-full max-h-none w-full max-w-none touch-pan-y touch-pinch-zoom overscroll-contain bg-transparent p-4 backdrop:bg-black/85 open:flex open:flex-col open:items-center open:justify-center"
+>
+  <button type="button" data-lightbox-close aria-label="Close" class={`${control} absolute right-4 top-4`}>
+    <X size={20} />
+  </button>
+  {photos.length > 1 && (
+    <>
+      <button type="button" data-lightbox-prev aria-label="Previous photo" class={`${control} absolute left-4 top-1/2 -translate-y-1/2`}>
+        <ChevronLeft size={22} />
+      </button>
+      <button type="button" data-lightbox-next aria-label="Next photo" class={`${control} absolute right-4 top-1/2 -translate-y-1/2`}>
+        <ChevronRight size={22} />
+      </button>
+    </>
+  )}
+  <img data-lightbox-image src="" alt="" class="max-h-[85vh] max-w-full rounded-lg object-contain" />
+  <iframe
+    data-lightbox-video
+    hidden
+    title="Demo video"
+    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+    allowfullscreen
+    class="aspect-video w-[min(90vw,calc(85vh*16/9))] rounded-lg"
+  ></iframe>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox-dialog]');
+  const tiles = [...document.querySelectorAll<HTMLAnchorElement>('[data-lightbox]')];
+
+  if (dialog && tiles.length > 0) {
+    const image = dialog.querySelector<HTMLImageElement>('[data-lightbox-image]')!;
+    const frame = dialog.querySelector<HTMLIFrameElement>('[data-lightbox-video]')!;
+    let current = 0;
+
+    // The YouTube player loads only when the video is shown, and is emptied again when the viewer moves on or closes.
+    const show = (index: number) => {
+      current = (index + tiles.length) % tiles.length;
+      const tile = tiles[current];
+      const photo = tile.querySelector('img')!;
+      const videoId = tile.dataset.video;
+      image.hidden = Boolean(videoId);
+      frame.hidden = !videoId;
+      frame.src = videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0` : 'about:blank';
+      if (!videoId) {
+        image.src = tile.href;
+        image.alt = photo.alt;
+      }
+    };
+
+    tiles.forEach((tile, index) =>
+      tile.addEventListener('click', (event) => {
+        event.preventDefault();
+        show(index);
+        dialog.showModal();
+      }),
+    );
+
+    // A link in the text with data-lightbox-open="<photo number>" opens that photo in the viewer. Without JavaScript it opens the photo in a new tab.
+    document.querySelectorAll<HTMLAnchorElement>('[data-lightbox-open]').forEach((link) =>
+      link.addEventListener('click', (event) => {
+        const index = Number(link.dataset.lightboxOpen);
+        if (!(index >= 0 && index < tiles.length)) return;
+        event.preventDefault();
+        show(index);
+        dialog.showModal();
+      }),
+    );
+
+    dialog.addEventListener('close', () => {
+      frame.src = 'about:blank';
+    });
+
+    dialog.querySelector('[data-lightbox-close]')!.addEventListener('click', () => dialog.close());
+    dialog.querySelector('[data-lightbox-prev]')?.addEventListener('click', () => show(current - 1));
+    dialog.querySelector('[data-lightbox-next]')?.addEventListener('click', () => show(current + 1));
+
+    // A click on the dimmed area around the photo closes it.
+    dialog.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      if (target === dialog) dialog.close();
+    });
+
+    // A horizontal swipe on touch screens goes to the previous or next photo. Multi-finger gestures such as pinch-zoom are ignored.
+    const SWIPE_DISTANCE = 50;
+    const touches = new Map<number, { x: number; y: number }>();
+    let swipeAborted = false;
+
+    dialog.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse') return;
+      if (touches.size > 0) swipeAborted = true;
+      else swipeAborted = false;
+      touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    });
+
+    dialog.addEventListener('pointerup', (event) => {
+      const start = touches.get(event.pointerId);
+      touches.delete(event.pointerId);
+      if (!start || swipeAborted) return;
+      const dx = event.clientX - start.x;
+      const dy = event.clientY - start.y;
+      if (Math.abs(dx) >= SWIPE_DISTANCE && Math.abs(dx) > Math.abs(dy)) show(current + (dx < 0 ? 1 : -1));
+    });
+
+    dialog.addEventListener('pointercancel', (event) => touches.delete(event.pointerId));
+
+    dialog.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') show(current - 1);
+      if (event.key === 'ArrowRight') show(current + 1);
+    });
+  }
+</script>

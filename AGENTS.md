@@ -22,6 +22,8 @@ npm run preview  # Preview production build locally
 ## Git
 
 - Use **Conventional Commits** for every new commit (for example: `feat: ...`, `fix: ...`, `chore: ...`, `docs: ...`).
+- **Work longer, then commit once.** The history is public, so do not commit every small change. Make the edits for a feature or a batch of requests, then create a single commit for it. Only commit when asked, or when a piece of work is finished.
+- Never push without being asked. A push to `master` deploys the site.
 - When rewriting history, preserve commit contents and metadata unless the task explicitly requires changing them.
 
 ## Project Structure
@@ -29,13 +31,19 @@ npm run preview  # Preview production build locally
 ```text
 /
 ├── src/
+│   ├── components/        # Highlights, achievement cards, gallery, timelines
 │   ├── content/
+│   │   ├── achievements/  # Highlight entries (Build / Compete / Research), one Markdown file each
 │   │   └── blog/        # Markdown blog posts
 │   ├── content.config.ts  # Content Layer API config (Astro 6 style)
 │   ├── layouts/
 │   │   └── Layout.astro   # Shared page layout
+│   ├── lib/
+│   │   └── marketplace.ts # Live install counts with fallbacks
 │   ├── pages/
 │   │   ├── index.astro    # Resume/home
+│   │   ├── achievements/
+│   │   │   └── [id].astro     # Achievement detail page
 │   │   └── blog/
 │   │       ├── index.astro    # Blog listing
 │   │       └── [id].astro     # Individual post

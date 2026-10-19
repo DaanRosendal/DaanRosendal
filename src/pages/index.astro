@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import ExperienceList from '../components/ExperienceList.astro';
 import EducationList from '../components/EducationList.astro';
+import Highlights from '../components/Highlights.astro';
 import { FileText, Mail, MapPin } from '@lucide/astro';
 ---
 <Layout title="Daan Rosendal">
@@ -11,7 +12,7 @@ import { FileText, Mail, MapPin } from '@lucide/astro';
       <p>Software Engineer</p>
       <span class="flex items-center gap-1">
         <MapPin size={13} />
-        Zurich, Switzerland
+        Zürich, Switzerland
       </span>
     </div>
     <nav class="flex justify-between items-center text-sm text-gray-500 dark:text-neutral-400">
@@ -38,6 +39,7 @@ import { FileText, Mail, MapPin } from '@lucide/astro';
   </nav>
   </header>
 
+  <Highlights />
   <ExperienceList />
   <EducationList />
 </Layout>

@@ -1,0 +1,57 @@
+---
+import { Play } from '@lucide/astro';
+
+interface Props {
+  youtube?: string;
+  thumbnail?: string;
+  title: string;
+}
+
+const { youtube, thumbnail, title } = Astro.props;
+const poster = thumbnail ?? (youtube ? `https://i.ytimg.com/vi/${youtube}/hqdefault.jpg` : undefined);
+---
+
+<div class="relative aspect-video w-full overflow-hidden rounded-xl bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700">
+  {youtube ? (
+    <button
+      type="button"
+      data-yt={youtube}
+      aria-label={`Play video: ${title}`}
+      class="group absolute inset-0 w-full h-full cursor-pointer"
+    >
+      <img
+        src={poster}
+        alt=""
+        loading="lazy"
+        class="w-full h-full object-cover"
+      />
+      <span class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+        <span class="w-16 h-16 rounded-full bg-white/90 text-gray-900 flex items-center justify-center">
+          <Play size={26} class="translate-x-0.5" fill="currentColor" />
+        </span>
+      </span>
+    </button>
+  ) : (
+    <>
+      {poster && <img src={poster} alt="" class="w-full h-full object-cover" />}
+      <div class={`absolute inset-0 flex flex-col items-center justify-center gap-2 ${poster ? 'bg-black/40 text-white' : 'text-gray-400 dark:text-neutral-500'}`}>
+        <Play size={28} />
+        <span class="text-sm">Video coming soon</span>
+      </div>
+    </>
+  )}
+</div>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-yt]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${button.dataset.yt}?autoplay=1&rel=0`;
+      iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      iframe.allowFullscreen = true;
+      iframe.title = button.getAttribute('aria-label') ?? 'Video';
+      iframe.className = 'absolute inset-0 w-full h-full';
+      button.replaceWith(iframe);
+    });
+  });
+</script>

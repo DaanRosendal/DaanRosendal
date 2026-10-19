@@ -1,0 +1,76 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AchievementVideo from '../../components/AchievementVideo.astro';
+import AchievementGallery from '../../components/AchievementGallery.astro';
+import { getCollection } from 'astro:content';
+import { resolveAchievementText } from '../../lib/marketplace';
+import { ArrowLeft, ArrowUpRight } from '@lucide/astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('achievements');
+  return entries.map((entry) => ({
+    params: { id: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { title, when, youtube, thumbnail, gallery, galleryVideo, links } = entry.data;
+const { stat, fill } = await resolveAchievementText(entry);
+const body = fill(entry.rendered?.html ?? '');
+---
+<Layout title={`${title} — Daan Rosendal`}>
+  <nav class="mb-12 text-sm">
+    <a href="/" class="inline-flex items-center gap-1.5 text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+      <ArrowLeft size={14} />
+      Home
+    </a>
+  </nav>
+
+  <article>
+    <header class="mb-8">
+      <p class="text-sm text-gray-400 dark:text-neutral-500 mb-2">{stat} · {when}</p>
+      <h1 class="text-4xl font-bold">{title}</h1>
+    </header>
+
+    {gallery.length > 0 ? (
+      <div class={gallery.length === 1 && !galleryVideo ? '' : 'mb-8'}>
+        <AchievementGallery photos={gallery} video={galleryVideo} />
+      </div>
+    ) : youtube ? (
+      <div class="mb-8">
+        <AchievementVideo youtube={youtube} thumbnail={thumbnail} title={title} />
+      </div>
+    ) : thumbnail && (
+      <div class="mb-8">
+        <img
+          src={thumbnail}
+          alt={`Screenshot: ${title}`}
+          class="mx-auto max-h-[28rem] w-auto rounded-xl border border-gray-200 dark:border-neutral-700"
+        />
+      </div>
+    )}
+
+    <div class="space-y-4 text-gray-700 dark:text-neutral-300 [&_a]:underline [&_a]:decoration-gray-300 [&_a]:underline-offset-2 dark:[&_a]:decoration-neutral-600 [&_a:hover]:decoration-current [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
+      <Fragment set:html={body} />
+    </div>
+
+    {links.length > 0 && (
+      <ul class="clear-both mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+        {links.map((link) => (
+          <li>
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1 text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              {link.label}
+              <ArrowUpRight size={13} />
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </article>
+</Layout>

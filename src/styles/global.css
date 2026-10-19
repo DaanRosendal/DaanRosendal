@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+@layer base {
+  /* Inline code: a soft chip in the monospace stack, a touch smaller than the surrounding text. */
+  :not(pre) > code {
+    @apply rounded-md bg-gray-100 px-1.5 py-0.5 font-mono text-[0.875em] text-gray-800 dark:bg-neutral-800 dark:text-neutral-200;
+  }
+
+  /* Code blocks: Astro's Shiki output brings its own colors, so only shape and spacing are set here. */
+  pre {
+    @apply overflow-x-auto rounded-xl border border-gray-200 p-4 text-sm leading-relaxed dark:border-neutral-700;
+  }
+}
+
+/* Keeps the page from scrolling behind an open modal dialog such as the photo viewer. */
+body:has(dialog[open]) {
+  overflow: hidden;
+}
