@@ -57,6 +57,14 @@ npm run preview  # Preview production build locally
 └── README.md              # GitHub Profile README (this repo is also the profile repo)
 ```
 
+## Resume and website
+
+- `resume/resume.tex` is the curated one-page resume. `latexmk -pdf resume.tex` (run inside `resume/`) builds it and `.latexmkrc` copies the PDF to `public/Daan_Rosendal_Resume.pdf`. Keep it on one page and check the page count after every edit.
+- The website (`src/components/ExperienceList.astro` and `EducationList.astro`) is the extensive version of the same history. Whenever a resume bullet, title, date or link changes, update the matching website entry in the same batch of work.
+- The website keeps the longer content that the resume leaves out: course lists, second bullets, the "5 evaluations" CERN bullet and older roles such as Deltion College and GWBO. There is space for it, so never trim the website to match the resume.
+- Roles that are left off the resume are flagged `earlier: true` in `ExperienceList.astro`. They glow when the resume's "See all roles" link (`/#earlier-experience`) is opened. When a role is dropped from or restored to the resume, update its flag.
+- In `resume.tex`, comment out single bullets that might come back and delete everything else. Do not keep dead blocks.
+
 ## Blog
 
 - The blog is deliberately not published: `src/pages/_blog/` is ignored by the router, so there is no `/blog/` page, no sitemap entry and nothing to index. The collection in `src/content/blog/` and its schema stay in place.
