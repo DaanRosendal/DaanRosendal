@@ -1,5 +1,7 @@
 ---
 import { Building2, ChevronDown } from '@lucide/astro';
+import TimelineBullet, { type Bullet } from './TimelineBullet.astro';
+import TimelineLinks, { type TimelineLink } from './TimelineLinks.astro';
 
 export interface TimelineItem {
   title: string;
@@ -16,7 +18,9 @@ export interface TimelineItem {
   logo?: string;
   logoDark?: string;
   rounded?: boolean;
-  bullets?: string[];
+  bullets?: Bullet[];
+  /** Project links shown under the description, optionally with a GitHub star count. */
+  links?: TimelineLink[];
   /** Left off the resume: glows when the section is opened through its anchor link. */
   earlier?: boolean;
 }
@@ -40,7 +44,7 @@ const hasOverflow = overflowItems.length > 0;
   <h2 class="text-xl font-semibold mb-6">{heading}</h2>
   <ul>
     {visibleItems.map((item, i) => {
-      const hasContent = !!(item.description || (item.bullets && item.bullets.length > 0));
+      const hasContent = !!(item.description || (item.bullets && item.bullets.length > 0) || (item.links && item.links.length > 0));
       const showBar = i < visibleItems.length - 1;
       const isLastVisible = hasOverflow && i === visibleItems.length - 1;
       const padClass = showBar || hasOverflow ? 'pb-8' : '';
@@ -116,13 +120,11 @@ const hasOverflow = overflowItems.length > 0;
                       {item.description && (
                         <p class="text-sm text-gray-500 dark:text-neutral-400 italic">{item.description}</p>
                       )}
+<TimelineLinks links={item.links} />
                       {item.bullets && item.bullets.length > 0 && (
                         <ul class="space-y-2">
                           {item.bullets.map((bullet) => (
-                            <li class="flex gap-2.5 text-sm text-gray-600 dark:text-neutral-400">
-                              <span class="mt-2 w-1 h-1 rounded-full bg-gray-300 dark:bg-neutral-600 shrink-0"></span>
-                              <span>{bullet}</span>
-                            </li>
+                            <TimelineBullet bullet={bullet} />
                           ))}
                         </ul>
                       )}
@@ -182,7 +184,7 @@ const hasOverflow = overflowItems.length > 0;
     <div data-exp-overflow style="height: 0; overflow: hidden;">
       <ul>
         {overflowItems.map((item, i) => {
-          const hasContent = !!(item.description || (item.bullets && item.bullets.length > 0));
+          const hasContent = !!(item.description || (item.bullets && item.bullets.length > 0) || (item.links && item.links.length > 0));
           const showBar = i < overflowItems.length - 1;
           const padClass = 'pb-8';
           return (
@@ -256,13 +258,11 @@ const hasOverflow = overflowItems.length > 0;
                           {item.description && (
                             <p class="text-sm text-gray-500 dark:text-neutral-400 italic">{item.description}</p>
                           )}
+<TimelineLinks links={item.links} />
                           {item.bullets && item.bullets.length > 0 && (
                             <ul class="space-y-2">
                               {item.bullets.map((bullet) => (
-                                <li class="flex gap-2.5 text-sm text-gray-600 dark:text-neutral-400">
-                                  <span class="mt-2 w-1 h-1 rounded-full bg-gray-300 dark:bg-neutral-600 shrink-0"></span>
-                                  <span>{bullet}</span>
-                                </li>
+                                <TimelineBullet bullet={bullet} />
                               ))}
                             </ul>
                           )}

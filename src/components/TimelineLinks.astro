@@ -1,0 +1,31 @@
+---
+import { ExternalLink } from '@lucide/astro';
+
+export interface TimelineLink {
+  label: string;
+  url: string;
+  /** GitHub stars, shown as a small star and count (for example "800+"). */
+  stars?: string;
+}
+
+interface Props {
+  links?: TimelineLink[];
+}
+
+const { links = [] } = Astro.props;
+---
+
+{links.length > 0 && (
+  <ul class="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+    {links.map((link) => (
+      <li>
+        <a
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-gray-600 dark:text-neutral-300 underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
+        >{link.label}{link.stars && (<><span class="text-amber-700 dark:text-amber-400" aria-hidden="true"> ★</span><span class="text-gray-500 dark:text-neutral-400"> {link.stars}</span></>)}<ExternalLink size={11} class="ml-1 inline align-baseline" aria-hidden="true" /></a>
+      </li>
+    ))}
+  </ul>
+)}

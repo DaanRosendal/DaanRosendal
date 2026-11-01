@@ -1,0 +1,46 @@
+---
+import { ExternalLink } from '@lucide/astro';
+
+export type Bullet = string | { text: string; linkText: string; url: string };
+
+interface Props {
+  bullet: Bullet;
+}
+
+const { bullet } = Astro.props;
+
+// A bullet is plain text, or text where one phrase links somewhere (the way the resume does it).
+let before = '';
+let linked = '';
+let after = '';
+let url = '';
+
+if (typeof bullet === 'string') {
+  before = bullet;
+} else {
+  const start = bullet.text.indexOf(bullet.linkText);
+  if (start === -1) {
+    before = bullet.text;
+  } else {
+    before = bullet.text.slice(0, start);
+    linked = bullet.linkText;
+    after = bullet.text.slice(start + bullet.linkText.length);
+    url = bullet.url;
+  }
+}
+
+// Every link opens in a new tab and carries the icon, so the open timeline stays where it is.
+// This also holds for links to pages on this site, as on the resume.
+const external = !!url;
+---
+
+<li class="flex gap-2.5 text-sm text-gray-600 dark:text-neutral-400">
+  <span class="mt-2 w-1 h-1 rounded-full bg-gray-300 dark:bg-neutral-600 shrink-0"></span>
+  <span>{before}{url && (
+    <a
+      href={url}
+      {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      class="underline decoration-dotted underline-offset-2 decoration-gray-300 dark:decoration-neutral-600 hover:text-gray-900 dark:hover:text-white hover:decoration-solid hover:decoration-gray-500 dark:hover:decoration-neutral-300 focus-visible:text-gray-900 dark:focus-visible:text-white focus-visible:decoration-solid focus-visible:decoration-gray-500 dark:focus-visible:decoration-neutral-300 transition-colors"
+    >{linked}{external && <ExternalLink size={11} class="ml-1 inline align-baseline" aria-hidden="true" />}</a>
+  )}{after}</span>
+</li>
