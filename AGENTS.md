@@ -6,10 +6,10 @@ Minimal personal website - resume and achievement highlights. The blog code is k
 
 ## Tech Stack
 
-- **Astro 6** with `output: "static"` (fully static — no SSR adapter needed) and `@astrojs/sitemap`
+- **Astro 7** with `output: "static"` (fully static — no SSR adapter needed) and `@astrojs/sitemap`
 - **Tailwind CSS v4** (`@tailwindcss/vite` Vite plugin — NOT `@astrojs/tailwind`, which is deprecated)
 - **Cloudflare Pages** — native Git integration, serves static `dist/` output (no GitHub Actions needed)
-- **Node.js 22+** required
+- **Node.js 22.23.4+** required (Astro 7)
 
 ## Commands
 
@@ -86,7 +86,7 @@ npm run preview  # Preview production build locally
 
 - **`README.md` is the GitHub profile README** and controls the public profile page. Only edit it when asked, never delete it, and keep it minimal: one sentence and a row of text links to the site, resume, LinkedIn and email. No badges, stats cards, skill icons or hotlinked third-party images, and no `daanrosendal.com` paths other than the home page and the resume PDF.
 - Do not add GitHub Actions YAML — Cloudflare native Git handles deploys.
-- Content collections must use the **Content Layer API** (`src/content.config.ts` with `loader`). The legacy v2 API is removed in Astro 6.
+- Content collections must use the **Content Layer API** (`src/content.config.ts` with `loader`). The legacy v2 API was removed in Astro 6.
 - Use `entry.id` not `entry.slug` — slug was removed in Astro 6.
 
 ## Deployment
@@ -97,4 +97,4 @@ Cloudflare build settings:
 
 - Build command: `npm run build`
 - Output directory: `dist`
-- Node.js version env var: `NODE_VERSION=22`
+- Node.js version env var: `NODE_VERSION=25` (set in the Cloudflare Pages project, must stay at 22.23.4 or newer)
