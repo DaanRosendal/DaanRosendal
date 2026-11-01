@@ -21,7 +21,7 @@ links:
     url: https://github.com/DaanRosendal/pinboard
 ---
 
-At Lakera / Check Point we work in a huge monorepo, and I kept digging through the same deep folder trees to reach the same few places. So I built Pinboard, a VS Code extension that pins any file or folder as a persistent shortcut in a panel at the top of the Explorer sidebar.
+At Lakera AI / Check Point we work in a huge monorepo, and I kept digging through the same deep folder trees to reach the same few places. So I built Pinboard, a VS Code extension that pins any file or folder as a persistent shortcut in a panel at the top of the Explorer sidebar.
 
 I published it on the Visual Studio Marketplace in March 2026, where it has {installs} installs. It is also on Open VSX, so it works in Cursor, Windsurf, Antigravity etc., and it has {downloads} downloads there{asOf}. It is open source under the MIT licence.
 
