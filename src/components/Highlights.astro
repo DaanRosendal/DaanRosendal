@@ -21,7 +21,7 @@ const tracks = [
 ] as const;
 ---
 
-<section class="tracks mb-14 grid gap-10 min-[480px]:grid-cols-2 min-[480px]:gap-x-4 min-[680px]:grid-cols-3 min-[680px]:gap-5">
+<section class="tracks mb-14 grid gap-10 min-[480px]:grid-cols-2 min-[480px]:gap-x-4 min-[680px]:grid-cols-3 min-[680px]:gap-5" data-nosnippet>
   {tracks.map(({ id, label }) => {
     const items = entries.filter((e) => e.data.track === id);
     return items.length > 0 && (
