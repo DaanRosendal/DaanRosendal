@@ -1,5 +1,5 @@
 ---
-title: CERN LHCb Ntupling Service
+title: A Year at CERN
 track: research
 when: "February 2023 - March 2024"
 stat: "Internship at CERN"
