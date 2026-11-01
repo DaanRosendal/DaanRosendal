@@ -20,7 +20,7 @@ pnpm-debug.log*
 .env
 .env.production
 
-# LaTeX secrets (PII — phone, email)
+# LaTeX secrets (PII: phone, email)
 resume/secrets.tex
 
 # LaTeX build artifacts

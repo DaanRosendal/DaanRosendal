@@ -25,26 +25,16 @@
 \input{secrets}
 
 
-%----------FONT OPTIONS----------
-% font size: 10.0pt
-% sans-serif
-% \usepackage[sfdefault]{FiraSans}
-% \usepackage[sfdefault]{roboto}
-% \usepackage[sfdefault]{noto-sans}
 \usepackage[default]{sourcesanspro}
 
-% serif
-% \usepackage{CormorantGaramond}
-% \usepackage{charter}
 
 
 \pagestyle{fancy}
-\fancyhf{} % clear all header and footer fields
+\fancyhf{}
 \fancyfoot{}
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 
-% Adjust margins
 \addtolength{\oddsidemargin}{-0.5in}
 \addtolength{\evensidemargin}{-0.5in}
 \addtolength{\textwidth}{1in}
@@ -57,7 +47,6 @@
 \raggedright
 \setlength{\tabcolsep}{0in}
 
-% Sections formatting
 \titleformat{\section}{
   \vspace{-4.65pt}\scshape\raggedright\large
 }{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
@@ -65,8 +54,6 @@
 % Ensure that generate pdf is machine readable/ATS parsable
 \pdfgentounicode=1
 
-%-------------------------
-% Custom commands
 \newcommand{\resumeItem}[1]{
   \item\small{
     {#1 \vspace{-2pt}}
@@ -107,29 +94,11 @@
 
 
 
-%-------------------------------------------
-%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 
 
 \begin{document}
-
-%----------HEADING----------
-% \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-%   \textbf{\href{http://sourabhbajaj.com/}{\Large Sourabh Bajaj}} & Email : \href{mailto:sourabh@sourabhbajaj.com}{sourabh@sourabhbajaj.com}\\
-%   \href{http://sourabhbajaj.com/}{http://www.sourabhbajaj.com} & Mobile : +1-123-456-7890 \\
-% \end{tabular*}
-
-% -----------Multiple Positions Heading-----------
-%     \resumeSubSubheading
-%     {Software Engineer I}{Oct 2014 - Sep 2016}
-%     \resumeItemListStart
-%         \resumeItem{Apache Beam}
-%          {Apache Beam is a unified model for defining both batch and streaming data-parallel processing pipelines}
-%     \resumeItemListEnd
-%     \resumeSubHeadingListEnd
-% -------------------------------------------
 
 \begin{center}
     \textbf{\Huge \fontfamily{cmr}\selectfont \scshape Daan E. Rosendal} \\ \vspace{1pt}
@@ -146,8 +115,6 @@
 
 
 
-
-%-----------EXPERIENCE-----------
 
 \section{Professional Experience}
 \resumeSubHeadingListStart
@@ -175,7 +142,7 @@
 {CERN $\cdot$ Intern $\cdot$ European Organisation for Nuclear Research | \href{https://github.com/cernopendata/opendata.cern.ch}{\underline{\smash{Open Data (700+ \color{Gold2}{\faStar}}{)}}} | \href{https://github.com/reanahub/reana}{\underline{\smash{REANA (100+ \color{Gold2}{\faStar}}{)}}}}{Geneva, Switzerland}
 \resumeItemListStart
 \resumeItem{Built a system that improves on-demand production and publishing of the particle accelerator's open data streams, allowing physicists all over the world to access 55 petabytes of LHCb data, using Go, JavaScript, React and npm packaging}
-\resumeItem{Enhanced REANA with workflow-sharing functionality in the web UI and CLI, earning a Poster Award by popular vote at the 2024 Conference on Computing in High Energy and Nuclear Physics; used Python, Flask, Go, Conda and React} % Our poster won on Wednesday, and there around 40 papers presented during lunch break per day
+\resumeItem{Enhanced REANA with workflow-sharing functionality in the web UI and CLI, earning a Poster Award by popular vote at the 2024 Conference on Computing in High Energy and Nuclear Physics; used Python, Flask, Go, Conda and React}
 \resumeItem{Set up 3 robust DevOps pipelines with automatic redeployment using Kubernetes, Docker, Helm, and GitLab CI/CD}
 % \resumeItem{Conducted performance research leading to a 35\% speed improvement by optimising time complexity from O(N\textsuperscript{2}) to O(N)}
 \resumeItem{Received consistent praise for excellent performance in both technical and social competencies across 5 evaluations}

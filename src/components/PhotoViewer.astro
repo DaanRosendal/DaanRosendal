@@ -93,7 +93,7 @@ const control = 'z-10 flex h-11 w-11 cursor-pointer items-center justify-center 
       }
     }
 
-    // A plain click opens the viewer; a click with a modifier key keeps the normal link behaviour (a new tab).
+    // A plain click opens the viewer, and a click with a modifier key keeps the normal link behaviour (a new tab).
     const isPlainClick = (event: MouseEvent) => event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 
     tiles.forEach((tile, index) =>
@@ -296,7 +296,7 @@ const control = 'z-10 flex h-11 w-11 cursor-pointer items-center justify-center 
     width: min(90vw, calc(85dvh * 16 / 9));
   }
 
-  /* A short fade and zoom (0.3 s) when the viewer opens and closes. Browsers without support just show and hide it at once. */
+  /* A short fade and zoom when the viewer opens and closes. Browsers without support just show and hide it at once. */
   @media (prefers-reduced-motion: no-preference) {
     dialog[data-lightbox-dialog] {
       opacity: 0;

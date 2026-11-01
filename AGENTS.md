@@ -6,9 +6,9 @@ Minimal personal website - resume and achievement highlights. The blog code is k
 
 ## Tech Stack
 
-- **Astro 7** with `output: "static"` (fully static — no SSR adapter needed) and `@astrojs/sitemap`
-- **Tailwind CSS v4** (`@tailwindcss/vite` Vite plugin — NOT `@astrojs/tailwind`, which is deprecated)
-- **Cloudflare Pages** — native Git integration, serves static `dist/` output (no GitHub Actions needed)
+- **Astro 7** with `output: "static"` (fully static - no SSR adapter needed) and `@astrojs/sitemap`
+- **Tailwind CSS v4** (`@tailwindcss/vite` Vite plugin - NOT `@astrojs/tailwind`, which is deprecated)
+- **Cloudflare Pages** - native Git integration, serves static `dist/` output (no GitHub Actions needed)
 - **Node.js 22.23.4+** required (Astro 7)
 
 ## Commands
@@ -65,9 +65,9 @@ npm run preview  # Preview production build locally
 
 ## Styling Conventions
 
-- **Dark mode** is system-preference only (`prefers-color-scheme`) — no toggle, no JS. Tailwind v4 handles this automatically via `dark:` utilities.
-- **Use `neutral-*` for all dark mode color variants** — Tailwind v4's `gray-*` and `zinc-*` both have a blue/cool tint in oklch color space. `neutral-*` is truly colorless. Light mode can use `gray-*` as normal.
-- **Icons**: `@lucide/astro` for UI icons. Brand icons (GitHub, LinkedIn) must be inline SVGs with `fill="currentColor"` — Lucide removed brand logos due to trademark concerns.
+- **Dark mode** is system-preference only (`prefers-color-scheme`) - no toggle, no JS. Tailwind v4 handles this automatically via `dark:` utilities.
+- **Use `neutral-*` for all dark mode color variants** - Tailwind v4's `gray-*` and `zinc-*` both have a blue/cool tint in oklch color space. `neutral-*` is truly colorless. Light mode can use `gray-*` as normal.
+- **Icons**: `@lucide/astro` for UI icons. Brand icons (GitHub, LinkedIn) must be inline SVGs with `fill="currentColor"` - Lucide removed brand logos due to trademark concerns.
 
 ## Images and performance
 
@@ -85,9 +85,9 @@ npm run preview  # Preview production build locally
 ## Hard Constraints
 
 - **`README.md` is the GitHub profile README** and controls the public profile page. Only edit it when asked, never delete it, and keep it minimal: one sentence and a row of text links to the site, resume, LinkedIn and email. No badges, stats cards, skill icons or hotlinked third-party images, and no `daanrosendal.com` paths other than the home page and the resume PDF.
-- Do not add GitHub Actions YAML — Cloudflare native Git handles deploys.
+- Do not add GitHub Actions YAML - Cloudflare native Git handles deploys.
 - Content collections must use the **Content Layer API** (`src/content.config.ts` with `loader`). The legacy v2 API was removed in Astro 6.
-- Use `entry.id` not `entry.slug` — slug was removed in Astro 6.
+- Use `entry.id` not `entry.slug` - slug was removed in Astro 6.
 
 ## Deployment
 

@@ -3,7 +3,6 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 
-// Static output for Cloudflare Pages (no SSR needed for resume + highlights)
 export default defineConfig({
   site: 'https://daanrosendal.com',
   output: 'static',

@@ -344,10 +344,6 @@ const hasOverflow = overflowItems.length > 0;
     return imgs[0] ?? null;
   }
 
-  /**
-   * Spawn one particle: a fixed-position clone of the logo that bursts outward,
-   * rotates, shrinks, and fades, then removes itself.
-   */
   function spawnParticle(
     src: string,
     originX: number,
@@ -389,12 +385,7 @@ const hasOverflow = overflowItems.length > 0;
     );
   }
 
-  /**
-   * Fire several waves of particles from the bar's current bottom edge.
-   * Because the bar instantly snaps to full height when details opens, we
-   * spread the origin Y across the bar's full length to create the
-   * "trailing exhaust along the bar" effect.
-   */
+  // Each wave starts lower along the bar than the one before, so the particles trail down it.
   function runExhaust(logo: HTMLImageElement, bar: HTMLElement | null) {
     const src = logo.src;
     const isCern = src.includes('/logos/cern.png');
@@ -410,13 +401,10 @@ const hasOverflow = overflowItems.length > 0;
 
         if (bar) {
           const r = bar.getBoundingClientRect();
-          // Progress from top → bottom of bar across waves, so particles
-          // trail downward giving the impression of a growing exhaust.
           const progress = w / (WAVES - 1);
           x = r.left + r.width / 2;
           y = r.top + r.height * progress;
         } else {
-          // Fallback if a row ever renders without a bar.
           const r = logo.getBoundingClientRect();
           x = r.left + r.width / 2;
           y = r.top + r.height / 2;
@@ -498,8 +486,7 @@ const hasOverflow = overflowItems.length > 0;
       const content = details.querySelector<HTMLElement>('.exp-fade');
 
       if (!details.open) {
-        // ── OPEN ──────────────────────────────────────────────────────────
-        // Snapshot the bar's current (base) height before content appears.
+        // Read the bar's height before the content appears.
         const baseH = bar ? bar.getBoundingClientRect().height : 0;
         if (bar) barBaseHeights.set(bar, baseH);
 
@@ -527,8 +514,6 @@ const hasOverflow = overflowItems.length > 0;
         if (logo) runExhaust(logo, bar);
 
       } else {
-        // ── CLOSE ─────────────────────────────────────────────────────────
-        // Return the bar to its pre-open height rather than zero.
         const baseH = bar ? (barBaseHeights.get(bar) ?? bar.getBoundingClientRect().height) : 0;
 
         const tl = gsap.timeline({
@@ -564,7 +549,6 @@ const hasOverflow = overflowItems.length > 0;
       if (!isOpen) {
         isOpen = true;
         toggleBar?.classList.remove('invisible');
-        // Measure natural height before animating (temporarily unconstrain to measure)
         gsap.set(overflow, { height: 'auto', overflow: 'visible' });
         const targetH = overflow.getBoundingClientRect().height;
         gsap.set(overflow, { height: 0, overflow: 'hidden' });
