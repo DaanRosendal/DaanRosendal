@@ -1,10 +1,10 @@
 ---
 // A label above the first role that is not on the resume. Hidden until the page is opened through the
-// resume link (see revealEarlier in TimelineList.astro). It spans the full row, logo column included, and
-// lines up with the edges of the highlighted boxes below it (they reach 12px beyond the row).
+// resume link (see revealEarlier in TimelineList.astro). It runs from the left edge of the logos to the
+// right edge of the dates and locations, so it lines up with the row content and not with the highlight.
 ---
 
-<li data-earlier-divider hidden class="-mx-3 flex items-center gap-3 pb-5 text-xs text-gray-500 dark:text-neutral-400">
+<li data-earlier-divider hidden class="flex items-center gap-3 pb-5 text-xs text-gray-500 dark:text-neutral-400">
   <span class="h-px flex-1 bg-gray-200 dark:bg-neutral-700" aria-hidden="true"></span>
   <span>Not on the resume</span>
   <span class="h-px flex-1 bg-gray-200 dark:bg-neutral-700" aria-hidden="true"></span>
