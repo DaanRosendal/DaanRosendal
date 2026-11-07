@@ -1,7 +1,8 @@
 ---
 import { getCollection, type CollectionEntry } from 'astro:content';
-import AchievementCard from './AchievementCard.astro';
+import HighlightCard from './HighlightCard.astro';
 import LiveCounts from './LiveCounts.astro';
+import { tracks } from '../lib/highlights';
 
 // 'importance' sorts by each entry's `order` (lowest first).
 // 'date' sorts newest first by `date`, with undated entries last, falling back to `order`.
@@ -11,14 +12,9 @@ const byImportance = (a: Entry, b: Entry) => a.data.order - b.data.order;
 const byDate = (a: Entry, b: Entry) =>
   (b.data.date?.valueOf() ?? -Infinity) - (a.data.date?.valueOf() ?? -Infinity) || byImportance(a, b);
 
-type Entry = CollectionEntry<'achievements'>;
-const entries = (await getCollection('achievements')).sort(SORT_BY === 'date' ? byDate : byImportance);
+type Entry = CollectionEntry<'highlights'>;
+const entries = (await getCollection('highlights')).sort(SORT_BY === 'date' ? byDate : byImportance);
 
-const tracks = [
-  { id: 'build', label: 'Build' },
-  { id: 'compete', label: 'Compete' },
-  { id: 'research', label: 'Research' },
-] as const;
 ---
 
 <section class="tracks mb-14 grid gap-10 min-[480px]:grid-cols-2 min-[480px]:gap-x-4 min-[680px]:grid-cols-3 min-[680px]:gap-5" data-nosnippet>
@@ -28,7 +24,7 @@ const tracks = [
       <div>
         <h2 class="mb-3 text-center text-lg font-semibold">{label}</h2>
         <div class="cards grid gap-3">
-          {items.map((entry, index) => <AchievementCard entry={entry} priority={index === 0} />)}
+          {items.map((entry, index) => <HighlightCard entry={entry} priority={index === 0} />)}
         </div>
       </div>
     );

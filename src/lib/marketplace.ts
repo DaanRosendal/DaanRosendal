@@ -52,7 +52,7 @@ const fetchOpenVsxDownloads = (id: string) =>
     return typeof downloadCount === 'number' ? downloadCount : null;
   });
 
-type Entry = CollectionEntry<'achievements'>;
+type Entry = CollectionEntry<'highlights'>;
 
 // Fills {installs} (Marketplace), {downloads} (Open VSX) and {total} (both added together) in an entry's summary and
 // stat, with the counts from the build (or the fallbacks when a source did not answer). {asOf} stays empty here: the
@@ -60,7 +60,7 @@ type Entry = CollectionEntry<'achievements'>;
 //
 // Returns plain text (`summary`, `stat`, `fill`) and an HTML variant (`summaryHtml`, `statHtml`, `fillHtml`) in which every
 // filled value sits in a <span data-live="..."> that the browser can update.
-export async function resolveAchievementText(entry: Entry) {
+export async function resolveHighlightText(entry: Entry) {
   const { summary, stat, marketplace, installsFallback, openVsx, downloadsFallback } = entry.data;
   const plain = (text: string) => text;
   if (!marketplace && !openVsx) {

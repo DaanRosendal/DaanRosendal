@@ -6,8 +6,8 @@ stat: "Built for my mother's bookstore"
 summary: "During the pandemic my mother opened a bookstore and kept track of her stock in Word documents. So I built her a Laravel app to manage it more easily."
 order: 6
 date: 2020-04-26
-thumbnail: /achievements/bookstore.webp
-cardImage: /achievements/bookstore-card.webp
+thumbnail: /media/bookstore.webp
+cardImage: /media/bookstore-card.webp
 links:
   - label: Code
     url: https://github.com/DaanRosendal/zwolse-boekenwurm-demo

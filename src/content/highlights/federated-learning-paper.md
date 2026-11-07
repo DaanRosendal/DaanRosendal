@@ -6,36 +6,36 @@ stat: "My first conference presentation"
 summary: "Wrote a paper on federated learning with Dr. Ana Oprescu as part of my master's thesis at the University of Amsterdam, and presented it in Macao."
 order: 4
 date: 2025-12-08
-thumbnail: /achievements/ieee/presenting.webp
-cardImage: /achievements/ieee/card.webp
+thumbnail: /media/ieee/presenting.webp
+cardImage: /media/ieee/card.webp
 gallery:
-  - src: /achievements/ieee/presenting.webp
-    full: /achievements/ieee/full/presenting.webp
+  - src: /media/ieee/presenting.webp
+    full: /media/ieee/full/presenting.webp
     alt: Presenting the paper on stage in Macao, with its title on the screen behind me
-  - src: /achievements/ieee/cable-car.webp
-    full: /achievements/ieee/full/cable-car.webp
+  - src: /media/ieee/cable-car.webp
+    full: /media/ieee/full/cable-car.webp
     alt: My brother and me in a cable car above water and green hills
-  - src: /achievements/ieee/night-market.webp
-    full: /achievements/ieee/full/night-market.webp
+  - src: /media/ieee/night-market.webp
+    full: /media/ieee/full/night-market.webp
     alt: A busy night market with rows of red lanterns overhead
-  - src: /achievements/ieee/hong-kong-night.webp
-    full: /achievements/ieee/full/hong-kong-night.webp
+  - src: /media/ieee/hong-kong-night.webp
+    full: /media/ieee/full/hong-kong-night.webp
     alt: The Hong Kong skyline and harbour at night
-  - src: /achievements/ieee/temple.webp
-    full: /achievements/ieee/full/temple.webp
+  - src: /media/ieee/temple.webp
+    full: /media/ieee/full/temple.webp
     alt: A traditional Chinese temple complex with bonsai trees in the foreground
-  - src: /achievements/ieee/buddha.webp
-    full: /achievements/ieee/full/buddha.webp
+  - src: /media/ieee/buddha.webp
+    full: /media/ieee/full/buddha.webp
     position: 50% 22%
     alt: A giant seated Buddha statue on a hill, with burning incense sticks in front
-  - src: /achievements/ieee/buddha-hall.webp
-    full: /achievements/ieee/full/buddha-hall.webp
+  - src: /media/ieee/buddha-hall.webp
+    full: /media/ieee/full/buddha-hall.webp
     alt: A temple hall with five golden Buddha statues under an ornate ceiling
-  - src: /achievements/ieee/ridge-trail.webp
-    full: /achievements/ieee/full/ridge-trail.webp
+  - src: /media/ieee/ridge-trail.webp
+    full: /media/ieee/full/ridge-trail.webp
     alt: A hiker on a stone path along a ridge above the sea
-  - src: /achievements/ieee/sunset.webp
-    full: /achievements/ieee/full/sunset.webp
+  - src: /media/ieee/sunset.webp
+    full: /media/ieee/full/sunset.webp
     alt: The sun setting behind a large tree next to a stone building with a reflecting pool
 links:
   - label: Paper (IEEE)

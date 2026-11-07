@@ -1,25 +1,26 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import AchievementVideo from '../../components/AchievementVideo.astro';
-import AchievementGallery from '../../components/AchievementGallery.astro';
+import HighlightVideo from '../../components/HighlightVideo.astro';
+import HighlightGallery from '../../components/HighlightGallery.astro';
 import PhotoViewer from '../../components/PhotoViewer.astro';
 import LiveCounts from '../../components/LiveCounts.astro';
 import { getCollection } from 'astro:content';
-import { resolveAchievementText } from '../../lib/marketplace';
+import { resolveHighlightText } from '../../lib/marketplace';
 import { imageSize } from '../../lib/image';
+import { tracks } from '../../lib/highlights';
 import { ArrowLeft, ArrowUpRight } from '@lucide/astro';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('achievements');
+  const entries = await getCollection('highlights');
   return entries.map((entry) => ({
-    params: { id: entry.id },
+    params: { section: tracks.find((t) => t.id === entry.data.track)!.section, id: entry.id },
     props: { entry },
   }));
 }
 
 const { entry } = Astro.props;
 const { title, when, youtube, thumbnail, gallery, galleryVideo, links } = entry.data;
-const { statHtml, summary, fillHtml } = await resolveAchievementText(entry);
+const { statHtml, summary, fillHtml } = await resolveHighlightText(entry);
 const body = fillHtml(entry.rendered?.html ?? '');
 const thumbnailSize = thumbnail ? await imageSize(thumbnail) : undefined;
 ---
@@ -39,11 +40,11 @@ const thumbnailSize = thumbnail ? await imageSize(thumbnail) : undefined;
 
     {gallery.length > 0 ? (
       <div class={gallery.length === 1 && !galleryVideo ? '' : 'mb-8'}>
-        <AchievementGallery photos={gallery} video={galleryVideo} />
+        <HighlightGallery photos={gallery} video={galleryVideo} />
       </div>
     ) : youtube ? (
       <div class="mb-8">
-        <AchievementVideo youtube={youtube} thumbnail={thumbnail} title={title} />
+        <HighlightVideo youtube={youtube} thumbnail={thumbnail} title={title} />
       </div>
     ) : thumbnail && (
       <div class="mb-8">

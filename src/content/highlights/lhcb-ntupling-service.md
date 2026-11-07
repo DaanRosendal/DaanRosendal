@@ -6,25 +6,25 @@ stat: "Internship at CERN"
 summary: "As an intern at CERN, I built the request system that lets physicists get custom LHCb datasets, and added workflow sharing to REANA, whose poster won a Poster Award by popular vote in 2024."
 order: 5
 date: 2024-10-19
-thumbnail: /achievements/cern/portrait.webp
-cardImage: /achievements/cern/card.webp
+thumbnail: /media/cern/portrait.webp
+cardImage: /media/cern/card.webp
 gallery:
-  - src: /achievements/cern/portrait.webp
-    full: /achievements/cern/full/portrait.webp
+  - src: /media/cern/portrait.webp
+    full: /media/cern/full/portrait.webp
     position: 50% 30%
     alt: Me in a red hard hat on a walkway next to a huge particle detector at CERN
-  - src: /achievements/cern/antimatter-factory.webp
-    full: /achievements/cern/full/antimatter-factory.webp
+  - src: /media/cern/antimatter-factory.webp
+    full: /media/cern/full/antimatter-factory.webp
     alt: The Antimatter Factory building at CERN under a blue sky
-  - src: /achievements/cern/gbar-hall.webp
-    full: /achievements/cern/full/gbar-hall.webp
+  - src: /media/cern/gbar-hall.webp
+    full: /media/cern/full/gbar-hall.webp
     position: 50% 27%
     alt: An experiment hall seen from above, with a GBAR logo on the wall
-  - src: /achievements/cern/office.webp
-    full: /achievements/cern/full/office.webp
+  - src: /media/cern/office.webp
+    full: /media/cern/full/office.webp
     alt: My desk at CERN with chocolates on it and a pyramid of paper cups behind
-  - src: /achievements/cern/alps.webp
-    full: /achievements/cern/full/alps.webp
+  - src: /media/cern/alps.webp
+    full: /media/cern/full/alps.webp
     alt: Snow-covered Alps behind a lamp post and fields on a cloudy day
 links:
   - label: Conference contribution
@@ -47,4 +47,4 @@ The LHCb Ntupling Service lets physicists all over the world request custom, fil
 
 Under the same supervisor I also worked on REANA, a platform for reproducible research data analysis developed at CERN. I added workflow sharing to its web interface and command line, so researchers can share their workflow runs, job logs and output files with colleagues while keeping full control themselves. The poster about it won the Poster Award by popular vote at the 2024 Conference on Computing in High Energy and Nuclear Physics.
 
-Besides the code, I guided official visits of the particle accelerator and the Antimatter Factory, explaining complex ideas to all kinds of audiences. I also built a pyramid out of cups, which became the highlight of the office (<a href="/achievements/cern/full/office.webp" data-lightbox-open="3" target="_blank" rel="noopener noreferrer">see picture</a>). Most of all, I met so many great people from all over the world, and many of my friends from CERN now live in Zürich, where I now live too. CERN was also where I moved out of my parents' house for the first time, and it was amazing for both my professional and personal development. I am very thankful to my supervisor <a href="https://scholar.google.com/citations?user=GWhk-qQAAAAJ&hl=en" target="_blank" rel="noopener noreferrer">Tibor Simko</a> for welcoming me into his team and being a great mentor.
+Besides the code, I guided official visits of the particle accelerator and the Antimatter Factory, explaining complex ideas to all kinds of audiences. I also built a pyramid out of cups, which became the highlight of the office (<a href="/media/cern/full/office.webp" data-lightbox-open="3" target="_blank" rel="noopener noreferrer">see picture</a>). Most of all, I met so many great people from all over the world, and many of my friends from CERN now live in Zürich, where I now live too. CERN was also where I moved out of my parents' house for the first time, and it was amazing for both my professional and personal development. I am very thankful to my supervisor <a href="https://scholar.google.com/citations?user=GWhk-qQAAAAJ&hl=en" target="_blank" rel="noopener noreferrer">Tibor Simko</a> for welcoming me into his team and being a great mentor.

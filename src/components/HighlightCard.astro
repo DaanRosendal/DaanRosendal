@@ -3,24 +3,25 @@ import { Play } from '@lucide/astro';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
-  entry: CollectionEntry<'achievements'>;
+  entry: CollectionEntry<'highlights'>;
   // Load the image straight away when the card is at the top of the page.
   priority?: boolean;
 }
 
 const { entry, priority = false } = Astro.props;
-import { resolveAchievementText } from '../lib/marketplace';
+import { resolveHighlightText } from '../lib/marketplace';
 import { imageSize } from '../lib/image';
+import { highlightUrl } from '../lib/highlights';
 
 const { title, when, youtube, thumbnail, cardImage } = entry.data;
-const { summaryHtml } = await resolveAchievementText(entry);
+const { summaryHtml } = await resolveHighlightText(entry);
 const local = cardImage ?? thumbnail;
 const image = local ?? (youtube ? `https://i.ytimg.com/vi/${youtube}/hqdefault.jpg` : undefined);
 const size = local ? await imageSize(local) : undefined;
 ---
 
 <a
-  href={`/achievements/${entry.id}/`}
+  href={highlightUrl(entry)}
   class="group flex flex-col rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50/60 dark:bg-neutral-800/40 p-4 transition-all duration-200 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-400 dark:focus-visible:outline-neutral-500 hover:-translate-y-0.5 hover:border-gray-300 hover:bg-gray-50 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
 >
   {image && (

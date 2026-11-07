@@ -11,8 +11,8 @@ const blog = defineCollection({
   }),
 });
 
-const achievements = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/achievements' }),
+const highlights = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/highlights' }),
   schema: z.object({
     title: z.string(),
     track: z.enum(['compete', 'build', 'research']),
@@ -38,4 +38,4 @@ const achievements = defineCollection({
   }),
 });
 
-export const collections = { blog, achievements };
+export const collections = { blog, highlights };
