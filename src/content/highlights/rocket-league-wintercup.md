@@ -18,7 +18,7 @@ links:
     url: https://www.win-nieuws.nl/2021/12/23/studententeam-wint-internationaal-rocket-league-toernooi/
 ---
 
-I founded a team at Windesheim University, and on 4 and 5 December 2021 we won the University Rocketeers Winter Cup #2, a major online Rocket League tournament between international universities. We played as EZ Windesheim: Matthias Rakhorst, Liem Tran and me, with Arjen van de Koot as substitute.
+I founded a team at Windesheim University, and on 4 and 5 December 2021 we won the University Rocketeers Winter Cup #2, a major online Rocket League tournament between international universities. We played as EZ Windesheim: Matthias Rakhorst, Liem Tran, and me, with Arjen van de Koot as substitute.
 
 The clip above is the winning goal of game four in the best-of-seven final. I set up the play and Liem scored in overtime to win the game.
 

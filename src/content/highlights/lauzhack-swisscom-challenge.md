@@ -33,6 +33,6 @@ links:
 
 In December 2023, <a href="https://ch.linkedin.com/in/carmenmarcos" target="_blank" rel="noopener noreferrer">Carmen Marcos</a> and I took on Swisscom's challenge at <a href="https://lauzhack.com/" target="_blank" rel="noopener noreferrer">LauzHack</a>, the yearly hackathon held at EPFL in Lausanne. The goal was to help customers find answers faster, using a system that pulls answers straight from Swisscom's public website.
 
-In a 24-hour sprint we built Lauzcom Assistant, a customisable chatbot that can be trained on any data, so it can be pointed at any company's catalogue instead of Swisscom's. It runs on a self-hosted language model or on OpenAI's GPT models, with a Python backend, a React and TypeScript frontend, MongoDB, Redis and Docker. It won Swisscom's challenge.
+In a 24-hour sprint we built Lauzcom Assistant, a customisable chatbot that can be trained on any data, so it can be pointed at any company's catalogue instead of Swisscom's. It runs on a self-hosted language model or on OpenAI's GPT models, with a Python backend, a React and TypeScript frontend, MongoDB, Redis, and Docker. It won Swisscom's challenge.
 
 The same weekend, <a href="https://www.linkedin.com/in/giuseppe-steduto/" target="_blank" rel="noopener noreferrer">Giuseppe Steduto</a> and <a href="https://www.linkedin.com/in/petar-stojkovi%C4%87-7b4053172/" target="_blank" rel="noopener noreferrer">Petar Stojković</a>, who were originally on our team, won Swissquote's challenge.

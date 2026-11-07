@@ -94,6 +94,7 @@ npm run preview  # Preview production build locally
 - Give every `<img>` a `width` and `height` (see `src/lib/image.ts`) and load the first image on a page eagerly with `fetchpriority="high"`.
 - Muted text uses `text-gray-500 dark:text-neutral-400` or darker, so contrast stays at 4.5:1 or better. Do not use `gray-400` or `neutral-500` for text.
 - Use a hyphen, not an en or em dash, in copy, titles and dates.
+- Use the Oxford comma in lists of three or more ("A, B, and C"), on the site, the resume and LinkedIn.
 
 ## Live install counts
 
