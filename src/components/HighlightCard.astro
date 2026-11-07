@@ -6,9 +6,11 @@ interface Props {
   entry: CollectionEntry<'highlights'>;
   // Load the image straight away when the card is at the top of the page.
   priority?: boolean;
+  // h3 under a section heading on the home page, h2 when the cards sit directly under the page title.
+  heading?: 'h2' | 'h3';
 }
 
-const { entry, priority = false } = Astro.props;
+const { entry, priority = false, heading: Heading = 'h3' } = Astro.props;
 import { resolveHighlightText } from '../lib/marketplace';
 import { imageSize } from '../lib/image';
 import { highlightUrl } from '../lib/highlights';
@@ -34,7 +36,7 @@ const size = local ? await imageSize(local) : undefined;
       )}
     </div>
   )}
-  <h3 class="text-base font-semibold leading-tight underline decoration-transparent underline-offset-4 transition-colors group-hover:decoration-gray-400 dark:group-hover:decoration-neutral-500">{title}</h3>
+  <Heading class="text-base font-semibold leading-tight underline decoration-transparent underline-offset-4 transition-colors group-hover:decoration-gray-400 dark:group-hover:decoration-neutral-500">{title}</Heading>
   <p class="mt-1.5 text-xs text-gray-600 dark:text-neutral-300 flex-1" set:html={summaryHtml} />
   <span class="mt-3 text-xs text-gray-500 dark:text-neutral-400">{when}</span>
 </a>

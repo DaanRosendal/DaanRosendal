@@ -28,7 +28,7 @@ const entries = (await getCollection('highlights'))
   </header>
 
   <div class="grid gap-3 min-[560px]:grid-cols-2" data-nosnippet>
-    {entries.map((entry, index) => <HighlightCard entry={entry} priority={index === 0} />)}
+    {entries.map((entry, index) => <HighlightCard entry={entry} priority={index === 0} heading="h2" />)}
   </div>
 
   <LiveCounts />
