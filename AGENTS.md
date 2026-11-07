@@ -61,6 +61,8 @@ npm run preview  # Preview production build locally
 
 ## Resume and website
 
+- Source of truth: the website (`src/components/ExperienceList.astro` and `EducationList.astro`) holds all the information. LinkedIn is a bullet-for-bullet copy of it (see LinkedIn). The resume is a one-page selection of it: it may drop roles, bullets, courses and tech names, but whatever it says must agree with the website.
+- Edit the website first, then bring LinkedIn in line, and update the resume if the changed text appears on it.
 - `resume/resume.tex` is the curated one-page resume. `latexmk -pdf resume.tex` (run inside `resume/`) builds it and `.latexmkrc` copies the PDF to `public/Daan_Rosendal_Resume.pdf`. Keep it on one page and check the page count after every edit.
 - The website (`src/components/ExperienceList.astro` and `EducationList.astro`) is the extensive version of the same history. Whenever a resume bullet, title, date or link changes, update the matching website entry in the same batch of work.
 - The website keeps the longer content that the resume leaves out: course lists, second bullets, the "5 evaluations" CERN bullet and older roles such as Deltion College and GWBO. There is space for it, so never trim the website to match the resume.
