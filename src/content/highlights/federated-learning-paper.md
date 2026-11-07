@@ -39,7 +39,7 @@ gallery:
     alt: The sun setting behind a large tree next to a stone building with a reflecting pool
 links:
   - label: Paper (IEEE)
-    url: https://ieeexplore.ieee.org/abstract/document/11401516
+    url: https://doi.org/10.1109/BigData66926.2025.11401516
   - label: Paper (arXiv)
     url: https://arxiv.org/abs/2604.23386
   - label: Master's thesis
