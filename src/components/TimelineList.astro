@@ -181,7 +181,7 @@ const hasOverflow = overflowItems.length > 0;
   </ul>
 
   {hasOverflow && (
-    <div data-exp-overflow style="height: 0; overflow: hidden;">
+    <div data-exp-overflow style="height: 0; overflow-x: visible; overflow-y: clip;">
       <ul>
         {overflowItems.map((item, i) => {
           const hasContent = !!(item.description || (item.bullets && item.bullets.length > 0) || (item.links && item.links.length > 0));
@@ -561,7 +561,7 @@ const hasOverflow = overflowItems.length > 0;
       toggleBar?.classList.remove('invisible');
       gsap.set(overflow, { height: 'auto', overflow: 'visible' });
       const targetH = overflow.getBoundingClientRect().height;
-      gsap.set(overflow, { height: 0, overflow: 'hidden' });
+      gsap.set(overflow, { height: 0, overflowX: 'visible', overflowY: 'clip' });
       gsap.to(overflow, {
         height: targetH,
         duration: 0.8,
@@ -583,7 +583,7 @@ const hasOverflow = overflowItems.length > 0;
       isOpen = false;
       toggleBar?.classList.add('invisible');
       const currentH = overflow.getBoundingClientRect().height;
-      gsap.set(overflow, { height: currentH, overflow: 'hidden' });
+      gsap.set(overflow, { height: currentH, overflowX: 'visible', overflowY: 'clip' });
       gsap.to(overflow, { height: 0, duration: 0.6, ease: 'power2.inOut' });
       gsap.to(chevron, { rotation: 0, duration: 0.3, ease: 'power2.inOut' });
       label.textContent = originalLabel;
