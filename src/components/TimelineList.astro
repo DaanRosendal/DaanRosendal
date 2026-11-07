@@ -1,5 +1,6 @@
 ---
 import { Building2, ChevronDown } from '@lucide/astro';
+import EarlierDivider from './EarlierDivider.astro';
 import TimelineBullet, { type Bullet } from './TimelineBullet.astro';
 import TimelineLinks, { type TimelineLink } from './TimelineLinks.astro';
 
@@ -40,6 +41,8 @@ const { heading, items, largeBreak = false, visibleCount = items.length, anchorI
 const visibleItems = items.slice(0, visibleCount);
 const overflowItems = items.slice(visibleCount);
 const hasOverflow = overflowItems.length > 0;
+// Index of the first role that is not on the resume; the label above it explains the highlight.
+const firstEarlier = items.findIndex((item) => item.earlier);
 ---
 
 <section id={anchorId} class="mb-10 scroll-mt-6">
@@ -51,6 +54,8 @@ const hasOverflow = overflowItems.length > 0;
       const isLastVisible = hasOverflow && i === visibleItems.length - 1;
       const padClass = showBar || hasOverflow ? 'pb-8' : '';
       return (
+        <>
+        {i === firstEarlier && <EarlierDivider />}
         <li class={`flex gap-4 relative isolate ${item.earlier ? 'earlier-item' : ''}`} {...(item.earlier ? { 'data-earlier': '' } : {})}>
           <div class="w-10 flex flex-col items-center">
             <div class="w-10 h-10 shrink-0 flex items-center justify-center overflow-hidden">
@@ -178,6 +183,7 @@ const hasOverflow = overflowItems.length > 0;
             )}
           </div>
         </li>
+        </>
       );
     })}
 
@@ -191,6 +197,8 @@ const hasOverflow = overflowItems.length > 0;
           const showBar = i < overflowItems.length - 1;
           const padClass = 'pb-8';
           return (
+            <>
+            {i + visibleCount === firstEarlier && <EarlierDivider />}
             <li class={`flex gap-4 relative isolate ${item.earlier ? 'earlier-item' : ''}`} {...(item.earlier ? { 'data-earlier': '' } : {})}>
               <div class="w-10 flex flex-col items-center">
                 <div class="w-10 h-10 shrink-0 flex items-center justify-center overflow-hidden">
@@ -317,6 +325,7 @@ const hasOverflow = overflowItems.length > 0;
                 )}
               </div>
             </li>
+            </>
           );
         })}
       </ul>
@@ -327,6 +336,7 @@ const hasOverflow = overflowItems.length > 0;
     <div class="flex justify-center -mt-4 py-2">
       <button
         data-exp-toggle
+        aria-expanded="false"
         class="flex items-center gap-2 text-sm text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
       >
         <ChevronDown
@@ -538,8 +548,18 @@ const hasOverflow = overflowItems.length > 0;
     });
   });
 
+  /** Show or hide the label above the first role that is not on the resume. */
+  function setDivider(section: HTMLElement, show: boolean) {
+    section.querySelector<HTMLElement>('[data-earlier-divider]')?.toggleAttribute('hidden', !show);
+  }
+
+  /** Stop the highlight on the earlier roles of a section. */
+  function clearEarlier(section: HTMLElement) {
+    section.querySelectorAll<HTMLElement>('[data-earlier]').forEach((item) => item.classList.remove('earlier-glow'));
+  }
+
   // Lets the hash handler below open a section's hidden roles the same way its button does.
-  const sectionOpeners = new WeakMap<HTMLElement, (onDone?: () => void) => void>();
+  const sectionOpeners = new WeakMap<HTMLElement, (onDone?: () => void, instant?: boolean) => void>();
 
   document.querySelectorAll<HTMLButtonElement>('[data-exp-toggle]').forEach((btn) => {
     const section = btn.closest<HTMLElement>('section');
@@ -553,7 +573,7 @@ const hasOverflow = overflowItems.length > 0;
     const toggleBar = section.querySelector<HTMLElement>('[data-exp-toggle-bar]');
     let isOpen = false;
 
-    function open(onDone?: () => void) {
+    function open(onDone?: () => void, instant = false) {
       if (!overflow || !chevron || !label) return;
       if (isOpen) {
         onDone?.();
@@ -562,7 +582,16 @@ const hasOverflow = overflowItems.length > 0;
       gsap.killTweensOf(overflow);
       gsap.killTweensOf(chevron);
       isOpen = true;
+      btn.setAttribute('aria-expanded', 'true');
       toggleBar?.classList.remove('invisible');
+      label.textContent = 'view less';
+      if (instant) {
+        // Arriving through the resume link: show everything at once, so the page lands in one move.
+        gsap.set(overflow, { height: 'auto', overflow: 'visible' });
+        gsap.set(chevron, { rotation: 180 });
+        onDone?.();
+        return;
+      }
       gsap.set(overflow, { height: 'auto', overflow: 'visible' });
       const targetH = overflow.getBoundingClientRect().height;
       gsap.set(overflow, { height: 0, overflowX: 'visible', overflowY: 'clip' });
@@ -576,7 +605,6 @@ const hasOverflow = overflowItems.length > 0;
         },
       });
       gsap.to(chevron, { rotation: 180, duration: 0.3, ease: 'power2.inOut' });
-      label.textContent = 'view less';
       runToggleExhaust(overflow);
     }
 
@@ -585,10 +613,19 @@ const hasOverflow = overflowItems.length > 0;
       gsap.killTweensOf(overflow);
       gsap.killTweensOf(chevron);
       isOpen = false;
+      btn.setAttribute('aria-expanded', 'false');
+      clearEarlier(section!);
       toggleBar?.classList.add('invisible');
       const currentH = overflow.getBoundingClientRect().height;
       gsap.set(overflow, { height: currentH, overflowX: 'visible', overflowY: 'clip' });
-      gsap.to(overflow, { height: 0, duration: 0.6, ease: 'power2.inOut' });
+      gsap.to(overflow, {
+        height: 0,
+        duration: 0.6,
+        ease: 'power2.inOut',
+        onComplete: () => {
+          if (!isOpen) setDivider(section!, false);
+        },
+      });
       gsap.to(chevron, { rotation: 0, duration: 0.3, ease: 'power2.inOut' });
       label.textContent = originalLabel;
     }
@@ -597,9 +634,30 @@ const hasOverflow = overflowItems.length > 0;
     sectionOpeners.set(section, open);
   });
 
+  /** Fonts and images can still shift the layout above after the first scroll, so centre once more when
+   *  the page has settled, unless the visitor has already started to scroll. */
+  function keepCentred(el: HTMLElement | undefined) {
+    if (!el) return;
+    let moved = false;
+    const stop = () => { moved = true; };
+    ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach((type) =>
+      window.addEventListener(type, stop, { once: true, passive: true }),
+    );
+    const recentre = async () => {
+      try { await document.fonts?.ready; } catch { /* fonts API unavailable */ }
+      if (moved) return;
+      const r = el.getBoundingClientRect();
+      if (Math.abs(r.top + r.height / 2 - window.innerHeight / 2) > 40) el.scrollIntoView({ behavior: 'auto', block: 'center' });
+    };
+    if (document.readyState === 'complete') void recentre();
+    else window.addEventListener('load', () => void recentre(), { once: true });
+  }
+
   // Visiting `#<section id>` (the resume links here) opens the hidden roles, scrolls to the
-  // first role left off the resume and lets each of them glow in turn.
-  function revealEarlier() {
+  // first role left off the resume, labels it and lets each of them pulse once in turn, then settle into
+  // a quiet highlight that stays until "view less". On the first load the
+  // roles open at once and the scroll is instant, so the browser's own jump and ours read as one move.
+  function revealEarlier(initial: boolean) {
     const id = location.hash.slice(1);
     if (!id) return;
     const section = document.getElementById(id);
@@ -607,22 +665,36 @@ const hasOverflow = overflowItems.length > 0;
     if (!section || !open) return;
 
     const items = [...section.querySelectorAll<HTMLElement>('[data-earlier]')];
+    setDivider(section, items.length > 0); // before opening, so the section opens at its final height
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     open(() => {
-      items[0]?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+      items[0]?.scrollIntoView({ behavior: initial || reduceMotion ? 'auto' : 'smooth', block: 'center' });
+      if (initial) keepCentred(items[0]);
+      clearEarlier(section);
       items.forEach((item, i) => {
-        item.style.setProperty('--earlier-delay', `${0.35 + i * 0.18}s`);
-        item.classList.remove('earlier-glow');
+        const delay = 350 + i * 180;
+        item.style.setProperty('--earlier-delay', `${delay}ms`);
         void item.offsetWidth; // restart the animation if the link is visited again
         item.classList.add('earlier-glow');
       });
-    });
+    }, initial);
   }
 
-  if (document.readyState === 'complete') revealEarlier();
-  else window.addEventListener('load', revealEarlier, { once: true });
-  window.addEventListener('hashchange', revealEarlier);
+  const start = () => revealEarlier(true);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+  else start();
+  window.addEventListener('hashchange', () => revealEarlier(false));
+
+  // Following a link to the hash the page is already on does not fire `hashchange`, so run it here.
+  document.addEventListener('click', (event) => {
+    const link = (event.target as Element | null)?.closest?.<HTMLAnchorElement>('a[href*="#"]');
+    if (!link) return;
+    const url = new URL(link.href, location.href);
+    if (url.pathname !== location.pathname || !url.hash || url.hash !== location.hash) return;
+    const target = document.getElementById(url.hash.slice(1));
+    if (target && sectionOpeners.has(target)) revealEarlier(false);
+  });
 </script>
 
 <style>
@@ -643,6 +715,9 @@ const hasOverflow = overflowItems.length > 0;
     --glow-bg: color-mix(in srgb, white 96%, rgb(17 24 39));
     --glow-ring: rgb(17 24 39 / 0.14);
     --glow-halo: rgb(17 24 39 / 0.2);
+    /* The quiet state a role rests in after the pulse. */
+    --glow-bg-soft: color-mix(in srgb, white 98.5%, rgb(17 24 39));
+    --glow-ring-soft: rgb(17 24 39 / 0.07);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -650,6 +725,8 @@ const hasOverflow = overflowItems.length > 0;
       --glow-bg: color-mix(in srgb, #171717 95%, white);
       --glow-ring: rgb(255 255 255 / 0.2);
       --glow-halo: rgb(255 255 255 / 0.18);
+      --glow-bg-soft: color-mix(in srgb, #171717 97.5%, white);
+      --glow-ring-soft: rgb(255 255 255 / 0.09);
     }
   }
 
@@ -662,7 +739,7 @@ const hasOverflow = overflowItems.length > 0;
   .earlier-item::before {
     content: '';
     position: absolute;
-    inset: -12px -12px 20px -12px;
+    inset: -10px -12px 22px -12px;
     z-index: -1;
     border-radius: 0.75rem;
     background: var(--glow-bg);
@@ -670,30 +747,38 @@ const hasOverflow = overflowItems.length > 0;
     pointer-events: none;
   }
 
+  /* A short pulse to catch the eye, then a quiet resting state that stays until the section is closed
+     again (the script removes the class). */
   .earlier-item.earlier-glow::before {
-    animation: earlier-glow 2.4s ease-out var(--earlier-delay, 0s) forwards;
+    animation: earlier-glow 3s ease-out var(--earlier-delay, 0s) both;
   }
 
   @keyframes earlier-glow {
     0% {
       opacity: 0;
+      background: var(--glow-bg);
       box-shadow: 0 0 0 0 transparent;
     }
-    30% {
+    15% {
       opacity: 1;
+      background: var(--glow-bg);
       box-shadow: 0 0 0 1px var(--glow-ring), 0 0 28px 4px var(--glow-halo);
     }
+    60%,
     100% {
       opacity: 1;
-      box-shadow: 0 0 0 1px var(--glow-ring), 0 0 0 0 transparent;
+      background: var(--glow-bg-soft);
+      box-shadow: 0 0 0 1px var(--glow-ring-soft), 0 0 0 0 transparent;
     }
   }
 
+  /* No motion: go straight to the resting state. */
   @media (prefers-reduced-motion: reduce) {
     .earlier-item.earlier-glow::before {
       animation: none;
       opacity: 1;
-      box-shadow: 0 0 0 1px var(--glow-ring);
+      background: var(--glow-bg-soft);
+      box-shadow: 0 0 0 1px var(--glow-ring-soft);
     }
   }
 </style>
