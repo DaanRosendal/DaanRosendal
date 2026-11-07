@@ -92,7 +92,7 @@
 
 \begin{center}
     \textbf{\Huge \fontfamily{cmr}\selectfont \scshape Daan E. Rosendal} \\ \vspace{1pt}
-    \small Zurich, Switzerland \\
+    \small Zurich, Switzerland\ifdefined\withphone\ $\cdot$ \myPhone\fi \\
     \href{mailto:\myEmail}{\underline{\smash{\myEmail}}} $\cdot$
     \href{https://linkedin.com/in/daanrosendal}{\underline{\smash{linkedin.com/in/daanrosendal}}} $\cdot$
     \href{https://github.com/daanrosendal}{\underline{\smash{github.com/daanrosendal}}} $\cdot$
@@ -108,8 +108,7 @@
 \resumeItemListStart
 \resumeItem{Developing Lakera Guard, an AI security API protecting agents and applications by screening for prompt injections, data leakage, and content violations at sub-50ms latency for Fortune 500 clients, using Python, Go, and Kubernetes}
 \resumeItem{Identified and engineered a 75\% reduction in Kafka infrastructure costs through compression and batching, cutting projected annualised spend from \$800K to \$200K for a single 5k RPS client and saving millions across all clients}
-\resumeItem{Built 5+ AI agent skills for 50+ engineers: code review, code hygiene, SRE investigation, ClickHouse queries, agent-safe secret injection and AWS and GCP access (SSO, SSM, kubectl) that cut setup and repair from about 3 hours to 10 minutes}
-\resumeItemListEnd
+\resumeItem{Built 5+ AI agent skills for 50+ engineers: code review, code hygiene, SRE investigation, ClickHouse queries, agent-safe secret injection and AWS and GCP access (SSO, SSM, kubectl) that cut setup and repair from about 3 hours to 10 minutes}\resumeItemListEnd
 
 \resumeSubheading
 {Cloud Solution Architect} {Feb 2025 -- Aug 2025}
@@ -145,15 +144,8 @@
 \resumeItem{Developed a scalable microservice architecture that is capable of handling 10,000+ simultaneous requests to automate printing and sending personalised postcards, using TypeScript, React, Next.js, Tailwind, C\#, GCP, Docker and Terraform}
 \resumeItemListEnd
 
-\resumeSubheading
-{Software Engineer}{Apr 2021 -- Dec 2021}
-{Univé $\cdot$ Part-time $\cdot$ Insurance company with over two million clients}{Zwolle, The Netherlands}
-\resumeItemListStart
-\resumeItem{Saved paralegals 20 hours per week by developing various single-page applications (SPAs) for the legal aid department (e.g., registering a legal case, adding documents to a legal case, filing complaints), using TypeScript and Angular}
-\resumeItemListEnd
-
 \resumeSubSubheading
-{Earlier: Software engineering internships at Deltion College (2020) \& GWBO (2019)}
+{Earlier: Software Engineer at Univé (2021), internships at Deltion College (2020) \& GWBO (2019)}
 {\href{https://daanrosendal.com/\#earlier-experience}{\underline{\smash{See all roles\, \faExternalLink}}}}
 
 \resumeSubHeadingListEnd
@@ -180,14 +172,21 @@
 {Deltion College $\cdot$ Top 1\% of 200 students (Cum Laude/With Honours)}{Zwolle, The Netherlands}
 \resumeSubHeadingListEnd
 
+%-----------PROJECTS-----------
+\section{Projects}
+\resumeSubHeadingListStart
+\resumeProjectHeading
+{\textbf{\href{https://daanrosendal.com/projects/pinboard-vscode-extension/}{\underline{\smash{Pinboard\, \faExternalLink}}}} $\cdot$ Open-source VS Code extension for pinning files and folders}{\small 5,000+ installs and downloads}
+\resumeSubHeadingListEnd
+
 %-----------TECHNICAL SKILLS-----------
 \section{Skills}
 \begin{itemize}[leftmargin=0.15in, label={}]
     \small{\item{
           \textbf{Day to day}{: Go, Python, TypeScript, gRPC, PostgreSQL, ClickHouse, Redis, Kafka, Kubernetes, Docker, AWS, GitLab, Grafana} \\
           \textbf{Familiar with}{: Java, C\#, C, SQL, React, Flask, Terraform, ArgoCD, GCP, Azure, Linux, GitHub Actions, Helm, Sentry, Bash, Git} \\
-          \textbf{AI and Agents}{: Claude Code, Codex, Cursor, MCP, skills, subagents, AGENTS.md, memory, headless agents, agent security} \\
-          \textbf{Focus}{: Product-minded engineering, distributed systems, performance \& cost, agentic automation, developer productivity}
+          \textbf{AI and Agents}{: Claude Code, Codex, Cursor, MCP, skills, subagents, AGENTS.md, memory, headless agents, agent security}
+          % \\ \textbf{Focus}{: Product-minded engineering, distributed systems, performance \& cost, agentic automation, developer productivity}
           }}
 \end{itemize}
 
