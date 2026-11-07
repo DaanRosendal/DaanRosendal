@@ -18,11 +18,13 @@ const entries = (await getCollection('highlights')).sort(SORT_BY === 'date' ? by
 ---
 
 <section class="tracks mb-14 grid gap-10 min-[480px]:grid-cols-2 min-[480px]:gap-x-4 min-[680px]:grid-cols-3 min-[680px]:gap-5" data-nosnippet>
-  {tracks.map(({ id, label }) => {
+  {tracks.map(({ id, label, section }) => {
     const items = entries.filter((e) => e.data.track === id);
     return items.length > 0 && (
       <div>
-        <h2 class="mb-3 text-center text-lg font-semibold">{label}</h2>
+        <h2 class="mb-3 text-center text-lg font-semibold">
+          <a href={`/${section}/`} class="underline decoration-transparent underline-offset-4 transition-colors hover:decoration-gray-400 dark:hover:decoration-neutral-500 focus-visible:decoration-gray-400 dark:focus-visible:decoration-neutral-500">{label}</a>
+        </h2>
         <div class="cards grid gap-3">
           {items.map((entry, index) => <HighlightCard entry={entry} priority={index === 0} />)}
         </div>

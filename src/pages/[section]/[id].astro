@@ -19,17 +19,20 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
+const track = tracks.find((t) => t.id === entry.data.track)!;
 const { title, when, youtube, thumbnail, gallery, galleryVideo, links } = entry.data;
 const { statHtml, summary, fillHtml } = await resolveHighlightText(entry);
 const body = fillHtml(entry.rendered?.html ?? '');
 const thumbnailSize = thumbnail ? await imageSize(thumbnail) : undefined;
 ---
 <Layout title={`${title} - Daan Rosendal`} description={summary}>
-  <nav class="mb-12 text-sm">
-    <a href="/" class="inline-flex items-center gap-1.5 text-gray-600 dark:text-neutral-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+  <nav class="mb-12 flex items-center gap-2 text-sm text-gray-600 dark:text-neutral-300">
+    <a href="/" class="inline-flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-white transition-colors">
       <ArrowLeft size={14} />
       Home
     </a>
+    <span class="text-gray-300 dark:text-neutral-600" aria-hidden="true">/</span>
+    <a href={`/${track.section}/`} class="hover:text-gray-900 dark:hover:text-white transition-colors">{track.label}</a>
   </nav>
 
   <article>

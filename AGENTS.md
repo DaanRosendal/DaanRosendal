@@ -44,6 +44,7 @@ npm run preview  # Preview production build locally
 │   ├── pages/
 │   │   ├── index.astro    # Resume/home
 │   │   ├── [section]/
+│   │   │   ├── index.astro    # Section index: /projects/, /competitions/ or /research/
 │   │   │   └── [id].astro     # Highlight detail page: /projects/<id>/, /competitions/<id>/ or /research/<id>/
 │   │   └── _blog/             # Unpublished blog pages (the underscore keeps them out of the build)
 │   │       ├── index.astro    # Blog listing

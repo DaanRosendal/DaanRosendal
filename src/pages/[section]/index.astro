@@ -1,0 +1,36 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import HighlightCard from '../../components/HighlightCard.astro';
+import LiveCounts from '../../components/LiveCounts.astro';
+import { getCollection } from 'astro:content';
+import { tracks } from '../../lib/highlights';
+import { ArrowLeft } from '@lucide/astro';
+
+export function getStaticPaths() {
+  return tracks.map((track) => ({ params: { section: track.section }, props: { track } }));
+}
+
+const { track } = Astro.props;
+const entries = (await getCollection('highlights'))
+  .filter((e) => e.data.track === track.id)
+  .sort((a, b) => a.data.order - b.data.order);
+---
+<Layout title={`${track.label} - Daan Rosendal`} description={track.description}>
+  <nav class="mb-12 text-sm">
+    <a href="/" class="inline-flex items-center gap-1.5 text-gray-600 dark:text-neutral-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+      <ArrowLeft size={14} />
+      Home
+    </a>
+  </nav>
+
+  <header class="mb-8">
+    <h1 class="text-4xl font-bold">{track.label}</h1>
+    <p class="mt-2 text-gray-600 dark:text-neutral-300">{track.description}</p>
+  </header>
+
+  <div class="grid gap-3 min-[560px]:grid-cols-2" data-nosnippet>
+    {entries.map((entry, index) => <HighlightCard entry={entry} priority={index === 0} />)}
+  </div>
+
+  <LiveCounts />
+</Layout>
