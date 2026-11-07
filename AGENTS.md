@@ -67,6 +67,13 @@ npm run preview  # Preview production build locally
 - Roles that are left off the resume are flagged `earlier: true` in `ExperienceList.astro`. They glow when the resume's "See all roles" link (`/#earlier-experience`) is opened. When a role is dropped from or restored to the resume, update its flag.
 - In `resume.tex`, comment out single bullets that might come back and delete everything else. Do not keep dead blocks.
 
+## LinkedIn
+
+- LinkedIn lists every bullet and mirrors the website (`ExperienceList.astro`, `EducationList.astro`), not the one-page resume. The website is the source of truth: content that only exists on LinkedIn is added to the website first, then LinkedIn follows.
+- After any change to a bullet, title, date, company or link in the website or the resume, check LinkedIn in the same batch of work. Read `https://www.linkedin.com/in/daanrosendal/details/experience/` and `/details/education/` with Claude in Chrome (the user is already signed in and the interface is Dutch), compare them with the website entries and report every mismatch.
+- Never edit LinkedIn without asking. Show the exact new text for each change and wait for a yes before saving. Never sign in or enter credentials, and do not install LinkedIn automation tools or MCP servers (they cannot edit profiles anyway and put the account at risk).
+- Expected differences, not drift: LinkedIn titles carry the type in brackets (for example "Cloud Solution Architect (Intern)"), the company is LinkedIn's entity ("Lakera, now part of Check Point"), and dates use Dutch month names. Projects synced from linked apps cannot be edited on LinkedIn.
+
 ## Blog
 
 - The blog is deliberately not published: `src/pages/_blog/` is ignored by the router, so there is no `/blog/` page, no sitemap entry and nothing to index. The collection in `src/content/blog/` and its schema stay in place.
