@@ -120,8 +120,13 @@ const glow = await Promise.all(
     transition: transform 0.9s cubic-bezier(0.34, 1.45, 0.64, 1), opacity 0.5s ease;
     will-change: transform;
   }
-  #cats[data-fan] [data-card] { cursor: pointer; }
-  #cats[data-fan] [data-card]:hover { z-index: 99 !important; }
+  /* In the fan, the photo under the cursor lifts smoothly (the pile order never changes, so nothing snaps). The invisible margin keeps the hover steady while the photo moves. */
+  #cats[data-fan] [data-card] {
+    cursor: pointer;
+    transition: transform 0.9s cubic-bezier(0.34, 1.45, 0.64, 1), translate 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), scale 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease;
+  }
+  #cats[data-fan] [data-card]::after { content: ''; position: absolute; inset: -12px 0; }
+  #cats[data-fan] [data-card]:hover { translate: 0 -10px; scale: 1.04; }
 
   /* Light that follows the cursor across the top photo. */
   #cats .glare {
@@ -144,7 +149,7 @@ const glow = await Promise.all(
   }
 
   @media (prefers-reduced-motion: reduce) {
-    #cats, #cats [data-card], #cat-glow > div { transition: none; }
+    #cats, #cats [data-card], #cats[data-fan] [data-card], #cat-glow > div { transition: none; }
   }
 </style>
 

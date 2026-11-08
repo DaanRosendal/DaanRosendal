@@ -104,7 +104,7 @@ export function catStack(
     // Cards sit on an arc, like a hand of playing cards.
     // The fan is about 2.9 photo-widths wide, so shrink it to fit the window.
     const w = stack.offsetWidth;
-    const sc = Math.min(0.95, (innerWidth - 32) / (2.9 * w));
+    const sc = Math.min(0.86, (innerWidth - 32) / (2.9 * w));
     const step = innerWidth < 560 ? 9 : 11;
     const radius = 1.04 * w * sc;
     const edge = ((((n - 1) / 2) * step) * Math.PI) / 180;
