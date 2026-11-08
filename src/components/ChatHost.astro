@@ -7,7 +7,7 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
      The conversation itself (src/scripts/chat.ts) is fetched only when the chat is used or restored. -->
 <div class="chat-pill-wrap">
   <form class="chat-pill" autocomplete="off">
-    <img class="chat-avatar" src="/media/cat/junior-avatar.webp" alt="" width="32" height="32" decoding="async" />
+    <img class="chat-avatar" src="/media/cat/junior-clean.webp" alt="" width="32" height="32" decoding="async" />
     <input class="chat-pill-input" type="text" name="q" maxlength="600" placeholder="Ask Junior about Daan" aria-label="Ask Junior about Daan" enterkeyhint="send" />
     <button type="submit" class="chat-pill-go" aria-label="Send"><ArrowUp size={16} aria-hidden="true" /></button>
   </form>
@@ -18,7 +18,7 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
 
 <section id="chat" class="chat" role="dialog" aria-label="Chat with Junior">
   <header class="chat-head">
-    <img class="chat-avatar" src="/media/cat/junior-avatar.webp" alt="" width="32" height="32" loading="lazy" decoding="async" />
+    <img class="chat-avatar" src="/media/cat/junior-clean.webp" alt="" width="32" height="32" loading="lazy" decoding="async" />
     <h2 class="chat-title">Junior</h2>
     <button type="button" class="chat-btn chat-btn-expand" data-chat-act="expand" aria-label="Expand the chat"><Maximize2 size={16} aria-hidden="true" /></button>
     <button type="button" class="chat-btn chat-btn-min" data-chat-act="minimise" aria-label="Minimise the chat"><Minimize2 size={16} aria-hidden="true" /></button>
