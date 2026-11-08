@@ -140,7 +140,8 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
       top 0.55s var(--ease),
       width 0.55s var(--ease),
       height 0.55s var(--ease),
-      border-radius 0.55s var(--ease);
+      border-radius 0.55s var(--ease),
+      background-color 0.4s ease;
   }
   html[data-chat] .chat {
     display: flex;
@@ -215,6 +216,16 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
     background: var(--c-bubble);
     color: var(--c-fg);
   }
+  /* While the water moves, the text waits: it fades out fast and comes back once the water has settled. */
+  .chat-head,
+  .chat-body {
+    transition: opacity 0.45s ease;
+  }
+  .chat-moving .chat-head,
+  .chat-moving .chat-body {
+    opacity: 0;
+    transition-duration: 0.12s;
+  }
   .chat-btn-expand,
   .chat-btn-min {
     display: none;
@@ -246,9 +257,16 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
     pointer-events: none;
     animation: chat-fade 0.6s ease 1.5s forwards;
   }
-  html[data-chat] .chat-pill-wrap,
   html[data-off] .chat-pill-wrap {
     display: none;
+  }
+  html[data-chat] .chat-pill-wrap {
+    opacity: 0 !important;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 0.2s ease,
+      visibility 0s 0.2s;
   }
   @keyframes chat-fade {
     to {

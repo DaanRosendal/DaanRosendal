@@ -124,6 +124,11 @@ html[data-chat='full'] .chat-input {
   transform: translateY(calc(100% + var(--crest)));
   transition: transform 1.15s cubic-bezier(0.3, 0.7, 0.2, 1);
 }
+/* Going back down is quicker, to keep pace with the window shrinking into the dock. */
+.chat-sea:not(.up) {
+  transition-duration: 0.6s;
+  transition-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
+}
 @media (prefers-color-scheme: dark) {
   .chat-sea {
     --sea-body: #0a0a0a;

@@ -200,9 +200,17 @@ async function readAnswer(response: Response, onPiece: (piece: string) => void) 
 
 // ---- Modes ----
 
+let movingTimer: ReturnType<typeof setTimeout> | undefined;
+
 function setMode(next: Mode | undefined) {
   const previous = mode();
   if (previous === next) return;
+  // The text hides while the water rises (or sinks) and returns when it has settled.
+  if ((next === 'full' || previous === 'full') && !reduceMotion.matches) {
+    root.classList.add('chat-moving');
+    clearTimeout(movingTimer);
+    movingTimer = setTimeout(() => root.classList.remove('chat-moving'), next === 'full' ? 900 : 560);
+  }
   if (next) root.dataset.chat = next;
   else delete root.dataset.chat;
 
