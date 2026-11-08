@@ -15,3 +15,7 @@
 /achievements/federated-learning-paper/ /research/federated-learning-paper/ 301
 /achievements/lhcb-ntupling-service /research/lhcb-ntupling-service/ 301
 /achievements/lhcb-ntupling-service/ /research/lhcb-ntupling-service/ 301
+
+# Tracked links: /go/<source>/<page> redirects to <page>. The edge analytics count the /go/ hit, so keep these rules.
+/go/:source / 302
+/go/:source/* /:splat 302
