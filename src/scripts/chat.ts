@@ -2,6 +2,8 @@
 // (see ChatHost.astro for the static shell and the html[data-chat] modes). Everything the model writes is added as
 // text nodes, never as HTML.
 // The conversation's styles ride along with this script (an inline string), so pages that never use the chat do not carry them.
+import { createRenderer } from '../vendor/limmat';
+import limmatCss from '../vendor/limmat/style.css?inline';
 import css from './chat.css?inline';
 
 const SITEKEY = ['localhost', '127.0.0.1'].includes(location.hostname) ? '1x00000000000000000000AA' : '0x4AAAAAAF5IJpF-SESG-Kls';
@@ -76,15 +78,6 @@ function save() {
 
 // ---- Links to pages on this site ----
 
-// A path on this site that really exists (from /chat-pages.json), whether written as /path/ or as a full address.
-function sitePath(href: string) {
-  let path = href;
-  if (path.startsWith(SITE)) path = path.slice(SITE.length) || '/';
-  if (!path.startsWith('/') || path.startsWith('//')) return null;
-  const bare = path.split(/[?#]/)[0];
-  return pages.has(bare) ? path : null;
-}
-
 // The chat steps aside into the dock, then the page changes, and the dock is already there on the next page.
 function go(path: string) {
   if (mode() !== 'dock') setMode('dock');
@@ -102,41 +95,26 @@ function go(path: string) {
 }
 
 // ---- Rendering the answer ----
-// Plain text with web addresses and the email address turned into real links, built as elements so nothing the model
-// writes can inject markup. A markdown renderer replaces this.
+// limmat builds the markdown as DOM nodes (never HTML) while the answer streams in. Links to pages that exist on this
+// site are handled here, so the chat can step aside before the page changes.
 
-function renderText(target: HTMLElement, text: string) {
-  const parts: (string | HTMLElement)[] = [];
-  let last = 0;
-  for (const match of text.matchAll(/https?:\/\/[^\s<>"]+|[\w.+-]+@[\w-]+\.[\w.-]+/g)) {
-    const found = match[0].replace(/[.,;:!?)\]]+$/, '');
-    const start = match.index ?? 0;
-    parts.push(text.slice(last, start));
-    last = start + found.length;
-    const internal = found.startsWith(SITE) ? sitePath(found) : null;
-    if (found.startsWith(SITE) && !internal) {
-      parts.push(found);
-      continue;
-    }
-    const link = el('a', 'chat-link', internal ?? found);
-    if (internal) {
-      link.href = internal;
-      link.addEventListener('click', (event) => {
-        if (event.defaultPrevented || event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-        event.preventDefault();
-        go(internal);
-      });
-    } else if (found.includes('@') && !found.startsWith('http')) {
-      link.href = `mailto:${found}`;
-    } else {
-      link.href = found;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-    }
-    parts.push(link);
-  }
-  parts.push(text.slice(last));
-  target.replaceChildren(...parts);
+const LANGS: Record<string, string> = { typescript: 'ts', tsx: 'ts', javascript: 'js', jsx: 'js', mjs: 'js', python: 'py', shell: 'bash', sh: 'bash', zsh: 'bash', yml: 'yaml', rust: 'rs', golang: 'go', cpp: 'c', 'c++': 'c', markdown: 'md', text: 'plain', txt: 'plain' };
+
+function renderer(target: HTMLElement) {
+  return createRenderer(target, {
+    // The highlighter and each language load as their own small files, only when a code block closes.
+    highlight: async (code, _text, lang) => {
+      const { highlightElement } = await import('@speed-highlight/core');
+      const name = lang.toLowerCase();
+      await highlightElement(code, LANGS[name] ?? (name || 'plain'));
+    },
+    isInternalPath: (path) => pages.has(path.split(/[?#]/)[0]),
+    onLinkClick: (href, event) => {
+      if (!href.startsWith('/') || event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
+      go(href);
+      return true;
+    },
+  });
 }
 
 // ---- Human check ----
@@ -186,7 +164,7 @@ async function humanToken(slot: HTMLElement) {
 }
 
 // The server streams Server-Sent Events: lines like `data: {"choices":[{"delta":{"content":"..."}}]}`.
-async function readAnswer(response: Response, onText: (text: string) => void) {
+async function readAnswer(response: Response, onPiece: (piece: string) => void) {
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
@@ -198,7 +176,10 @@ async function readAnswer(response: Response, onText: (text: string) => void) {
     try {
       const chunk = JSON.parse(data);
       const piece = chunk.choices?.[0]?.delta?.content ?? chunk.response ?? '';
-      if (typeof piece === 'string' && piece) onText((answer += piece));
+      if (typeof piece === 'string' && piece) {
+        answer += piece;
+        onPiece(piece);
+      }
     } catch {
       // A partial or unknown line: skip it.
     }
@@ -287,7 +268,7 @@ export function sync() {
 // ---- Building the conversation ----
 
 async function build() {
-  document.head.append(el('style', undefined, css));
+  document.head.append(el('style', undefined, limmatCss + css));
   readStore();
   try {
     pages = new Set(await (await fetch('/chat-pages.json')).json());
@@ -328,8 +309,14 @@ async function build() {
     log.scrollTop = log.scrollHeight;
   };
   const addMessage = (role: 'user' | 'assistant' | 'note', text: string) => {
-    const bubble = el('div', `chat-msg chat-plain chat-${role === 'note' ? 'notice' : role === 'user' ? 'user' : 'bot'}`);
-    renderText(bubble, text);
+    const bubble = el('div', `chat-msg chat-${role === 'note' ? 'notice' : role === 'user' ? 'user' : 'bot'}`);
+    if (role === 'assistant') {
+      const markdown = renderer(bubble);
+      markdown.write(text);
+      markdown.end();
+    } else {
+      bubble.textContent = text;
+    }
     log.append(bubble);
     scroll();
     return bubble;
@@ -379,8 +366,10 @@ async function build() {
     grow();
     addMessage('user', text);
     turns.push({ role: 'user', content: text });
-    const answerBubble = addMessage('assistant', 'Thinking...');
-    answerBubble.classList.add('chat-thinking');
+    const answerBubble = el('div', 'chat-msg chat-bot chat-thinking', 'Thinking...');
+    log.append(answerBubble);
+    scroll();
+    const markdown = renderer(answerBubble);
     // Screen readers wait for the whole answer instead of announcing every streamed chunk.
     log.setAttribute('aria-busy', 'true');
     try {
@@ -395,15 +384,22 @@ async function build() {
         const problem = await response.json().catch(() => null);
         throw new Error(problem?.message ?? `The chat is unavailable right now. Please email ${CONTACT} instead.`);
       }
-      const answer = await readAnswer(response, (soFar) => {
-        answerBubble.classList.remove('chat-thinking');
-        renderText(answerBubble, soFar);
+      let started = false;
+      const answer = await readAnswer(response, (piece) => {
+        if (!started) {
+          started = true;
+          answerBubble.classList.remove('chat-thinking');
+          answerBubble.textContent = '';
+        }
+        markdown.write(piece);
         scroll();
       });
+      markdown.end();
       if (!answer.trim()) throw new Error('No answer came back. Please try again.');
       turns.push({ role: 'assistant', content: answer.trim() });
     } catch (error) {
       turns.pop();
+      markdown.destroy();
       answerBubble.remove();
       addMessage('note', error instanceof Error ? error.message : 'Something went wrong. Please try again.');
       input.value = draft = text;

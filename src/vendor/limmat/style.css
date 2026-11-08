@@ -1,0 +1,38 @@
+/* Optional styles for limmat. Override the variables, or ignore this file and style the classes yourself. */
+:root {
+  --limmat-code-bg: color-mix(in srgb, currentColor 7%, transparent);
+  --limmat-border: color-mix(in srgb, currentColor 22%, transparent);
+  --limmat-muted: color-mix(in srgb, currentColor 65%, transparent);
+  --limmat-link: #1d4ed8;
+  --limmat-radius: 0.5rem;
+  --limmat-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --limmat-focus: #2563eb;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --limmat-link: #93c5fd; --limmat-focus: #93c5fd; }
+}
+.limmat-link { color: var(--limmat-link); text-decoration: underline; text-underline-offset: 0.15em; }
+.limmat-code { margin: 0.75em 0; border: 1px solid var(--limmat-border); border-radius: var(--limmat-radius); background: var(--limmat-code-bg); overflow: hidden; }
+.limmat-code-head { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.5rem; border-bottom: 1px solid var(--limmat-border); font-size: 0.8em; color: var(--limmat-muted); }
+.limmat-lang { margin-right: auto; font-family: var(--limmat-font-mono); }
+.limmat-code-head > .limmat-copy:first-child { margin-left: auto; }
+.limmat-copy { font: inherit; color: inherit; background: none; border: 1px solid var(--limmat-border); border-radius: 0.3rem; padding: 0.1rem 0.5rem; cursor: pointer; }
+.limmat-copy:hover { background: var(--limmat-code-bg); }
+.limmat-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.limmat-code pre { margin: 0; padding: 0.75rem; overflow-x: auto; font-family: var(--limmat-font-mono); font-size: 0.9em; line-height: 1.5; }
+.limmat-code code { font: inherit; }
+.limmat-table-wrap { margin: 0.75em 0; overflow-x: auto; }
+.limmat-table-wrap table { border-collapse: collapse; min-width: 100%; }
+.limmat-table-wrap th, .limmat-table-wrap td { border: 1px solid var(--limmat-border); padding: 0.3rem 0.6rem; text-align: left; }
+.limmat-table-wrap th { background: var(--limmat-code-bg); }
+.limmat-list { padding-left: 1.5em; }
+li:has(> input[type='checkbox']:first-child) { list-style: none; margin-left: -1.25em; }
+li > input[type='checkbox']:first-child { margin-right: 0.5em; }
+:where(.limmat-code pre, .limmat-table-wrap):focus-visible, .limmat-copy:focus-visible, .limmat-link:focus-visible { outline: 2px solid var(--limmat-focus); outline-offset: 2px; }
+@media (forced-colors: active) {
+  .limmat-code, .limmat-code-head, .limmat-copy, .limmat-table-wrap th, .limmat-table-wrap td { border-color: CanvasText; }
+  .limmat-link { color: LinkText; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .limmat-copy { transition: background-color 0.15s; }
+}

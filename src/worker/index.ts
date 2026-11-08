@@ -139,12 +139,29 @@ async function readUsage(stream: ReadableStream<Uint8Array>) {
 // A canned stream for local testing (DRY_RUN in .dev.vars), so the limits and the page can be tried for free.
 function dryRunStream() {
   const encoder = new TextEncoder();
-  const words = 'This is a canned answer from the test mode of the chat, so no AI neurons were spent. See https://daanrosendal.com/research/federated-learning-paper/ for a paper, or write to contact@daanrosendal.com.'.split(' ');
+  const answer = `Meow, a **canned** answer from the test mode, so no neurons were spent.
+
+## What I can do
+- Read a [research page](/research/federated-learning-paper/) or the [projects](/projects/)
+- Show \`inline code\` and a snippet:
+
+\`\`\`ts
+const greet = (name: string) => \`hello \${name}\`;
+console.log(greet('Junior'));
+\`\`\`
+
+| Where | When |
+|:--|--:|
+| CERN | 2023 |
+| Lakera | now |
+
+> Cats do not need a markdown renderer, but it helps. Write to contact@daanrosendal.com.
+`;
   return new ReadableStream<Uint8Array>({
     async start(controller) {
-      for (const word of words) {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: `${word} ` } }] })}\n\n`));
-        await new Promise((resolve) => setTimeout(resolve, 40));
+      for (let i = 0; i < answer.length; i += 6) {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: answer.slice(i, i + 6) } }] })}\n\n`));
+        await new Promise((resolve) => setTimeout(resolve, 25));
       }
       controller.enqueue(encoder.encode('data: [DONE]\n\n'));
       controller.close();

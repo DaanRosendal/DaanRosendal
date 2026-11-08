@@ -24,9 +24,6 @@
   max-width: 100%;
   overflow-wrap: anywhere;
 }
-.chat-plain {
-  white-space: pre-wrap;
-}
 .chat-user {
   align-self: flex-end;
   max-width: 88%;
@@ -201,4 +198,124 @@ html[data-chat='full'] .chat-input {
   html[data-chat='full'] .chat {
     --c-bg: Canvas;
   }
+}
+
+/* limmat's elements, in the site's colors. */
+.chat {
+  --limmat-link: currentColor;
+  --limmat-focus: var(--c-muted);
+  --limmat-border: var(--c-line);
+  --limmat-code-bg: var(--c-bubble);
+  --limmat-muted: var(--c-muted);
+}
+.chat-bot > :first-child {
+  margin-top: 0;
+}
+.chat-bot > :last-child {
+  margin-bottom: 0;
+}
+.chat-bot p {
+  margin: 0.6em 0;
+}
+.chat-bot h1,
+.chat-bot h2,
+.chat-bot h3,
+.chat-bot h4 {
+  margin: 1em 0 0.4em;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.chat-bot h1 {
+  font-size: 1.2em;
+}
+.chat-bot h2 {
+  font-size: 1.1em;
+}
+.chat-bot h3,
+.chat-bot h4 {
+  font-size: 1em;
+}
+.chat-bot ul.limmat-list {
+  list-style: disc;
+}
+.chat-bot ol.limmat-list {
+  list-style: decimal;
+}
+.chat-bot blockquote {
+  margin: 0.6em 0;
+  padding-left: 0.8rem;
+  border-left: 2px solid var(--c-line);
+  color: var(--c-muted);
+}
+.chat-bot hr {
+  margin: 1em 0;
+  border: 0;
+  border-top: 1px solid var(--c-line);
+}
+.chat-bot :not(pre) > code {
+  padding: 0.1em 0.35em;
+  border-radius: 0.3rem;
+  background: var(--c-bubble);
+  font-size: 0.9em;
+}
+.chat-bot .limmat-link {
+  text-decoration-style: dotted;
+}
+.chat-bot .limmat-link:hover {
+  text-decoration-style: solid;
+}
+.chat .limmat-code pre {
+  border: 0;
+  border-radius: 0;
+  padding: 0.75rem;
+  font-size: 0.85em;
+}
+.chat-bot :not(pre) > code {
+  color: inherit;
+}
+
+/* Code colors (the highlighter only adds the shj-syn-* classes). */
+.chat {
+  --syn-kwd: #9d174d;
+  --syn-str: #166534;
+  --syn-num: #1d4ed8;
+  --syn-fn: #6d28d9;
+  --syn-type: #0e7490;
+}
+@media (prefers-color-scheme: dark) {
+  .chat,
+  html[data-chat='full'] .chat {
+    --syn-kwd: #f9a8d4;
+    --syn-str: #86efac;
+    --syn-num: #93c5fd;
+    --syn-fn: #c4b5fd;
+    --syn-type: #67e8f9;
+  }
+}
+.shj-syn-kwd,
+.shj-syn-oper,
+.shj-syn-err,
+.shj-syn-deleted {
+  color: var(--syn-kwd);
+}
+.shj-syn-str,
+.shj-syn-insert {
+  color: var(--syn-str);
+}
+.shj-syn-num,
+.shj-syn-bool,
+.shj-syn-var {
+  color: var(--syn-num);
+}
+.shj-syn-func,
+.shj-syn-class,
+.shj-syn-section {
+  color: var(--syn-fn);
+}
+.shj-syn-type {
+  color: var(--syn-type);
+}
+.shj-syn-cmnt {
+  color: var(--c-muted);
+  font-style: italic;
 }
