@@ -145,5 +145,6 @@ Workers Builds settings (Worker `daanrosendal` > Settings > Builds):
 - Static assets: `assets.directory` in `wrangler.jsonc` is `./dist`. `not_found_handling` is `404-page`, which serves `dist/404.html` (the cat page) with a 404 status. Without it unknown URLs get a bare 404.
 - `public/_redirects` and `public/_headers` work the same as on Pages. `public/.assetsignore` keeps `.DS_Store` out of the upload.
 - Node.js: the Workers Builds default is fine (Astro 7 needs 22.23.4 or newer). Set a `NODE_VERSION` build variable only to pin a different one.
-- `workers_dev` serves a copy of the site at `daanrosendal.<account>.workers.dev`. Keep it `false` in production so that host is not indexed, and set it `true` only while testing a change.
+- `workers_dev` is `false`, so the site is served only on `daanrosendal.com` (and `www`, which redirects to it) and no second host gets indexed. Set it `true` only while testing a change on `daanrosendal.<account>.workers.dev`, and back to `false` afterwards.
+- The domains `daanrosendal.com` and `www.daanrosendal.com` are Worker custom domains. The old Pages project was deleted on 2026-11-08, and Pages can be set up again from this repo if ever needed.
 - Rollback: `npx wrangler rollback` or Deployments > Rollback in the dashboard.
