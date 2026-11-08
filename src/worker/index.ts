@@ -6,9 +6,10 @@ export { Limiter };
 
 const CONTACT = 'contact@daanrosendal.com';
 const SITEVERIFY = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
-const MAX_BODY_CHARS = 8000;
+const MAX_BODY_CHARS = 20000;
 const MAX_HISTORY = 6;
-const MAX_MESSAGE_CHARS = 800;
+// A visitor's question stays short, but the assistant's earlier answers (resent as history) are far longer.
+const MAX_CHARS = { user: 800, assistant: 4000 };
 const MAX_ANSWER_TOKENS = 300;
 
 // Models change often, so the choice lives here. Neuron prices are per million tokens (input, output).
@@ -87,7 +88,7 @@ function readMessages(value: unknown): ChatMessage[] | null {
     const { role, content } = (item ?? {}) as Partial<ChatMessage>;
     if ((role !== 'user' && role !== 'assistant') || typeof content !== 'string') return null;
     const text = content.trim();
-    if (!text || text.length > MAX_MESSAGE_CHARS) return null;
+    if (!text || text.length > MAX_CHARS[role]) return null;
     messages.push({ role, content: text });
   }
   return messages.at(-1)?.role === 'user' ? messages : null;
