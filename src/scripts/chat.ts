@@ -11,10 +11,8 @@ const CONTACT = 'contact@daanrosendal.com';
 const STORE = 'chat:v1';
 const SITE = 'https://daanrosendal.com';
 
-const GREETING = "Hi, I am an AI on Daan's site. I know his work, studies, and projects, and I am happy to chat about other things too.";
-const SUGGESTIONS = ['What does Daan do at Lakera?', 'What did Daan build at CERN?', 'What is Pinboard for VS Code?', 'Tell me something fun'];
 
-type Mode = 'open' | 'full' | 'dock';
+type Mode = 'full' | 'dock';
 
 interface TurnstileApi {
   render(container: HTMLElement, options: Record<string, unknown>): string;
@@ -252,10 +250,7 @@ export async function act(action: string) {
   const parts = await ensureUi();
   // The box was measured while the chat was hidden, so measure it again once it shows.
   requestAnimationFrame(parts.grow);
-  if (action === 'open') {
-    setMode(turns.length ? 'full' : 'open');
-    focusSoon(parts.input);
-  } else if (action === 'expand') {
+  if (action === 'expand') {
     setMode('full');
     focusSoon(parts.input);
   } else if (action === 'minimise') {
@@ -263,8 +258,16 @@ export async function act(action: string) {
     focusSoon(parts.panel.querySelector<HTMLElement>('.chat-btn-expand'));
   } else if (action === 'close') {
     setMode(undefined);
-    focusSoon(document.querySelector<HTMLElement>('.chat-pill'));
+    focusSoon(document.querySelector<HTMLElement>('.chat-pill-input'));
   }
+}
+
+// A question typed into the pill: the screen floods and the question goes out.
+export async function send(text: string) {
+  const parts = await ensureUi();
+  setMode('full');
+  requestAnimationFrame(parts.grow);
+  parts.submit(text);
 }
 
 // The page came back from the browser's back-forward cache: the saved state may be newer than the frozen page.
@@ -302,8 +305,6 @@ async function build() {
   sea.append(el('div', 'sea-body'), crest);
   document.body.append(sea);
 
-  const note = el('p', 'chat-note', 'A public AI chat that knows this site. It can be wrong. Messages go to Cloudflare to be answered and are not stored here.');
-
   const log = el('div', 'chat-log');
   log.setAttribute('role', 'log');
   log.setAttribute('aria-label', 'Conversation');
@@ -322,12 +323,6 @@ async function build() {
   form.append(input, send);
 
   const slot = el('div', 'chat-turnstile');
-  const foot = el('p', 'chat-foot');
-  const privacy = el('a', 'chat-link', 'Cloudflare Turnstile');
-  privacy.href = 'https://www.cloudflare.com/privacypolicy/';
-  privacy.target = '_blank';
-  privacy.rel = 'noopener noreferrer';
-  foot.append('Protected by ', privacy, '. Limited to 20 messages a day.');
 
   const scroll = () => {
     log.scrollTop = log.scrollHeight;
@@ -340,20 +335,9 @@ async function build() {
     return bubble;
   };
 
-  const suggestions = el('div', 'chat-suggestions');
-  for (const text of SUGGESTIONS) {
-    const chip = el('button', 'chat-chip', text);
-    chip.type = 'button';
-    chip.addEventListener('click', () => submit(text));
-    suggestions.append(chip);
-  }
-
   const renderAll = () => {
     log.replaceChildren();
-    const greeting = addMessage('assistant', GREETING);
-    greeting.classList.remove('chat-bot');
     for (const turn of turns) addMessage(turn.role, turn.content);
-    if (!turns.length) log.append(suggestions);
     input.value = draft;
     grow();
     scroll();
@@ -391,11 +375,8 @@ async function build() {
     }
     busy = true;
     send.disabled = true;
-    suggestions.remove();
     input.value = draft = '';
     grow();
-    // The first message from the small window floods the screen.
-    if (mode() === 'open') setMode('full');
     addMessage('user', text);
     turns.push({ role: 'user', content: text });
     const answerBubble = addMessage('assistant', 'Thinking...');
@@ -436,13 +417,12 @@ async function build() {
     }
   }
 
-  body.append(note, log, slot, form, foot);
+  body.append(log, slot, form);
   renderAll();
 
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape' || event.defaultPrevented) return;
     if (mode() === 'full') void act('minimise');
-    else if (mode() === 'open') void act('close');
   });
   addEventListener('pagehide', save);
 
@@ -450,7 +430,7 @@ async function build() {
   if (mode() !== 'dock') loadTurnstile().catch(() => {});
   else addEventListener('pointerdown', () => loadTurnstile().catch(() => {}), { once: true });
 
-  return { panel, sea, input, renderAll, grow };
+  return { panel, sea, input, renderAll, grow, submit };
 }
 
 // A minimised chat from the previous page: bring its conversation back.

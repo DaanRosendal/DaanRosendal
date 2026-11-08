@@ -1,16 +1,17 @@
 ---
-import { Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
+import { ArrowUp, Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
 ---
 
 <!-- The chat's static shell. The whole chat is driven by html[data-chat] (open, full, dock; absent means closed), which an
      inline script in Layout sets before the first paint, so a minimised chat is already in place when a new page appears.
      The conversation itself (src/scripts/chat.ts) is fetched only when the chat is used or restored. -->
 <div class="chat-pill-wrap">
-  <button type="button" class="chat-pill" data-chat-act="open">
+  <form class="chat-pill" autocomplete="off">
     <Sparkles size={16} aria-hidden="true" />
-    <span>Ask about Daan</span>
-  </button>
-  <button type="button" class="chat-pill-x" data-chat-act="dismiss" aria-label="Hide the chat button">
+    <input class="chat-pill-input" type="text" name="q" maxlength="600" placeholder="Ask about Daan" aria-label="Ask about Daan" enterkeyhint="send" />
+    <button type="submit" class="chat-pill-go" aria-label="Send"><ArrowUp size={16} aria-hidden="true" /></button>
+  </form>
+  <button type="button" class="chat-pill-x" data-chat-act="dismiss" aria-label="Hide the chat box">
     <X size={12} aria-hidden="true" />
   </button>
 </div>
@@ -33,9 +34,19 @@ import { Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
   const load = () => (chat ??= import('../scripts/chat'));
   const OFF_KEY = 'chat:off';
 
-  const pill = document.querySelector('.chat-pill');
-  pill?.addEventListener('pointerenter', load, { once: true });
-  pill?.addEventListener('focus', load, { once: true });
+  const pill = document.querySelector<HTMLFormElement>('.chat-pill')!;
+  const field = pill.querySelector<HTMLInputElement>('input')!;
+  pill.addEventListener('pointerenter', load, { once: true });
+  field.addEventListener('focus', load, { once: true });
+  // Enter sends the question and the chat takes over the screen.
+  pill.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const text = field.value.trim();
+    if (!text) return;
+    field.value = '';
+    field.blur();
+    load().then((chat) => chat.send(text));
+  });
 
   document.addEventListener('click', (event) => {
     const target = event.target as Element;
@@ -54,8 +65,10 @@ import { Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
         localStorage.removeItem(OFF_KEY);
       } catch {}
       delete root.dataset.off;
+      requestAnimationFrame(() => field.focus());
+      return;
     }
-    load().then((chat) => chat.act(act === 'revive' ? 'open' : act));
+    load().then((chat) => chat.act(act));
   });
 
   // A minimised chat from the previous page: bring its conversation back.
@@ -86,14 +99,27 @@ import { Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
     view-transition-name: chat;
   }
 
-  .chat {
+  .chat,
+  .chat-pill-wrap {
     --c-bg: #fff;
     --c-fg: #111827;
     --c-muted: #4b5563;
-    --c-line: #e5e7eb;
+    --c-line: #d1d5db;
     --c-bubble: #f3f4f6;
-    --c-accent: #0f766e;
     --ease: cubic-bezier(0.22, 0.8, 0.3, 1);
+  }
+  @media (prefers-color-scheme: dark) {
+    .chat,
+    .chat-pill-wrap {
+      --c-bg: #171717;
+      --c-fg: #fff;
+      --c-muted: #a3a3a3;
+      --c-line: #404040;
+      --c-bubble: #262626;
+    }
+  }
+
+  .chat {
     position: fixed;
     z-index: 60;
     display: none;
@@ -106,11 +132,8 @@ import { Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
     background: var(--c-bg);
     color: var(--c-fg);
     border: 1px solid var(--c-line);
-    border-radius: 1.25rem;
-    box-shadow:
-      0 0 0 1px rgb(45 212 191 / 0.1),
-      0 18px 60px -12px rgb(14 116 144 / 0.4),
-      0 0 40px -10px rgb(99 102 241 / 0.35);
+    border-radius: 1rem;
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.14);
     transition:
       left 0.55s var(--ease),
       top 0.55s var(--ease),
@@ -118,25 +141,8 @@ import { Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
       height 0.55s var(--ease),
       border-radius 0.55s var(--ease);
   }
-  @media (prefers-color-scheme: dark) {
-    .chat {
-      --c-bg: #171717;
-      --c-fg: #fff;
-      --c-muted: #a3a3a3;
-      --c-line: #404040;
-      --c-bubble: #262626;
-      --c-accent: #5eead4;
-    }
-  }
   html[data-chat] .chat {
     display: flex;
-  }
-  html[data-chat='open'] .chat {
-    --w: min(34rem, calc(100% - 2rem));
-    --h: min(38rem, calc(100dvh - 3rem));
-    --x: calc((100% - var(--w)) / 2);
-    --y: calc(100dvh - var(--h) - 1.5rem);
-    animation: chat-in 0.35s var(--ease);
   }
   html[data-chat='dock'] .chat {
     --w: min(23rem, calc(100% - 2rem));
@@ -146,11 +152,6 @@ import { Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
   }
   html[data-chat='full'] .chat {
     --c-bg: transparent;
-    --c-fg: #e8f6f6;
-    --c-muted: #a9c1cc;
-    --c-line: rgb(255 255 255 / 0.16);
-    --c-bubble: rgb(255 255 255 / 0.09);
-    --c-accent: #5eead4;
     --w: 100%;
     --h: 100dvh;
     --x: 0px;
@@ -169,16 +170,6 @@ import { Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
     html[data-chat='dock'] .chat-body {
       display: none;
     }
-    html[data-chat='open'] .chat {
-      --h: calc(100dvh - 1.5rem);
-      --y: 0.75rem;
-    }
-  }
-  @keyframes chat-in {
-    from {
-      opacity: 0;
-      transform: translateY(14px) scale(0.98);
-    }
   }
 
   .chat-head {
@@ -194,20 +185,9 @@ import { Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
   }
   .chat-title {
     flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.95rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-  }
-  .chat-title::before {
-    content: '';
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 999px;
-    background: #2dd4bf;
-    box-shadow: 0 0 10px 2px rgb(45 212 191 / 0.7);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--c-muted);
   }
   .chat-btn {
     display: grid;
@@ -240,8 +220,8 @@ import { Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
     flex-direction: column;
   }
   .chat :focus-visible,
-  .chat-pill-wrap :focus-visible {
-    outline: 2px solid #5eead4;
+  .chat-pill-x:focus-visible {
+    outline: 2px solid var(--c-muted);
     outline-offset: 2px;
   }
 
@@ -251,10 +231,10 @@ import { Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
     left: 50%;
     bottom: 1.25rem;
     translate: -50% 0;
+    width: min(22rem, calc(100% - 2rem));
     opacity: 0;
     pointer-events: none;
-    isolation: isolate;
-    animation: chat-fade 0.7s ease 2s forwards;
+    animation: chat-fade 0.6s ease 1.5s forwards;
   }
   html[data-chat] .chat-pill-wrap,
   html[data-off] .chat-pill-wrap {
@@ -266,68 +246,76 @@ import { Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
       pointer-events: auto;
     }
   }
-  .chat-pill-wrap::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: 999px;
-    background: linear-gradient(110deg, #2dd4bf, #6366f1 60%, #22d3ee);
-    filter: blur(16px);
-    opacity: 0.5;
-    animation: chat-breathe 4s ease-in-out infinite alternate;
-  }
-  .chat-pill-wrap:hover::before {
-    opacity: 0.8;
-    animation-play-state: paused;
-  }
-  @keyframes chat-breathe {
-    from {
-      opacity: 0.3;
-      transform: scale(0.96);
-    }
-    to {
-      opacity: 0.62;
-      transform: scale(1.05);
-    }
-  }
   .chat-pill {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.7rem 1.4rem;
-    border: 1px solid transparent;
+    gap: 0.6rem;
+    padding: 0.3rem 0.35rem 0.3rem 1rem;
+    border: 1px solid var(--c-line);
     border-radius: 999px;
-    background:
-      linear-gradient(#0b1220, #0b1220) padding-box,
-      linear-gradient(110deg, #2dd4bf, #6366f1 60%, #22d3ee) border-box;
-    color: #e6fffb;
-    font-size: 0.9rem;
-    font-weight: 500;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: transform 0.2s var(--ease, ease);
+    background: var(--c-bg);
+    color: var(--c-muted);
+    box-shadow: 0 4px 16px rgb(0 0 0 / 0.1);
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
   }
-  .chat-pill:hover {
-    transform: translateY(-2px);
+  .chat-pill:hover,
+  .chat-pill:focus-within {
+    border-color: var(--c-muted);
+    box-shadow: 0 6px 22px rgb(0 0 0 / 0.14);
+  }
+  .chat-pill-input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.45rem 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--c-fg);
+    font: inherit;
+    font-size: 1rem;
+  }
+  .chat-pill-input::placeholder {
+    color: var(--c-muted);
+  }
+  .chat-pill-go {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    background: var(--c-fg);
+    color: var(--c-bg);
+    cursor: pointer;
+    opacity: 0;
+    scale: 0.8;
+    transition:
+      opacity 0.15s,
+      scale 0.15s;
+  }
+  .chat-pill:has(.chat-pill-input:not(:placeholder-shown)) .chat-pill-go {
+    opacity: 1;
+    scale: 1;
   }
   .chat-pill-x {
     position: absolute;
-    right: -0.4rem;
-    bottom: -0.5rem;
+    right: -0.3rem;
+    bottom: -0.55rem;
     display: grid;
     place-items: center;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.4rem;
+    height: 1.4rem;
     border-radius: 999px;
-    border: 1px solid rgb(255 255 255 / 0.28);
-    background: #0b1220;
-    color: #cbd5e1;
+    border: 1px solid var(--c-line);
+    background: var(--c-bg);
+    color: var(--c-muted);
     cursor: pointer;
   }
   .chat-pill-x:hover {
-    color: #fff;
-    border-color: rgb(255 255 255 / 0.6);
+    color: var(--c-fg);
+    border-color: var(--c-muted);
   }
   .chat-revive {
     display: none;
@@ -336,21 +324,12 @@ import { Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
     display: block;
   }
   @media (prefers-reduced-motion: reduce) {
-    .chat-pill-wrap::before {
-      animation: none;
-    }
     .chat,
     .chat-pill {
       transition: none;
     }
-    html[data-chat='open'] .chat {
-      animation: none;
-    }
   }
   @media (forced-colors: active) {
-    .chat-pill-wrap::before {
-      display: none;
-    }
     .chat,
     .chat-pill,
     .chat-pill-x {

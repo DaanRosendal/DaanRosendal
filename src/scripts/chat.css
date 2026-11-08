@@ -1,15 +1,4 @@
 /* The conversation part of the chat (the shell is in ChatHost.astro). Loaded together with chat.ts. */
-.chat-note,
-.chat-foot {
-  flex: none;
-  padding: 0 1.1rem;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  color: var(--c-muted);
-}
-.chat-foot {
-  padding-bottom: 0.7rem;
-}
 .chat-link {
   text-decoration: underline;
   text-decoration-style: dotted;
@@ -27,9 +16,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
-  margin-top: 0.5rem;
-  padding: 0.9rem 1.1rem;
-  border-top: 1px solid var(--c-line);
+  padding: 0.5rem 1.1rem 0.9rem;
   font-size: 0.925rem;
   line-height: 1.55;
 }
@@ -49,7 +36,7 @@
 }
 .chat-bot {
   padding-left: 0.8rem;
-  border-left: 2px solid rgb(45 212 191 / 0.5);
+  border-left: 2px solid var(--c-line);
 }
 .chat-notice {
   padding: 0.5rem 0.8rem;
@@ -66,27 +53,6 @@
   50% {
     opacity: 0.45;
   }
-}
-.chat-suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.chat-chip {
-  cursor: pointer;
-  padding: 0.4rem 0.8rem;
-  border: 1px solid var(--c-line);
-  border-radius: 999px;
-  font-size: 0.825rem;
-  text-align: left;
-  color: var(--c-fg);
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
-}
-.chat-chip:hover {
-  border-color: #2dd4bf;
-  box-shadow: 0 0 14px -4px rgb(45 212 191 / 0.7);
 }
 .chat-turnstile:empty {
   display: none;
@@ -124,8 +90,8 @@
   cursor: pointer;
   padding: 0.55rem 1.1rem;
   border-radius: 999px;
-  background: linear-gradient(110deg, #14b8a6, #6366f1);
-  color: #fff;
+  background: var(--c-fg);
+  color: var(--c-bg);
   font-size: 0.875rem;
   font-weight: 600;
 }
@@ -135,33 +101,38 @@
 }
 html[data-chat='full'] .chat-log,
 html[data-chat='full'] .chat-form,
-html[data-chat='full'] .chat-foot,
-html[data-chat='full'] .chat-note,
 html[data-chat='full'] .chat-turnstile {
   padding-inline: max(1.1rem, calc((100% - 46rem) / 2));
 }
 html[data-chat='full'] .chat-log {
-  border-top-color: transparent;
   font-size: 1rem;
-}
-html[data-chat='full'] .chat-input {
-  background: rgb(255 255 255 / 0.06);
-  border-color: rgb(255 255 255 / 0.22);
 }
 html[data-chat='full'] .chat-head {
   padding-inline: max(1.1rem, calc((100% - 46rem) / 2 - 0.5rem)) max(0.5rem, calc((100% - 46rem) / 2 - 0.5rem));
 }
+html[data-chat='full'] .chat-input {
+  background: var(--c-bg-field, transparent);
+}
 
-/* The water that takes over the screen on the first message. */
+/* The water that takes over the screen on the first message, in the site's own neutral colors. */
 .chat-sea {
   --crest: 120px;
+  --sea-body: #f3f4f6;
+  --sea-1: #e5e7eb;
+  --sea-2: #d1d5db;
   position: fixed;
   inset: 0;
   z-index: 55;
   pointer-events: none;
-  overflow: visible;
   transform: translateY(calc(100% + var(--crest)));
   transition: transform 1.15s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+@media (prefers-color-scheme: dark) {
+  .chat-sea {
+    --sea-body: #0a0a0a;
+    --sea-1: #1c1c1c;
+    --sea-2: #262626;
+  }
 }
 .chat-sea.up {
   transform: none;
@@ -169,25 +140,7 @@ html[data-chat='full'] .chat-head {
 .sea-body {
   position: absolute;
   inset: 0;
-  overflow: hidden;
-  background:
-    radial-gradient(60% 45% at 18% 8%, rgb(45 212 191 / 0.2), transparent 70%),
-    radial-gradient(55% 45% at 88% 85%, rgb(99 102 241 / 0.26), transparent 70%),
-    linear-gradient(180deg, #0a2540 0%, #061a2b 55%, #050d1f 100%);
-}
-.sea-body::before {
-  content: '';
-  position: absolute;
-  inset: -20%;
-  background:
-    radial-gradient(30% 30% at 30% 40%, rgb(45 212 191 / 0.12), transparent 70%),
-    radial-gradient(30% 30% at 75% 60%, rgb(99 102 241 / 0.14), transparent 70%);
-  animation: sea-drift 18s ease-in-out infinite alternate;
-}
-@keyframes sea-drift {
-  to {
-    transform: translate3d(6%, -4%, 0) scale(1.08);
-  }
+  background: var(--sea-body);
 }
 .sea-crest {
   position: absolute;
@@ -198,27 +151,28 @@ html[data-chat='full'] .chat-head {
   overflow: hidden;
 }
 .sea-wave {
+  --tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 120' preserveAspectRatio='none'%3E%3Cpath d='M0 60C100 20 200 20 300 60S500 100 600 60V120H0Z'/%3E%3C/svg%3E");
   position: absolute;
   left: 0;
   bottom: 0;
   width: calc(100% + 600px);
   height: 100%;
-  background-repeat: repeat-x;
-  background-size: 600px 100%;
+  mask: var(--tile) repeat-x 0 0 / 600px 100%;
   animation: sea-slide 9s linear infinite;
 }
 .sea-wave:nth-child(1) {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 120' preserveAspectRatio='none'%3E%3Cpath d='M0 60C100 20 200 20 300 60S500 100 600 60V120H0Z' fill='%232dd4bf' fill-opacity='.35'/%3E%3C/svg%3E");
-  translate: 0 -6px;
+  background: var(--sea-2);
+  translate: 0 -8px;
   animation-duration: 7s;
 }
 .sea-wave:nth-child(2) {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 120' preserveAspectRatio='none'%3E%3Cpath d='M0 66C100 26 200 26 300 66S500 106 600 66V120H0Z' fill='%236366f1' fill-opacity='.5'/%3E%3C/svg%3E");
+  background: var(--sea-1);
+  translate: 0 -3px;
   animation-duration: 11s;
   animation-direction: reverse;
 }
 .sea-wave:nth-child(3) {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 120' preserveAspectRatio='none'%3E%3Cpath d='M0 78C100 38 200 38 300 78S500 118 600 78V120H0Z' fill='%230a2540'/%3E%3C/svg%3E");
+  background: var(--sea-body);
   animation-duration: 15s;
 }
 @keyframes sea-slide {
@@ -235,12 +189,9 @@ html[data-chat='full'] .chat-head {
   .chat-sea.up {
     opacity: 1;
   }
-  .sea-crest {
-    display: none;
-  }
-  .sea-body::before,
+  .sea-crest,
   .chat-thinking {
-    animation: none;
+    display: none;
   }
 }
 @media (forced-colors: active) {
@@ -249,6 +200,5 @@ html[data-chat='full'] .chat-head {
   }
   html[data-chat='full'] .chat {
     --c-bg: Canvas;
-    --c-fg: CanvasText;
   }
 }
