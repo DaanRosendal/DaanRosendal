@@ -16,6 +16,7 @@ const FLICK_DISTANCE = 90; // px of dragging that sends the photo away
 const FLICK_SPEED = 600; // px per second of fling that sends the photo away
 const FAN_WIDTH = 2.9; // the open fan is this many photo-widths wide
 const FAN_MAX_SCALE = 0.86;
+const FAN_STAGGER_MS = 25; // delay between neighbouring photos while the fan opens and closes
 
 const LABEL_PILE = 'Photos of my cat. Press Enter or the arrow keys for the next one.';
 const LABEL_FAN = 'Photos of my cat, fanned out. Pick one, or press Escape to close the fan.';
@@ -127,6 +128,7 @@ export function catStack({ stack, counter, fanButton, glow, status }: CatStackPa
   function flick(ux: number, uy: number, manual: boolean) {
     mode = 'flicking';
     clearTimeout(timer);
+    cards.forEach((c) => (c.el.style.transitionDelay = ''));
     const [card, ...others] = order;
     order = others;
     tucked = null;
@@ -164,8 +166,15 @@ export function catStack({ stack, counter, fanButton, glow, status }: CatStackPa
     if (mode === 'idle') flick(ux, uy, manual);
   }
 
+  /** Removes the cascade delays once they have played, so later moves (a flick, a hover lift) are not held back. */
+  let delayTimer = 0;
+  function clearDelays() {
+    clearTimeout(delayTimer);
+    delayTimer = window.setTimeout(() => cards.forEach((c) => (c.el.style.transitionDelay = '')), (n - 1) * FAN_STAGGER_MS + SPRING_MS);
+  }
+
   // The fan: the photos sit on an arc, like a hand of playing cards.
-  function layoutFan() {
+  function layoutFan(cascade = true) {
     const w = stack.offsetWidth;
     const scale = Math.min(FAN_MAX_SCALE, (innerWidth - 32) / (FAN_WIDTH * w)); // shrinks the fan to fit the window
     const step = ((innerWidth < 560 ? 9 : 11) * Math.PI) / 180;
@@ -174,13 +183,16 @@ export function catStack({ stack, counter, fanButton, glow, status }: CatStackPa
     // The outer photos hang lower than the middle ones: lift the whole fan by half of that and reserve the other half below it.
     const drop = radius * (1 - Math.cos(half * step));
     stack.style.marginBottom = `${(drop / 2).toFixed(0)}px`;
+    // The pile's layering is kept: the top photo stays in front and sweeps out to the right end, and the ones beneath it fan out behind it. No photo ever jumps over another.
     order.forEach((c, i) => {
-      const a = (i - half) * step;
-      c.el.style.zIndex = String(i + 1);
+      const a = (n - 1 - i - half) * step;
+      c.el.style.zIndex = String(n - i);
       c.el.style.opacity = '1';
+      c.el.style.transitionDelay = cascade && !reduced ? `${i * FAN_STAGGER_MS}ms` : ''; // the top photo leads, the rest follow
       c.el.style.transform = `translate(${(Math.sin(a) * radius).toFixed(1)}px, ${(radius * (1 - Math.cos(a)) - drop / 2).toFixed(1)}px) rotate(${((a * 180) / Math.PI).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
       setAccess(c, 'pick');
     });
+    clearDelays();
   }
 
   function setFan(on: boolean) {
@@ -197,7 +209,9 @@ export function catStack({ stack, counter, fanButton, glow, status }: CatStackPa
       layoutFan();
     } else {
       stack.style.marginBottom = '';
+      order.forEach((c, i) => (c.el.style.transitionDelay = reduced ? '' : `${(n - 1 - i) * FAN_STAGGER_MS}ms`)); // the bottom photos go first, so the top one lands last
       render();
+      clearDelays();
       schedule();
     }
   }
@@ -317,7 +331,7 @@ export function catStack({ stack, counter, fanButton, glow, status }: CatStackPa
     if (!stack.contains(e.target) && !fanButton?.contains(e.target)) setFan(false);
   });
   addEventListener('resize', () => {
-    if (mode === 'fanned') layoutFan();
+    if (mode === 'fanned') layoutFan(false); // no cascade while the window is being resized
   });
 
   // Deal the photos in from the sides, one after another, once the page has settled a little.
