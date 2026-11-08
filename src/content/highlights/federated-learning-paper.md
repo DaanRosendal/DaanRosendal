@@ -37,6 +37,7 @@ gallery:
   - src: /media/ieee/sunset.webp
     full: /media/ieee/full/sunset.webp
     alt: The sun setting behind a large tree next to a stone building with a reflecting pool
+galleryBelow: true
 links:
   - label: Paper (IEEE)
     url: https://doi.org/10.1109/BigData66926.2025.11401516

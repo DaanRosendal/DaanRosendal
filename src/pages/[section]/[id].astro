@@ -20,7 +20,7 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const track = tracks.find((t) => t.id === entry.data.track)!;
-const { title, when, youtube, thumbnail, gallery, galleryVideo, links } = entry.data;
+const { title, when, youtube, thumbnail, gallery, galleryVideo, galleryBelow, links } = entry.data;
 const { statHtml, summary, fillHtml } = await resolveHighlightText(entry);
 const body = fillHtml(entry.rendered?.html ?? '');
 const thumbnailSize = thumbnail ? await imageSize(thumbnail) : undefined;
@@ -41,7 +41,7 @@ const thumbnailSize = thumbnail ? await imageSize(thumbnail) : undefined;
       <h1 class="text-4xl font-bold">{title}</h1>
     </header>
 
-    {gallery.length > 0 ? (
+    {gallery.length > 0 && galleryBelow ? null : gallery.length > 0 ? (
       <div class={gallery.length === 1 && !galleryVideo ? '' : 'mb-8'}>
         <HighlightGallery photos={gallery} video={galleryVideo} />
       </div>
@@ -94,6 +94,11 @@ const thumbnailSize = thumbnail ? await imageSize(thumbnail) : undefined;
           </li>
         ))}
       </ul>
+    )}
+    {gallery.length > 0 && galleryBelow && (
+      <div class="mt-10">
+        <HighlightGallery photos={gallery} video={galleryVideo} eager={false} />
+      </div>
     )}
   </article>
   {entry.data.marketplace && <LiveCounts />}

@@ -13,9 +13,11 @@ interface Photo {
 interface Props {
   photos: Photo[];
   video?: string;
+  // The lead photo loads straight away, unless the gallery sits below the text.
+  eager?: boolean;
 }
 
-const { photos, video } = Astro.props;
+const { photos, video, eager = true } = Astro.props;
 const [lead, ...rest] = photos;
 const sizes = await Promise.all(photos.map((photo) => imageSize(photo.src)));
 // Every tile has a smaller "-sm" copy for phones: the browser picks the one that fits the tile's width.
@@ -45,7 +47,7 @@ const img = 'w-full h-full object-cover transition-transform duration-300 group-
 ) : (
 <div class="grid grid-cols-4 gap-2">
   <a href={lead.full ?? lead.src} data-lightbox="0" target="_blank" rel="noopener noreferrer" class={`${tileBase} col-span-2 row-span-2`}>
-    <img src={lead.src} alt={lead.alt} srcset={srcset(0)} sizes={leadWidth} width={sizes[0]?.width} height={sizes[0]?.height} loading="eager" fetchpriority="high" decoding="async" class={`${img} absolute inset-0`} style={lead.position && `object-position: ${lead.position}`} />
+    <img src={lead.src} alt={lead.alt} srcset={srcset(0)} sizes={leadWidth} width={sizes[0]?.width} height={sizes[0]?.height} loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : undefined} decoding="async" class={`${img} absolute inset-0`} style={lead.position && `object-position: ${lead.position}`} />
   </a>
   {rest.map((photo, i) => (
     <a href={photo.full ?? photo.src} data-lightbox={i + 1} target="_blank" rel="noopener noreferrer" class={tile}>

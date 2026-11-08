@@ -34,6 +34,8 @@ const highlights = defineCollection({
       .array(z.object({ src: z.string(), alt: z.string(), full: z.string().optional(), position: z.string().optional() }))
       .default([]),
     galleryVideo: z.string().optional(),
+    // Show the gallery after the text and links instead of above them.
+    galleryBelow: z.boolean().default(false),
     links: z.array(z.object({ label: z.string(), url: z.string().url() })).default([]),
   }),
 });
