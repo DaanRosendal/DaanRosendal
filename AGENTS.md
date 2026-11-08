@@ -2,13 +2,13 @@
 
 ## Project
 
-Minimal personal website - resume and highlights (projects, competitions and research). The blog code is kept but not published (see Blog). Deployed to Cloudflare Pages via native Git integration.
+Minimal personal website - resume and highlights (projects, competitions and research). The blog code is kept but not published (see Blog). Deployed to Cloudflare Workers (static assets) via Workers Builds.
 
 ## Tech Stack
 
 - **Astro 7** with `output: "static"` (fully static - no SSR adapter needed) and `@astrojs/sitemap`
 - **Tailwind CSS v4** (`@tailwindcss/vite` Vite plugin - NOT `@astrojs/tailwind`, which is deprecated)
-- **Cloudflare Pages** - native Git integration, serves static `dist/` output (no GitHub Actions needed)
+- **Cloudflare Workers (static assets)** - Workers Builds Git integration, serves the static `dist/` output with no Worker script (no GitHub Actions needed). It replaced Cloudflare Pages in 2026-11 because Cloudflare builds new features on Workers only.
 - **Node.js 22.23.4+** required (Astro 7)
 
 ## Commands
@@ -130,16 +130,20 @@ npm run preview  # Preview production build locally
 ## Hard Constraints
 
 - **`README.md` is the GitHub profile README** and controls the public profile page. Only edit it when asked, never delete it, and keep it minimal: one sentence and a row of text links to the site, resume, LinkedIn and email. No badges, stats cards, skill icons or hotlinked third-party images, and no `daanrosendal.com` paths other than the home page and the resume PDF.
-- Do not add GitHub Actions YAML - Cloudflare native Git handles deploys.
+- Do not add GitHub Actions YAML - Workers Builds handles deploys.
 - Content collections must use the **Content Layer API** (`src/content.config.ts` with `loader`). The legacy v2 API was removed in Astro 6.
 - Use `entry.id` not `entry.slug` - slug was removed in Astro 6.
 
 ## Deployment
 
-Push to `master` → Cloudflare auto-builds and deploys.
+Push to `master` → Workers Builds auto-builds and deploys the `daanrosendal` Worker.
 
-Cloudflare build settings:
+Workers Builds settings (Worker `daanrosendal` > Settings > Builds):
 
 - Build command: `npm run build`
-- Output directory: `dist`
-- Node.js version env var: `NODE_VERSION=25` (set in the Cloudflare Pages project, must stay at 22.23.4 or newer)
+- Deploy command: `npx wrangler deploy`
+- Static assets: `assets.directory` in `wrangler.jsonc` is `./dist`. `not_found_handling` is `404-page`, which serves `dist/404.html` (the cat page) with a 404 status. Without it unknown URLs get a bare 404.
+- `public/_redirects` and `public/_headers` work the same as on Pages. `public/.assetsignore` keeps `.DS_Store` out of the upload.
+- Node.js: the Workers Builds default is fine (Astro 7 needs 22.23.4 or newer). Set a `NODE_VERSION` build variable only to pin a different one.
+- `workers_dev` serves a copy of the site at `daanrosendal.<account>.workers.dev`. Keep it `false` in production so that host is not indexed, and set it `true` only while testing a change.
+- Rollback: `npx wrangler rollback` or Deployments > Rollback in the dashboard.

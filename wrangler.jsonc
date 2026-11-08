@@ -1,4 +1,9 @@
 {
   "name": "daanrosendal",
-  "pages_build_output_dir": "./dist"
+  "compatibility_date": "2026-11-08",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  },
+  "workers_dev": true
 }
