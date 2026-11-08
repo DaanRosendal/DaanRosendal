@@ -96,7 +96,7 @@ npm run preview  # Preview production build locally
 
 - `src/pages/404.astro` holds the markup and its CSS (`<style is:global>` is bundled into that page only). The behaviour lives in `src/scripts/fall-404.ts` (letter physics), `cat-stack.ts` (photo pile) and `drag.ts` (shared drag tracking). They are hand-written, with no animation or physics library.
 - It must fit the window without scrolling, on laptops and phones. Sizes come from the window height (`--f` for the letters, `--sh` for the pile). The `6rem` is the body padding in `Layout.astro` and the `19rem` is the room for the text and button row: after changing either, or the copy, re-check the fit at a short laptop and a small phone size.
-- Photos: one 540 x 720 (3:4) WebP per photo in `public/media/cat/`, cropped from the original with metadata stripped. There is no `-sm` or `full/` copy, because the pile is small and never opens the photo viewer. To add one, list it in the `cats` array in `404.astro` (with alt text and a tilt); the glow colors are sampled from the file at build time.
+- Photos: one 540 x 720 (3:4) WebP per photo in `public/media/cat/`, cropped from the original with metadata stripped. There is no `-sm` or `full/` copy, because the pile is small and never opens the photo viewer. Cloudflare caches `/media/` for 30 days, so give a replacement photo a new file name instead of overwriting the old one. To add one, list it in the `cats` array in `404.astro` (with alt text and a tilt); the glow colors are sampled from the file at build time.
 - It honors `prefers-reduced-motion` (static letters, no autoplay or springs) and works without JavaScript (a static row and a static pile).
 
 ## Blog

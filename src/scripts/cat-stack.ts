@@ -304,9 +304,17 @@ export function catStack({ stack, counter, fanButton, glow, status }: CatStackPa
     setFan(false);
     fanButton?.focus({ preventScroll: true });
   });
-  fanButton?.addEventListener('click', () => {
+  fanButton?.addEventListener('click', (e) => {
     navigator.vibrate?.(10); // a small tap on phones that support it
-    setFan(mode !== 'fanned');
+    const opening = mode !== 'fanned';
+    setFan(opening);
+    // Opened from the keyboard: move focus onto the photos, which sit before the button in the page.
+    if (opening && mode === 'fanned' && e.detail === 0) order[0].el.focus({ preventScroll: true });
+  });
+  // A tap anywhere outside the fan closes it.
+  addEventListener('pointerdown', (e) => {
+    if (mode !== 'fanned' || !(e.target instanceof Node)) return;
+    if (!stack.contains(e.target) && !fanButton?.contains(e.target)) setFan(false);
   });
   addEventListener('resize', () => {
     if (mode === 'fanned') layoutFan();
