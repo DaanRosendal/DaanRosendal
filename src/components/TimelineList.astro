@@ -46,6 +46,11 @@ const firstEarlier = items.findIndex((item) => item.earlier);
 ---
 
 <section id={anchorId} class="mb-10 scroll-mt-6">
+  {anchorId && (
+    // Runs while the page is still being parsed, before the first paint: when the visitor arrived through this
+    // section's anchor link, mark it open, so the CSS below shows the hidden roles right away.
+    <script is:inline>(function () { var s = document.currentScript.parentElement; if (location.hash === '#' + s.id) s.setAttribute('data-open', ''); })();</script>
+  )}
   <h2 class="text-xl font-semibold mb-6">{heading}</h2>
   <ul>
     {visibleItems.map((item, i) => {
@@ -550,7 +555,7 @@ const firstEarlier = items.findIndex((item) => item.earlier);
 
   /** Show or hide the label above the first role that is not on the resume. */
   function setDivider(section: HTMLElement, show: boolean) {
-    section.querySelector<HTMLElement>('[data-earlier-divider]')?.toggleAttribute('hidden', !show);
+    section.querySelector<HTMLElement>('[data-earlier-divider]')?.toggleAttribute('data-show', show);
   }
 
   /** Stop the highlight on the earlier roles of a section. */
@@ -668,6 +673,7 @@ const firstEarlier = items.findIndex((item) => item.earlier);
     setDivider(section, items.length > 0); // before opening, so the section opens at its final height
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    section.dataset.ready = ''; // hands the open state over from the CSS below to the script
     open(() => {
       items[0]?.scrollIntoView({ behavior: initial || reduceMotion ? 'auto' : 'smooth', block: 'center' });
       if (initial) keepCentred(items[0]);
@@ -707,6 +713,14 @@ const firstEarlier = items.findIndex((item) => item.earlier);
     .exp-fade {
       opacity: 0;
     }
+  }
+
+  /* Arriving through the section's anchor link, the inline script at the top of the section sets data-open
+     before the first paint, so the hidden roles and their label are already open then and nothing below them
+     jumps when the main script runs. That script sets data-ready once it has taken over the open state. */
+  section[data-open]:not([data-ready]) [data-exp-overflow] {
+    height: auto !important;
+    overflow: visible !important;
   }
 
   /* Highlight for roles left off the resume. Sits behind the row so it never shifts the layout. */

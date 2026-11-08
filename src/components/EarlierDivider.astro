@@ -2,10 +2,24 @@
 // A label above the first role that is not on the resume. Hidden until the page is opened through the
 // resume link (see revealEarlier in TimelineList.astro). It runs from the left edge of the logos to the
 // right edge of the dates and locations, so it lines up with the row content and not with the highlight.
+// It shows with data-show, or from the first paint when the section is open through its anchor link (see
+// data-open in TimelineList.astro). The display rules live here and not in Tailwind classes, because
+// Tailwind's own `[hidden]` rule is a layered !important that no plain rule can beat.
 ---
 
-<li data-earlier-divider hidden class="flex items-center gap-3 pb-5 text-xs text-gray-500 dark:text-neutral-400">
+<li data-earlier-divider class="items-center gap-3 pb-5 text-xs text-gray-500 dark:text-neutral-400">
   <span class="h-px flex-1 bg-gray-200 dark:bg-neutral-700" aria-hidden="true"></span>
   <span>Not on the resume</span>
   <span class="h-px flex-1 bg-gray-200 dark:bg-neutral-700" aria-hidden="true"></span>
 </li>
+
+<style is:global>
+  [data-earlier-divider] {
+    display: none;
+  }
+
+  [data-earlier-divider][data-show],
+  section[data-open]:not([data-ready]) [data-earlier-divider] {
+    display: flex;
+  }
+</style>
