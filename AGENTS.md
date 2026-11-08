@@ -23,7 +23,7 @@ npm run preview  # Preview production build locally
 
 - Use **Conventional Commits** for every new commit (for example: `feat: ...`, `fix: ...`, `chore: ...`, `docs: ...`).
 - **Work longer, then commit once.** The history is public, so do not commit every small change. Make the edits for a feature or a batch of requests, then create a single commit for it. Only commit when asked, or when a piece of work is finished.
-- Never push without being asked. A push to `master` deploys the site.
+- Never push unless the user says so. A push to `master` deploys the site. Committing is not permission to push, and a go-ahead to push once does not carry over to later commits: ask again each time.
 - When rewriting history, preserve commit contents and metadata unless the task explicitly requires changing them.
 
 ## Project Structure
