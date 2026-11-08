@@ -232,10 +232,11 @@ function setMode(next: Mode | undefined) {
   const previous = mode();
   if (previous === next) return;
   // The text hides while the water rises (or sinks) and returns when it has settled.
-  if ((next === 'full' || previous === 'full') && !reduceMotion.matches) {
+  // (Between the dock and full screen the text stays: the window just clips it while it resizes.)
+  if ((next === 'full' || previous === 'full') && previous !== 'dock' && next !== 'dock' && !reduceMotion.matches) {
     root.classList.add('chat-moving');
     clearTimeout(movingTimer);
-    movingTimer = setTimeout(() => root.classList.remove('chat-moving'), previous === 'dock' || next === 'dock' ? 300 : next === 'full' ? 900 : 560);
+    movingTimer = setTimeout(() => root.classList.remove('chat-moving'), next === 'full' ? 900 : 560);
   }
   if (next) root.dataset.chat = next;
   else delete root.dataset.chat;
