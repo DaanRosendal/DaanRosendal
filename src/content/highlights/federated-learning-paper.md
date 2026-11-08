@@ -46,8 +46,6 @@ links:
     url: https://github.com/DaanRosendal/fl-disagreement-resolution/blob/main/docs/FL_Disagreement_Resolution_Thesis_DaanRosendal.pdf
   - label: Code
     url: https://github.com/DaanRosendal/fl-disagreement-resolution
-  - label: Google Scholar
-    url: https://scholar.google.com/citations?view_op=view_citation&hl=en&user=UR00g0AAAAAJ&citation_for_view=UR00g0AAAAAJ:d1gkVwhDpl0C
 ---
 
 Federated learning lets many parties, called clients, train machine learning models together, and it normally assumes that every client works with every other client. In practice, clients may need to exclude each other for strategic, regulatory or competitive reasons.
