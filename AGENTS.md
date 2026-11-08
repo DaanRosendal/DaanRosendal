@@ -44,7 +44,9 @@ npm run preview  # Preview production build locally
 │   │   ├── count.ts       # Shared count formatting and rounding
 │   │   └── image.ts       # imageSize(): pixel size of a /public image for width and height attributes
 │   ├── scripts/
-│   │   └── live-counts.ts # Refreshes install counts in the browser and adds the hover note
+│   │   ├── live-counts.ts # Refreshes install counts in the browser and adds the hover note
+│   │   ├── fall-404.ts    # Falling, draggable "404" letters on the 404 page (skipped with reduced motion)
+│   │   └── cat-stack.ts   # The flick-away stack of cat photos on the 404 page
 │   ├── pages/
 │   │   ├── index.astro    # Resume/home
 │   │   ├── [section]/
@@ -104,6 +106,7 @@ npm run preview  # Preview production build locally
 - The site is tuned for a Lighthouse score of 100 on every page (mobile and desktop, light and dark). Re-check with `npx lighthouse <url>` after changes to layout, images or colors.
 - Photos live in `public/media/` as **WebP**. Per photo keep three sizes: `name.webp` (about 420 px wide, or 600-800 px for a lead photo), `name-sm.webp` (200 px, or 360 px for a lead photo, used by `srcset` on phones) and `full/name.webp` (up to 2400 px, opened in the photo viewer). Strip metadata (EXIF, location) before adding a photo.
 - A YouTube demo video (`galleryVideo`) shows a local copy of its thumbnail from `public/media/youtube/<video id>.webp` (about 420 px wide), so the page makes no request to YouTube before the visitor plays it. Add that file together with the video id.
+- The 404 page's cat photos are 540 x 720 (3:4) WebP files in `public/media/cat/`, cropped from the originals with metadata stripped, and listed in `src/pages/404.astro`.
 - Cards on the home page use a baked 16:9 crop of 560 x 315 set with `cardImage` in the entry's frontmatter.
 - Give every `<img>` a `width` and `height` (see `src/lib/image.ts`) and load the first image on a page eagerly with `fetchpriority="high"`.
 - Muted text uses `text-gray-500 dark:text-neutral-400` or darker, so contrast stays at 4.5:1 or better. Do not use `gray-400` or `neutral-500` for text.
