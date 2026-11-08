@@ -200,6 +200,32 @@ async function readAnswer(response: Response, onPiece: (piece: string) => void) 
 
 // ---- Modes ----
 
+let seaTimer: ReturnType<typeof setTimeout> | undefined;
+
+// The water: it rises from the bottom when the chat opens, grows out of the dock window when the dock expands,
+// shrinks into the dock window on minimise, and sinks when the chat closes from full screen.
+function moveSea(sea: HTMLElement, from: Mode | undefined, to: Mode | undefined) {
+  clearTimeout(seaTimer);
+  const jump = (change: () => void) => {
+    sea.classList.add('instant');
+    change();
+    void sea.offsetWidth;
+    sea.classList.remove('instant');
+  };
+  if (to === 'full' && from === 'dock' && !reduceMotion.matches) {
+    jump(() => sea.classList.add('up', 'docking'));
+    sea.classList.remove('docking');
+  } else if (to === 'full') {
+    sea.classList.remove('docking');
+    sea.classList.add('up');
+  } else if (from === 'full' && to === 'dock' && !reduceMotion.matches) {
+    sea.classList.add('docking');
+    seaTimer = setTimeout(() => jump(() => sea.classList.remove('up', 'docking')), 600);
+  } else {
+    sea.classList.remove('up', 'docking');
+  }
+}
+
 let movingTimer: ReturnType<typeof setTimeout> | undefined;
 
 function setMode(next: Mode | undefined) {
@@ -215,7 +241,7 @@ function setMode(next: Mode | undefined) {
   else delete root.dataset.chat;
 
   const full = next === 'full';
-  ui?.sea.classList.toggle('up', full);
+  if (ui) moveSea(ui.sea, previous, next);
   if (full) ui?.panel.setAttribute('aria-modal', 'true');
   else ui?.panel.removeAttribute('aria-modal');
   document.querySelector('main')?.toggleAttribute('inert', full);

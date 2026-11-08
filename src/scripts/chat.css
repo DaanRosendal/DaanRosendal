@@ -122,12 +122,30 @@ html[data-chat='full'] .chat-input {
   z-index: 55;
   pointer-events: none;
   transform: translateY(calc(100% + var(--crest)));
-  transition: transform 1.15s cubic-bezier(0.3, 0.7, 0.2, 1);
+  clip-path: inset(0 0 0 0 round 0);
+  transition:
+    transform 1.15s cubic-bezier(0.3, 0.7, 0.2, 1),
+    clip-path 0.55s cubic-bezier(0.22, 0.8, 0.3, 1);
 }
-/* Going back down is quicker, to keep pace with the window shrinking into the dock. */
+/* To and from the dock the water does not sink: it is clipped to the dock window (the same box as the dock in
+   ChatHost.astro) and the window grows or shrinks around it. */
+.chat-sea.docking {
+  --dw: min(23rem, calc(100% - 2rem));
+  --dh: min(30rem, calc(100dvh - 2rem));
+  clip-path: inset(calc(100dvh - var(--dh) - 1rem) 1rem 1rem calc(100% - var(--dw) - 1rem) round 1rem);
+}
+@media (max-width: 40rem) {
+  .chat-sea.docking {
+    clip-path: inset(calc(100dvh - 4rem) 0.75rem 0.75rem 0.75rem round 1rem);
+  }
+}
+.chat-sea.instant {
+  transition: none !important;
+}
+/* Closing from full screen: going back down is quicker than coming up. */
 .chat-sea:not(.up) {
-  transition-duration: 0.6s;
-  transition-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
+  transition-duration: 0.6s, 0.55s;
+  transition-timing-function: cubic-bezier(0.5, 0, 0.75, 0), cubic-bezier(0.22, 0.8, 0.3, 1);
 }
 @media (prefers-color-scheme: dark) {
   .chat-sea {
