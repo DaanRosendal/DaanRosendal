@@ -125,7 +125,7 @@ html[data-chat='full'] .chat-input {
   clip-path: inset(0 0 0 0 round 0);
   transition:
     transform 1.15s cubic-bezier(0.3, 0.7, 0.2, 1),
-    clip-path 0.55s cubic-bezier(0.22, 0.8, 0.3, 1);
+    clip-path 0.45s cubic-bezier(0.22, 0.8, 0.3, 1);
 }
 /* To and from the dock the water does not sink: it is clipped to the dock window (the same box as the dock in
    ChatHost.astro) and the window grows or shrinks around it. */
@@ -144,13 +144,13 @@ html[data-chat='full'] .chat-input {
 }
 /* Closing from full screen: going back down is quicker than coming up. */
 .chat-sea:not(.up) {
-  transition-duration: 0.6s, 0.55s;
+  transition-duration: 0.6s, 0.45s;
   transition-timing-function: cubic-bezier(0.5, 0, 0.75, 0), cubic-bezier(0.22, 0.8, 0.3, 1);
 }
 @media (prefers-color-scheme: dark) {
   .chat-sea {
-    --sea-body: #0a0a0a;
-    --sea-1: #1c1c1c;
+    --sea-body: #111111;
+    --sea-1: #1a1a1a;
     --sea-2: #262626;
   }
 }

@@ -220,7 +220,7 @@ function moveSea(sea: HTMLElement, from: Mode | undefined, to: Mode | undefined)
     sea.classList.add('up');
   } else if (from === 'full' && to === 'dock' && !reduceMotion.matches) {
     sea.classList.add('docking');
-    seaTimer = setTimeout(() => jump(() => sea.classList.remove('up', 'docking')), 600);
+    seaTimer = setTimeout(() => jump(() => sea.classList.remove('up', 'docking')), 480);
   } else {
     sea.classList.remove('up', 'docking');
   }
@@ -235,7 +235,7 @@ function setMode(next: Mode | undefined) {
   if ((next === 'full' || previous === 'full') && !reduceMotion.matches) {
     root.classList.add('chat-moving');
     clearTimeout(movingTimer);
-    movingTimer = setTimeout(() => root.classList.remove('chat-moving'), next === 'full' ? 900 : 560);
+    movingTimer = setTimeout(() => root.classList.remove('chat-moving'), previous === 'dock' || next === 'dock' ? 300 : next === 'full' ? 900 : 560);
   }
   if (next) root.dataset.chat = next;
   else delete root.dataset.chat;
