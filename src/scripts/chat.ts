@@ -1,13 +1,20 @@
-// The "Ask about Daan" dialog. Loaded only when the visitor clicks the button (see AskDaan.astro), so the page
-// itself makes no extra request. Everything the model writes is added as text nodes, never as HTML.
+// The chat. Loaded only when the visitor uses the pill, or when a minimised chat has to be restored on a new page
+// (see ChatHost.astro for the static shell and the html[data-chat] modes). Everything the model writes is added as
+// text nodes, never as HTML.
+// The conversation's styles ride along with this script (an inline string), so pages that never use the chat do not carry them.
+import css from './chat.css?inline';
 
 const SITEKEY = ['localhost', '127.0.0.1'].includes(location.hostname) ? '1x00000000000000000000AA' : '0x4AAAAAAF5IJpF-SESG-Kls';
 const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 const MAX_HISTORY = 6;
 const CONTACT = 'contact@daanrosendal.com';
+const STORE = 'chat:v1';
+const SITE = 'https://daanrosendal.com';
 
-const GREETING = 'Hi, I am an AI on Daan\'s site. I know his work, studies, and projects, and I am happy to chat about other things too.';
+const GREETING = "Hi, I am an AI on Daan's site. I know his work, studies, and projects, and I am happy to chat about other things too.";
 const SUGGESTIONS = ['What does Daan do at Lakera?', 'What did Daan build at CERN?', 'What is Pinboard for VS Code?', 'Tell me something fun'];
+
+type Mode = 'open' | 'full' | 'dock';
 
 interface TurnstileApi {
   render(container: HTMLElement, options: Record<string, unknown>): string;
@@ -25,12 +32,17 @@ interface Turn {
   content: string;
 }
 
-let dialog: HTMLDialogElement | undefined;
+const root = document.documentElement;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+let turns: Turn[] = [];
+let draft = '';
 let widget: string | undefined;
 let pending: { resolve(token: string): void; reject(error: Error): void } | undefined;
 let turnstileLoading: Promise<void> | undefined;
-const history: Turn[] = [];
 let busy = false;
+let pages = new Set<string>();
+let ui: Awaited<ReturnType<typeof build>> | undefined;
+let building: Promise<NonNullable<typeof ui>> | undefined;
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string, text?: string) {
   const node = document.createElement(tag);
@@ -39,43 +51,97 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string, t
   return node;
 }
 
-function closeIcon() {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  svg.setAttribute('width', '18');
-  svg.setAttribute('height', '18');
-  svg.setAttribute('fill', 'none');
-  svg.setAttribute('stroke', 'currentColor');
-  svg.setAttribute('stroke-width', '2');
-  svg.setAttribute('stroke-linecap', 'round');
-  svg.setAttribute('aria-hidden', 'true');
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('d', 'M18 6 6 18M6 6l12 12');
-  svg.append(path);
-  return svg;
+const mode = () => root.dataset.chat as Mode | undefined;
+
+// ---- Saved conversation (this tab only) ----
+
+function readStore() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(STORE) ?? 'null');
+    if (!saved || !Array.isArray(saved.turns)) return;
+    turns = saved.turns.filter((turn: Turn) => (turn?.role === 'user' || turn?.role === 'assistant') && typeof turn.content === 'string');
+    draft = typeof saved.draft === 'string' ? saved.draft : '';
+  } catch {
+    // Storage can be blocked: the chat then just forgets between pages.
+  }
 }
 
-// Plain text with web addresses and the email address turned into real links. Links are built as elements, so
-// nothing the model writes can inject markup.
-function show(target: HTMLElement, text: string) {
-  const parts: (string | HTMLAnchorElement)[] = [];
+// A chat that is open when the page goes away comes back minimised on the next page.
+function save() {
+  try {
+    const live = mode() !== undefined && turns.length > 0;
+    sessionStorage.setItem(STORE, JSON.stringify({ mode: live ? 'dock' : 'closed', turns: turns.slice(-12), draft }));
+  } catch {
+    // See readStore.
+  }
+}
+
+// ---- Links to pages on this site ----
+
+// A path on this site that really exists (from /chat-pages.json), whether written as /path/ or as a full address.
+function sitePath(href: string) {
+  let path = href;
+  if (path.startsWith(SITE)) path = path.slice(SITE.length) || '/';
+  if (!path.startsWith('/') || path.startsWith('//')) return null;
+  const bare = path.split(/[?#]/)[0];
+  return pages.has(bare) ? path : null;
+}
+
+// The chat steps aside into the dock, then the page changes, and the dock is already there on the next page.
+function go(path: string) {
+  if (mode() !== 'dock') setMode('dock');
+  save();
+  const target = new URL(path, location.href);
+  const delay = reduceMotion.matches ? 0 : 320;
+  setTimeout(() => {
+    if (target.pathname === location.pathname && target.search === location.search) {
+      if (target.hash) location.hash = target.hash;
+      else window.scrollTo({ top: 0 });
+    } else {
+      location.assign(target);
+    }
+  }, delay);
+}
+
+// ---- Rendering the answer ----
+// Plain text with web addresses and the email address turned into real links, built as elements so nothing the model
+// writes can inject markup. A markdown renderer replaces this.
+
+function renderText(target: HTMLElement, text: string) {
+  const parts: (string | HTMLElement)[] = [];
   let last = 0;
   for (const match of text.matchAll(/https?:\/\/[^\s<>"]+|[\w.+-]+@[\w-]+\.[\w.-]+/g)) {
     const found = match[0].replace(/[.,;:!?)\]]+$/, '');
     const start = match.index ?? 0;
     parts.push(text.slice(last, start));
-    const link = el('a', 'ask-link', found);
-    link.href = found.includes('@') && !found.startsWith('http') ? `mailto:${found}` : found;
-    if (!found.includes('@') || found.startsWith('http')) {
+    last = start + found.length;
+    const internal = found.startsWith(SITE) ? sitePath(found) : null;
+    if (found.startsWith(SITE) && !internal) {
+      parts.push(found);
+      continue;
+    }
+    const link = el('a', 'chat-link', internal ?? found);
+    if (internal) {
+      link.href = internal;
+      link.addEventListener('click', (event) => {
+        if (event.defaultPrevented || event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        go(internal);
+      });
+    } else if (found.includes('@') && !found.startsWith('http')) {
+      link.href = `mailto:${found}`;
+    } else {
+      link.href = found;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
     }
     parts.push(link);
-    last = start + found.length;
   }
   parts.push(text.slice(last));
   target.replaceChildren(...parts);
 }
+
+// ---- Human check ----
 
 function loadTurnstile() {
   turnstileLoading ??= new Promise<void>((resolve, reject) => {
@@ -153,62 +219,145 @@ async function readAnswer(response: Response, onText: (text: string) => void) {
   return answer;
 }
 
-function build() {
-  const root = el('dialog', 'ask-dialog');
-  root.setAttribute('aria-labelledby', 'ask-title');
+// ---- Modes ----
 
-  const head = el('div', 'ask-head');
-  const title = el('h2', 'ask-title', 'Ask about Daan');
-  title.id = 'ask-title';
-  const close = el('button', 'ask-close');
-  close.type = 'button';
-  close.setAttribute('aria-label', 'Close');
-  close.append(closeIcon());
-  close.addEventListener('click', () => root.close());
-  head.append(title, close);
+function setMode(next: Mode | undefined) {
+  const previous = mode();
+  if (previous === next) return;
+  if (next) root.dataset.chat = next;
+  else delete root.dataset.chat;
 
-  const note = el('p', 'ask-note', 'A public AI chat that knows this site. It can be wrong. Messages go to Cloudflare to be answered and are not stored here.');
+  const full = next === 'full';
+  ui?.sea.classList.toggle('up', full);
+  if (full) ui?.panel.setAttribute('aria-modal', 'true');
+  else ui?.panel.removeAttribute('aria-modal');
+  document.querySelector('main')?.toggleAttribute('inert', full);
+  document.querySelector('.chat-revive')?.toggleAttribute('inert', full);
+  root.style.overflow = full ? 'hidden' : '';
+  save();
+}
 
-  const log = el('div', 'ask-log');
+function focusSoon(target: HTMLElement | null | undefined) {
+  // After the mode's display change has been applied.
+  requestAnimationFrame(() => target?.focus({ preventScroll: true }));
+}
+
+async function ensureUi() {
+  building ??= build();
+  ui = await building;
+  return ui;
+}
+
+export async function act(action: string) {
+  const parts = await ensureUi();
+  // The box was measured while the chat was hidden, so measure it again once it shows.
+  requestAnimationFrame(parts.grow);
+  if (action === 'open') {
+    setMode(turns.length ? 'full' : 'open');
+    focusSoon(parts.input);
+  } else if (action === 'expand') {
+    setMode('full');
+    focusSoon(parts.input);
+  } else if (action === 'minimise') {
+    setMode('dock');
+    focusSoon(parts.panel.querySelector<HTMLElement>('.chat-btn-expand'));
+  } else if (action === 'close') {
+    setMode(undefined);
+    focusSoon(document.querySelector<HTMLElement>('.chat-pill'));
+  }
+}
+
+// The page came back from the browser's back-forward cache: the saved state may be newer than the frozen page.
+export function sync() {
+  readStore();
+  if (!ui) return;
+  ui.renderAll();
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(STORE) ?? 'null');
+    if (saved?.mode === 'dock') setMode('dock');
+    else if (mode() === 'dock') setMode(undefined);
+  } catch {
+    // See readStore.
+  }
+}
+
+// ---- Building the conversation ----
+
+async function build() {
+  document.head.append(el('style', undefined, css));
+  readStore();
+  try {
+    pages = new Set(await (await fetch('/chat-pages.json')).json());
+  } catch {
+    // Without the list, links to site pages stay plain text.
+  }
+
+  const panel = document.getElementById('chat')!;
+  const body = panel.querySelector<HTMLElement>('.chat-body')!;
+
+  const sea = el('div', 'chat-sea');
+  sea.setAttribute('aria-hidden', 'true');
+  const crest = el('div', 'sea-crest');
+  crest.append(el('div', 'sea-wave'), el('div', 'sea-wave'), el('div', 'sea-wave'));
+  sea.append(el('div', 'sea-body'), crest);
+  document.body.append(sea);
+
+  const note = el('p', 'chat-note', 'A public AI chat that knows this site. It can be wrong. Messages go to Cloudflare to be answered and are not stored here.');
+
+  const log = el('div', 'chat-log');
   log.setAttribute('role', 'log');
   log.setAttribute('aria-label', 'Conversation');
   log.setAttribute('aria-live', 'polite');
 
-  const form = el('form', 'ask-form');
-  const input = el('textarea', 'ask-input');
+  const form = el('form', 'chat-form');
+  const input = el('textarea', 'chat-input');
   input.rows = 1;
   input.maxLength = 600;
   input.placeholder = 'Ask a question';
   input.setAttribute('aria-label', 'Your question');
-  const send = el('button', 'ask-send', 'Send');
+  input.enterKeyHint = 'send';
+  input.value = draft;
+  const send = el('button', 'chat-send', 'Send');
   send.type = 'submit';
   form.append(input, send);
 
-  const slot = el('div', 'ask-turnstile');
-  const foot = el('p', 'ask-foot');
-  const privacy = el('a', 'ask-link', 'Cloudflare Turnstile');
+  const slot = el('div', 'chat-turnstile');
+  const foot = el('p', 'chat-foot');
+  const privacy = el('a', 'chat-link', 'Cloudflare Turnstile');
   privacy.href = 'https://www.cloudflare.com/privacypolicy/';
   privacy.target = '_blank';
   privacy.rel = 'noopener noreferrer';
   foot.append('Protected by ', privacy, '. Limited to 20 messages a day.');
 
-  const addMessage = (role: 'user' | 'assistant' | 'note', text: string) => {
-    const bubble = el('div', `ask-msg ask-${role === 'note' ? 'notice' : role}`);
-    show(bubble, text);
-    log.append(bubble);
+  const scroll = () => {
     log.scrollTop = log.scrollHeight;
+  };
+  const addMessage = (role: 'user' | 'assistant' | 'note', text: string) => {
+    const bubble = el('div', `chat-msg chat-plain chat-${role === 'note' ? 'notice' : role === 'user' ? 'user' : 'bot'}`);
+    renderText(bubble, text);
+    log.append(bubble);
+    scroll();
     return bubble;
   };
 
-  addMessage('assistant', GREETING);
-  const suggestions = el('div', 'ask-suggestions');
+  const suggestions = el('div', 'chat-suggestions');
   for (const text of SUGGESTIONS) {
-    const chip = el('button', 'ask-chip', text);
+    const chip = el('button', 'chat-chip', text);
     chip.type = 'button';
     chip.addEventListener('click', () => submit(text));
     suggestions.append(chip);
   }
-  log.append(suggestions);
+
+  const renderAll = () => {
+    log.replaceChildren();
+    const greeting = addMessage('assistant', GREETING);
+    greeting.classList.remove('chat-bot');
+    for (const turn of turns) addMessage(turn.role, turn.content);
+    if (!turns.length) log.append(suggestions);
+    input.value = draft;
+    grow();
+    scroll();
+  };
 
   const grow = () => {
     input.style.height = 'auto';
@@ -217,7 +366,11 @@ function build() {
     input.style.height = `${Math.min(wanted, 128)}px`;
     input.style.overflowY = wanted > 128 ? 'auto' : 'hidden';
   };
-  input.addEventListener('input', grow);
+  input.addEventListener('input', () => {
+    grow();
+    draft = input.value;
+    save();
+  });
   input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
       event.preventDefault();
@@ -239,63 +392,66 @@ function build() {
     busy = true;
     send.disabled = true;
     suggestions.remove();
-    input.value = '';
+    input.value = draft = '';
     grow();
+    // The first message from the small window floods the screen.
+    if (mode() === 'open') setMode('full');
     addMessage('user', text);
-    history.push({ role: 'user', content: text });
+    turns.push({ role: 'user', content: text });
     const answerBubble = addMessage('assistant', 'Thinking...');
+    answerBubble.classList.add('chat-thinking');
     // Screen readers wait for the whole answer instead of announcing every streamed chunk.
     log.setAttribute('aria-busy', 'true');
     try {
       const turnstile = await humanToken(slot);
+      const page = { path: location.pathname, title: document.title.replace(/ - Daan Rosendal$/, '') };
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ messages: history.slice(-MAX_HISTORY), turnstile }),
+        body: JSON.stringify({ messages: turns.slice(-MAX_HISTORY), turnstile, page }),
       });
       if (!response.ok || !response.body) {
         const problem = await response.json().catch(() => null);
         throw new Error(problem?.message ?? `The chat is unavailable right now. Please email ${CONTACT} instead.`);
       }
       const answer = await readAnswer(response, (soFar) => {
-        show(answerBubble, soFar);
-        log.scrollTop = log.scrollHeight;
+        answerBubble.classList.remove('chat-thinking');
+        renderText(answerBubble, soFar);
+        scroll();
       });
       if (!answer.trim()) throw new Error('No answer came back. Please try again.');
-      history.push({ role: 'assistant', content: answer.trim() });
+      turns.push({ role: 'assistant', content: answer.trim() });
     } catch (error) {
-      history.pop();
+      turns.pop();
       answerBubble.remove();
       addMessage('note', error instanceof Error ? error.message : 'Something went wrong. Please try again.');
-      input.value = text;
+      input.value = draft = text;
       grow();
     } finally {
       log.removeAttribute('aria-busy');
       busy = false;
       send.disabled = false;
-      input.focus();
+      save();
+      if (mode() !== 'dock') input.focus({ preventScroll: true });
     }
   }
 
-  root.append(head, note, log, slot, form, foot);
-  root.addEventListener('click', (event) => {
-    if (event.target === root) root.close();
-  });
-  root.addEventListener('close', () => {
-    document.documentElement.style.overflow = '';
-  });
-  document.body.append(root);
-  return { root, input };
-}
+  body.append(note, log, slot, form, foot);
+  renderAll();
 
-let parts: ReturnType<typeof build> | undefined;
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || event.defaultPrevented) return;
+    if (mode() === 'full') void act('minimise');
+    else if (mode() === 'open') void act('close');
+  });
+  addEventListener('pagehide', save);
 
-export function openChat() {
-  parts ??= build();
-  dialog = parts.root;
-  document.documentElement.style.overflow = 'hidden';
-  dialog.showModal();
-  parts.input.focus();
   // Load the human check now, so the first answer does not wait for it.
-  loadTurnstile().catch(() => {});
+  if (mode() !== 'dock') loadTurnstile().catch(() => {});
+  else addEventListener('pointerdown', () => loadTurnstile().catch(() => {}), { once: true });
+
+  return { panel, sea, input, renderAll, grow };
 }
+
+// A minimised chat from the previous page: bring its conversation back.
+if (mode()) void ensureUi();

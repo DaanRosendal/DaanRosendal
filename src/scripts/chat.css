@@ -1,0 +1,254 @@
+/* The conversation part of the chat (the shell is in ChatHost.astro). Loaded together with chat.ts. */
+.chat-note,
+.chat-foot {
+  flex: none;
+  padding: 0 1.1rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--c-muted);
+}
+.chat-foot {
+  padding-bottom: 0.7rem;
+}
+.chat-link {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.chat-link:hover {
+  text-decoration-style: solid;
+}
+.chat-log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-top: 0.5rem;
+  padding: 0.9rem 1.1rem;
+  border-top: 1px solid var(--c-line);
+  font-size: 0.925rem;
+  line-height: 1.55;
+}
+.chat-msg {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.chat-plain {
+  white-space: pre-wrap;
+}
+.chat-user {
+  align-self: flex-end;
+  max-width: 88%;
+  padding: 0.5rem 0.8rem;
+  border-radius: 1rem 1rem 0.25rem 1rem;
+  background: var(--c-bubble);
+}
+.chat-bot {
+  padding-left: 0.8rem;
+  border-left: 2px solid rgb(45 212 191 / 0.5);
+}
+.chat-notice {
+  padding: 0.5rem 0.8rem;
+  border: 1px dashed var(--c-line);
+  border-radius: 0.8rem;
+  font-size: 0.85rem;
+  color: var(--c-muted);
+}
+.chat-thinking {
+  color: var(--c-muted);
+  animation: chat-pulse 1.4s ease-in-out infinite;
+}
+@keyframes chat-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+.chat-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.chat-chip {
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--c-line);
+  border-radius: 999px;
+  font-size: 0.825rem;
+  text-align: left;
+  color: var(--c-fg);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.chat-chip:hover {
+  border-color: #2dd4bf;
+  box-shadow: 0 0 14px -4px rgb(45 212 191 / 0.7);
+}
+.chat-turnstile:empty {
+  display: none;
+}
+.chat-turnstile {
+  flex: none;
+  padding: 0 1.1rem 0.5rem;
+}
+.chat-form {
+  flex: none;
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  padding: 0.5rem 1.1rem;
+}
+.chat-input {
+  flex: 1;
+  resize: none;
+  overflow-y: hidden;
+  min-height: 2.6rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--c-line);
+  border-radius: 1.1rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.chat-input::placeholder {
+  color: var(--c-muted);
+}
+.chat-send {
+  flex: none;
+  cursor: pointer;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  background: linear-gradient(110deg, #14b8a6, #6366f1);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.chat-send:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+html[data-chat='full'] .chat-log,
+html[data-chat='full'] .chat-form,
+html[data-chat='full'] .chat-foot,
+html[data-chat='full'] .chat-note,
+html[data-chat='full'] .chat-turnstile {
+  padding-inline: max(1.1rem, calc((100% - 46rem) / 2));
+}
+html[data-chat='full'] .chat-log {
+  border-top-color: transparent;
+  font-size: 1rem;
+}
+html[data-chat='full'] .chat-input {
+  background: rgb(255 255 255 / 0.06);
+  border-color: rgb(255 255 255 / 0.22);
+}
+html[data-chat='full'] .chat-head {
+  padding-inline: max(1.1rem, calc((100% - 46rem) / 2 - 0.5rem)) max(0.5rem, calc((100% - 46rem) / 2 - 0.5rem));
+}
+
+/* The water that takes over the screen on the first message. */
+.chat-sea {
+  --crest: 120px;
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+  overflow: visible;
+  transform: translateY(calc(100% + var(--crest)));
+  transition: transform 1.15s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+.chat-sea.up {
+  transform: none;
+}
+.sea-body {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 45% at 18% 8%, rgb(45 212 191 / 0.2), transparent 70%),
+    radial-gradient(55% 45% at 88% 85%, rgb(99 102 241 / 0.26), transparent 70%),
+    linear-gradient(180deg, #0a2540 0%, #061a2b 55%, #050d1f 100%);
+}
+.sea-body::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(30% 30% at 30% 40%, rgb(45 212 191 / 0.12), transparent 70%),
+    radial-gradient(30% 30% at 75% 60%, rgb(99 102 241 / 0.14), transparent 70%);
+  animation: sea-drift 18s ease-in-out infinite alternate;
+}
+@keyframes sea-drift {
+  to {
+    transform: translate3d(6%, -4%, 0) scale(1.08);
+  }
+}
+.sea-crest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(1px - var(--crest));
+  height: var(--crest);
+  overflow: hidden;
+}
+.sea-wave {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc(100% + 600px);
+  height: 100%;
+  background-repeat: repeat-x;
+  background-size: 600px 100%;
+  animation: sea-slide 9s linear infinite;
+}
+.sea-wave:nth-child(1) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 120' preserveAspectRatio='none'%3E%3Cpath d='M0 60C100 20 200 20 300 60S500 100 600 60V120H0Z' fill='%232dd4bf' fill-opacity='.35'/%3E%3C/svg%3E");
+  translate: 0 -6px;
+  animation-duration: 7s;
+}
+.sea-wave:nth-child(2) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 120' preserveAspectRatio='none'%3E%3Cpath d='M0 66C100 26 200 26 300 66S500 106 600 66V120H0Z' fill='%236366f1' fill-opacity='.5'/%3E%3C/svg%3E");
+  animation-duration: 11s;
+  animation-direction: reverse;
+}
+.sea-wave:nth-child(3) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 120' preserveAspectRatio='none'%3E%3Cpath d='M0 78C100 38 200 38 300 78S500 118 600 78V120H0Z' fill='%230a2540'/%3E%3C/svg%3E");
+  animation-duration: 15s;
+}
+@keyframes sea-slide {
+  to {
+    transform: translateX(-600px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-sea {
+    transform: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .chat-sea.up {
+    opacity: 1;
+  }
+  .sea-crest {
+    display: none;
+  }
+  .sea-body::before,
+  .chat-thinking {
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  .chat-sea {
+    display: none;
+  }
+  html[data-chat='full'] .chat {
+    --c-bg: Canvas;
+    --c-fg: CanvasText;
+  }
+}

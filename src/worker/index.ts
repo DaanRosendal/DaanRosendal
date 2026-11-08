@@ -10,7 +10,7 @@ const MAX_BODY_CHARS = 20000;
 const MAX_HISTORY = 6;
 // A visitor's question stays short, but the assistant's earlier answers (resent as history) are far longer.
 const MAX_CHARS = { user: 800, assistant: 4000 };
-const MAX_ANSWER_TOKENS = 300;
+const MAX_ANSWER_TOKENS = 700;
 
 // Models change often, so the choice lives here. Neuron prices are per million tokens (input, output).
 // The second model is only tried when the first one is gone (deprecated) or no longer free.
@@ -25,6 +25,15 @@ const ESTIMATE_INPUT_PRICE = 9091;
 const ESTIMATE_OUTPUT_PRICE = 36400;
 
 const PROMPT = SYSTEM_PROMPT + context;
+
+// The page the visitor is on, so "this page" and "here" make sense. The client sends it, so it is checked and kept short.
+function readPage(value: unknown) {
+  const { path, title } = (value ?? {}) as { path?: unknown; title?: unknown };
+  if (typeof path !== 'string' || typeof title !== 'string') return null;
+  if (!/^\/[a-z0-9\-_/]{0,100}$/.test(path)) return null;
+  const clean = title.replace(/[\u0000-\u001f\u007f]+/g, ' ').trim().slice(0, 100);
+  return clean ? { path, title: clean } : null;
+}
 
 const HEADERS = {
   'cache-control': 'no-store',
@@ -130,7 +139,7 @@ async function readUsage(stream: ReadableStream<Uint8Array>) {
 // A canned stream for local testing (DRY_RUN in .dev.vars), so the limits and the page can be tried for free.
 function dryRunStream() {
   const encoder = new TextEncoder();
-  const words = 'This is a canned answer from the test mode of the chat, so no AI neurons were spent.'.split(' ');
+  const words = 'This is a canned answer from the test mode of the chat, so no AI neurons were spent. See https://daanrosendal.com/research/federated-learning-paper/ for a paper, or write to contact@daanrosendal.com.'.split(' ');
   return new ReadableStream<Uint8Array>({
     async start(controller) {
       for (const word of words) {
@@ -158,7 +167,7 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
 
   const raw = await request.text();
   if (raw.length > MAX_BODY_CHARS) return reply(413, 'bad_request');
-  let body: { messages?: unknown; turnstile?: unknown };
+  let body: { messages?: unknown; turnstile?: unknown; page?: unknown };
   try {
     body = JSON.parse(raw);
   } catch {
@@ -174,7 +183,9 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
     return reply(403, 'turnstile');
   }
 
-  const messages = [{ role: 'system', content: PROMPT }, ...history];
+  const page = readPage(body.page);
+  const system = page ? `${PROMPT}\nThe visitor is currently viewing the page "${page.title}" (${page.path}).\n` : PROMPT;
+  const messages = [{ role: 'system', content: system }, ...history];
   const promptChars = messages.reduce((sum, message) => sum + message.content.length, 0);
   const estimate =
     (Math.ceil(promptChars / 3) * ESTIMATE_INPUT_PRICE + MAX_ANSWER_TOKENS * ESTIMATE_OUTPUT_PRICE) / 1_000_000;

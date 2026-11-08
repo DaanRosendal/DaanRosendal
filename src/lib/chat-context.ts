@@ -27,6 +27,17 @@ const plain = (markdown: string) =>
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 
+// Every page the chat may link to: the home page, the three section indexes, and each highlight's detail page.
+export async function sitePages() {
+  const entries = (await getCollection('highlights')).sort((a, b) => a.data.order - b.data.order);
+  return [
+    { path: '/', title: 'Home: experience, education, and highlights' },
+    { path: '/#earlier-experience', title: 'Home, earlier experience' },
+    ...tracks.map((track) => ({ path: `/${track.section}/`, title: track.label })),
+    ...entries.map((entry) => ({ path: highlightUrl(entry), title: entry.data.title })),
+  ];
+}
+
 // Everything the chat assistant may say about Daan, as plain text, built from the same data the pages render.
 // Install counts are the ones from the build, so they are dated.
 export async function buildContext(): Promise<string> {
@@ -75,6 +86,10 @@ export async function buildContext(): Promise<string> {
     '',
     '# Highlights',
     highlights.join('\n\n'),
+    '',
+    '# Site pages',
+    'Pages on this site, as site-relative paths. Link only to these (see the instructions above).',
+    (await sitePages()).map((page) => `- ${page.path} : ${page.title}`).join('\n'),
     '',
   ].join('\n');
 }

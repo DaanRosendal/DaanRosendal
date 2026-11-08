@@ -1,11 +1,13 @@
 ---
 import '../styles/global.css';
+import ChatHost from '../components/ChatHost.astro';
 interface Props {
   title: string;
   description: string;
   noindex?: boolean;
+  chat?: boolean;
 }
-const { title, description, noindex = false } = Astro.props;
+const { title, description, noindex = false, chat = true } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/og.png', Astro.site);
 ---
@@ -29,11 +31,14 @@ const ogImage = new URL('/og.png', Astro.site);
     <meta property="og:image:alt" content="Daan Rosendal, Software Engineer, Zürich" />
     <meta name="twitter:card" content="summary_large_image" />
     {noindex && <meta name="robots" content="noindex" />}
+    {chat && <script is:inline>try{var d=document.documentElement,s=JSON.parse(sessionStorage.getItem('chat:v1'));if(s&&s.mode==='dock')d.dataset.chat='dock';var o=+localStorage.getItem('chat:off');if(o&&Date.now()-o<2592e6)d.dataset.off=''}catch(e){}</script>}
   </head>
-  <body class="max-w-3xl mx-auto px-6 py-12 bg-white text-gray-900 dark:bg-neutral-900 dark:text-white">
+  <body class:list={["max-w-3xl mx-auto px-6 py-12 bg-white text-gray-900 dark:bg-neutral-900 dark:text-white", chat && "pb-24"]}>
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:text-gray-900 focus:shadow dark:focus:bg-neutral-800 dark:focus:text-white">Skip to content</a>
+    {chat && <ChatHost />}
     <main id="main">
       <slot />
     </main>
+    {chat && <p class="chat-revive mt-12 text-sm text-gray-500 dark:text-neutral-400"><button type="button" data-chat-act="revive" class="cursor-pointer underline underline-offset-2 hover:text-gray-900 dark:hover:text-white">Ask Daan's AI</button></p>}
   </body>
 </html>

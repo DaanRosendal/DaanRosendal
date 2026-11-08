@@ -28,7 +28,7 @@ const glow = await Promise.all(
   }),
 );
 ---
-<Layout title="Page not found - Daan Rosendal" description="This page does not exist." noindex>
+<Layout title="Page not found - Daan Rosendal" description="This page does not exist." noindex chat={false}>
   <!-- Everything scales with the window height so the page fits without scrolling: 6rem is the body's vertical padding in Layout.astro (py-12), and the 19rem in --sh below is the room the heading, the text and the button row take. Change either and re-check the fit. -->
   <div class="flex min-h-[calc(100svh-6rem)] flex-col items-center justify-center text-center" style="--f: clamp(4.5rem, 16svh, 11rem)">
     <h1 class="sr-only">404 - Page not found</h1>

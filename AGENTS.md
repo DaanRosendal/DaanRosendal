@@ -32,7 +32,7 @@ npm run build && npx wrangler dev   # Run the site and the chat Worker locally o
 ```text
 /
 ├── src/
-│   ├── components/        # Highlights, highlight cards, gallery, photo viewer, timelines
+│   ├── components/        # ChatHost (the chat's static shell), highlights, highlight cards, gallery, photo viewer, timelines
 │   ├── content/
 │   │   ├── highlights/    # Highlight entries (Projects / Competitions / Research), one Markdown file each
 │   │   └── blog/        # Markdown blog posts (not published, see Blog)
@@ -44,7 +44,7 @@ npm run build && npx wrangler dev   # Run the site and the chat Worker locally o
 │   │   ├── experience.ts  # Experience data (the website's source of truth), rendered by ExperienceList.astro
 │   │   ├── education.ts   # Education data, rendered by EducationList.astro
 │   │   ├── timeline.ts    # TimelineItem, Bullet and TimelineLink types
-│   │   ├── chat-context.ts # buildContext(): the whole site as plain text for the chat assistant
+│   │   ├── chat-context.ts # buildContext(): the whole site as plain text for the chat assistant, and sitePages(): the pages it may link to
 │   │   ├── marketplace.ts # Live install counts with fallbacks (build time)
 │   │   ├── count.ts       # Shared count formatting and rounding
 │   │   └── image.ts       # imageSize(): pixel size of a /public image for width and height attributes
@@ -52,7 +52,8 @@ npm run build && npx wrangler dev   # Run the site and the chat Worker locally o
 │   ├── integrations/
 │   │   └── chat-context.ts # After the build, moves dist/chat-context.txt to src/worker/context.generated.txt
 │   ├── scripts/
-│   │   ├── chat.ts        # The "Ask about Daan" dialog, loaded only when the button is used
+│   │   ├── chat.ts        # The chat (modes, wave, dock, saved conversation), loaded only when the pill is used or a minimised chat is restored
+│   │   ├── chat.css       # The conversation's styles, imported as an inline string by chat.ts
 │   │   ├── live-counts.ts # Refreshes install counts in the browser and adds the hover note
 │   │   ├── drag.ts        # startDrag(): one pointer's drag, shared by the two 404 scripts
 │   │   ├── fall-404.ts    # Falling, draggable "404" letters on the 404 page (skipped with reduced motion)
@@ -110,7 +111,7 @@ npm run build && npx wrangler dev   # Run the site and the chat Worker locally o
 
 ## Chat
 
-- The home page has an "Ask about Daan" button (`src/components/AskDaan.astro`). Its click loads `src/scripts/chat.ts` (the dialog) and POSTs to `/api/chat`, which is the Worker in `src/worker/`. Nothing chat-related loads or runs before the visitor hovers, focuses, or clicks the button, which keeps Lighthouse at 100. Answers are rendered as text nodes, never as HTML.
+- Every page except the 404 has a glowing "Ask about Daan" pill (`src/components/ChatHost.astro`, included by `Layout.astro`; pass `chat={false}` to leave it out). It fades in after about 2 s, and its cross hides it for 30 days (`localStorage` `chat:off`, with an "Ask Daan's AI" text link at the page end to bring it back). The chat is driven by `html[data-chat]`: absent (closed, only the pill), `open` (small window), `full` (water takeover on the first message), `dock` (bottom right, a one-line bar on phones). An inline head script in `Layout.astro` sets `data-chat="dock"` from `sessionStorage` (`chat:v1`) before the first paint, so a minimised chat is already in place on the next page. Pages are full loads (no router); the conversation is restored from `sessionStorage`, `pageshow` handles the back-forward cache, and `@view-transition` keeps the dock steady. `src/scripts/chat.ts` is fetched only when the pill is used (hover, focus, click) or when a minimised chat has to be restored, so Lighthouse stays at 100. Links in answers to real site pages (checked against `/chat-pages.json`, built from `sitePages()`) minimise the chat to the dock and then navigate. Answers are rendered as text nodes, never as HTML.
 - The Worker answers with Workers AI (`MODELS` in `src/worker/index.ts`: Gemma 4 first, GLM 4.7 flash when Gemma is deprecated or no longer free). It is on the Free plan on purpose: the allowance is 10,000 neurons a day, shared by the whole account, and nothing bills past it. Check the model catalog and changelog when changing the model, because free access to models keeps shrinking.
 - The system prompt (`src/worker/prompt.ts`) is deliberately short and loose: Daan wants the bot as free as possible (text only, sandboxed, configured on purpose so visitors can have fun), with the whole site text injected as context. Do not add topic restrictions or refusal rules without asking. The site text comes from `src/lib/chat-context.ts` (the same experience, education, and highlight data the pages use), is written to `dist/chat-context.txt` during the build and moved to the gitignored `src/worker/context.generated.txt` by `src/integrations/chat-context.ts`, and is bundled into the Worker. So the website stays the single source of truth: never hand-write facts into the prompt, and run `npm run build` before `wrangler dev`. The prompt just tells the model that Daan is a man.
 - Layers, in order: `Origin` and method checks, Turnstile (Managed, `daanrosendal.com` only, secret in the Worker secret `TURNSTILE_SECRET`), then the Durable Object `Limiter` (`src/worker/limiter.ts`, one instance per UTC day): 20 messages a day and 3 a minute per visitor (salted hash of the IP), about a quarter of the neurons per visitor, and 7,000 neurons a day overall (70% of the allowance). It holds back an estimate before the AI call and swaps in the real usage afterwards. A 3036 error from Workers AI closes the chat for the rest of the UTC day.
