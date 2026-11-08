@@ -1,10 +1,12 @@
-// The photo pile on the 404 page. The photos are dealt in with a spring, the top one tilts in 3D with a glare that follows the cursor, and it flicks away to the side and tucks under the pile. The pile advances on its own, on tap or click, with the arrow keys, or by dragging the top photo away. A button fans all the photos out in an arc, and a soft glow behind the pile takes the colors of the current photo (sampled at build time into `data-glow`).
+// The photo pile on the 404 page. The photos are dealt in with a spring, the top one tilts in 3D with a glare that follows the cursor, and it flicks away to the side and tucks under the pile. The pile advances on its own, on tap or click, with the arrow keys, or by dragging the top photo away in any direction. A button fans all the photos out in an arc, and a soft glow behind the pile takes the colors of the current photo (sampled at build time into `data-glow`).
 
 import { startDrag, isStill } from './drag';
 
 const SHOWN = 4; // photos visible in the pile
 const AUTO_MS = 3400; // time between automatic flicks
-const FLICK_MS = 400; // the top photo leaving the pile
+const FLICK_MS = 450; // the top photo swinging out to the side
+const TUCK_AT = 0.7; // fraction of the flick after which the photo turns back, so it never stops dead at the side
+const RETURN_MS = 700; // the photo sliding back in underneath the pile
 const SPRING_MS = 900; // how long the card spring in 404.astro takes to settle
 const DEAL_WAIT_MS = 120; // pause before the photos are dealt in
 const DEAL_STAGGER_MS = 140; // gap between the photos being dealt
@@ -38,6 +40,10 @@ export interface CatStackParts {
 }
 
 const randomDir = () => (Math.random() < 0.5 ? -1 : 1);
+const unit = (x: number, y: number): [number, number] => {
+  const len = Math.hypot(x, y) || 1;
+  return [x / len, y / len];
+};
 
 export function catStack({ stack, counter, fanButton, glow, status }: CatStackParts) {
   // Every photo has its own small tilt and offset, so the pile looks hand-dropped.
@@ -117,8 +123,8 @@ export function catStack({ stack, counter, fanButton, glow, status }: CatStackPa
     timer = window.setTimeout(() => (mode !== 'idle' || document.hidden || hovering ? schedule() : next(randomDir(), 0, false)), AUTO_MS);
   }
 
-  /** Sends the top photo off to the side, then slides it back in underneath the pile. `manual` is true when the visitor did it, so screen readers are told. */
-  function flick(dir: number, fromY: number, manual: boolean) {
+  /** Sends the top photo off in the direction (ux, uy), then slides it back in underneath the pile. `manual` is true when the visitor did it, so screen readers are told. */
+  function flick(ux: number, uy: number, manual: boolean) {
     mode = 'flicking';
     clearTimeout(timer);
     const [card, ...others] = order;
@@ -126,27 +132,36 @@ export function catStack({ stack, counter, fanButton, glow, status }: CatStackPa
     tucked = null;
     render(); // the rest of the pile moves up
     const { el } = card;
-    const out = (stack.offsetWidth * 0.62 + innerWidth * 0.08) * dir;
+    // Swing out far enough to clear the whole pile in that direction, so the photo changes layer where nothing overlaps and the swap cannot be seen.
+    const reach = Math.max(Math.abs(ux) / (stack.offsetWidth * 1.2 + 28), Math.abs(uy) / (stack.offsetHeight * 1.2 + 28));
+    const outX = ux / reach;
+    const outY = uy / reach - 20 * (1 - Math.abs(uy)); // a little lift when it leaves sideways
     el.removeAttribute('data-tilt');
     el.style.zIndex = String(n + 1);
     el.style.opacity = '1';
-    el.style.transition = reduced ? 'none' : `transform ${FLICK_MS}ms cubic-bezier(0.2, 0.7, 0.3, 1)`;
-    el.style.transform = `translate(${out}px, ${-30 + fromY}px) rotate(${dir * 16}deg)`;
+    el.style.transition = reduced ? 'none' : `transform ${FLICK_MS}ms cubic-bezier(0.25, 0.8, 0.3, 1)`;
+    el.style.transform = `translate(${outX.toFixed(1)}px, ${outY.toFixed(1)}px) rotate(${(ux * 14).toFixed(1)}deg) scale(1.04)`;
     window.setTimeout(
       () => {
         order.push(card);
         tucked = card;
-        render(); // slides back in underneath, with the spring from the stylesheet
+        render(); // puts the photo underneath the pile, and its transform back to the bottom of the pile
+        if (!reduced) {
+          el.style.transition = `transform ${RETURN_MS}ms cubic-bezier(0.45, 0, 0.2, 1)`;
+          window.setTimeout(() => {
+            if (card !== order[0]) el.style.transition = '';
+          }, RETURN_MS);
+        }
         mode = 'idle';
         if (manual) announce();
         schedule();
       },
-      reduced ? 0 : FLICK_MS,
+      reduced ? 0 : FLICK_MS * TUCK_AT,
     );
   }
 
-  function next(dir: number, fromY: number, manual: boolean) {
-    if (mode === 'idle') flick(dir, fromY, manual);
+  function next(ux: number, uy: number, manual: boolean) {
+    if (mode === 'idle') flick(ux, uy, manual);
   }
 
   // The fan: the photos sit on an arc, like a hand of playing cards.
@@ -175,6 +190,9 @@ export function catStack({ stack, counter, fanButton, glow, status }: CatStackPa
     stack.toggleAttribute('data-fan', on);
     stack.setAttribute('aria-label', on ? LABEL_FAN : LABEL_PILE);
     fanButton?.setAttribute('aria-pressed', String(on));
+    const buttonLabel = on ? 'Close the fan' : 'Fan out the photos';
+    fanButton?.setAttribute('aria-label', buttonLabel);
+    fanButton?.setAttribute('title', buttonLabel);
     if (on) {
       layoutFan();
     } else {
@@ -235,7 +253,7 @@ export function catStack({ stack, counter, fanButton, glow, status }: CatStackPa
 
     const started = startDrag(stack, e, {
       onMove({ dx, dy }) {
-        top.el.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${(dx * 0.05).toFixed(1)}deg) translate(${dx}px, ${dy * 0.35}px) rotate(${(dx * 0.07).toFixed(2)}deg)`;
+        top.el.style.transform = `perspective(${PERSPECTIVE}px) rotateX(${(-dy * 0.05).toFixed(1)}deg) rotateY(${(dx * 0.05).toFixed(1)}deg) translate(${dx}px, ${dy}px) rotate(${(dx * 0.07).toFixed(2)}deg)`;
       },
       onEnd(drag) {
         mode = 'idle';
@@ -244,14 +262,14 @@ export function catStack({ stack, counter, fanButton, glow, status }: CatStackPa
           // The browser took the gesture (a scroll started), so put the photo back.
           render();
           schedule();
-        } else if (Math.abs(dx) < TAP_SLOP && Math.abs(dy) < TAP_SLOP) {
+        } else if (Math.hypot(dx, dy) < TAP_SLOP) {
           next(randomDir(), 0, true); // a tap
         } else {
           // A long enough drag goes the way it was dragged, a short one only if it was flung that way.
-          const flung = !isStill(drag) && Math.abs(drag.vx) > FLICK_SPEED;
-          const dir = Math.abs(dx) > FLICK_DISTANCE ? Math.sign(dx) : flung ? Math.sign(drag.vx) : 0;
-          if (dir) {
-            flick(dir, dy * 0.35, true);
+          const flung = !isStill(drag) && Math.hypot(drag.vx, drag.vy) > FLICK_SPEED;
+          const vector = Math.hypot(dx, dy) > FLICK_DISTANCE ? [dx, dy] : flung ? [drag.vx, drag.vy] : null;
+          if (vector) {
+            flick(...unit(vector[0], vector[1]), true);
           } else {
             render();
             schedule();
@@ -274,12 +292,11 @@ export function catStack({ stack, counter, fanButton, glow, status }: CatStackPa
         e.preventDefault();
         pick(card);
       }
-    } else if (activate || e.key === 'ArrowRight') {
+    } else {
+      const direction = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key] ?? (activate ? [1, 0] : null);
+      if (!direction) return;
       e.preventDefault();
-      next(1, 0, true);
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      next(-1, 0, true);
+      next(direction[0], direction[1], true);
     }
   });
   addEventListener('keydown', (e) => {
@@ -287,7 +304,10 @@ export function catStack({ stack, counter, fanButton, glow, status }: CatStackPa
     setFan(false);
     fanButton?.focus({ preventScroll: true });
   });
-  fanButton?.addEventListener('click', () => setFan(mode !== 'fanned'));
+  fanButton?.addEventListener('click', () => {
+    navigator.vibrate?.(10); // a small tap on phones that support it
+    setFan(mode !== 'fanned');
+  });
   addEventListener('resize', () => {
     if (mode === 'fanned') layoutFan();
   });

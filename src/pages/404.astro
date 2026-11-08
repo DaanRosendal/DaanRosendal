@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Images } from '@lucide/astro';
+import { Images, X } from '@lucide/astro';
 import { join } from 'node:path';
 import sharp from 'sharp';
 
@@ -88,9 +88,10 @@ const glow = await Promise.all(
         aria-pressed="false"
         aria-label="Fan out the photos"
         title="Fan out the photos"
-        class="hidden size-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition-colors hover:border-gray-400 hover:text-gray-900 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-500 dark:hover:text-white"
+        class="group hidden size-11 touch-manipulation items-center justify-center rounded-full border border-gray-300 text-gray-700 transition-[transform,background-color,color,border-color] duration-150 [-webkit-tap-highlight-color:transparent] hover:border-gray-500 hover:text-gray-900 active:scale-90 active:bg-gray-100 aria-pressed:border-gray-900 aria-pressed:bg-gray-900 aria-pressed:text-white dark:border-neutral-600 dark:text-neutral-300 dark:hover:border-neutral-400 dark:hover:text-white dark:active:bg-neutral-800 dark:aria-pressed:border-white dark:aria-pressed:bg-white dark:aria-pressed:text-neutral-900"
       >
-        <Images size={16} />
+        <Images size={18} class="group-aria-pressed:hidden" />
+        <X size={18} class="hidden group-aria-pressed:block" />
       </button>
       <span class="text-gray-300 dark:text-neutral-600" aria-hidden="true">·</span>
       <a href="/" class="text-gray-700 underline decoration-gray-300 underline-offset-2 hover:decoration-current dark:text-neutral-300 dark:decoration-neutral-600">Back to the home page</a>
@@ -101,6 +102,8 @@ const glow = await Promise.all(
 <style is:global>
   /* Photos and letters fly past the edge of the window, so never show a horizontal scrollbar. */
   html { overflow-x: clip; }
+  /* A photo flicked down must not make the page scrollable. The body is exactly one window tall here, so this clips at the window edge. */
+  body { overflow-y: clip; }
 
   /* Hide the letters until the script has placed them, so they do not flash at the bottom before they fall. Without JavaScript they stay visible. */
   @media (scripting: enabled) {
@@ -119,7 +122,8 @@ const glow = await Promise.all(
   @media (scripting: enabled) {
     #cats:not([data-ready]) [data-card] { visibility: hidden; }
   }
-  #cats { touch-action: pan-y; transition: margin-bottom 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  /* The pile claims every touch gesture, so a swipe in any direction moves the photo instead of scrolling the page. */
+  #cats { touch-action: none; transition: margin-bottom 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
   #cats[data-ready] { cursor: pointer; }
   #cats[data-fan] { cursor: default; }
   #cats:focus-visible { outline: 2px solid currentColor; outline-offset: 12px; border-radius: 0.5rem; }
