@@ -6,6 +6,9 @@ dist/
 # generated types
 .astro/
 
+# chat Worker context, written by the chat-context integration at build time
+src/worker/context.generated.txt
+
 # dependencies
 node_modules/
 
@@ -19,6 +22,7 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+.dev.vars
 
 # LaTeX secrets (PII: phone, email)
 resume/secrets.tex

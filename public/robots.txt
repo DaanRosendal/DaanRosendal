@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /go/
+Disallow: /api/
 
 Sitemap: https://daanrosendal.com/sitemap-index.xml

@@ -1,7 +1,6 @@
 ---
 import { ExternalLink } from '@lucide/astro';
-
-export type Bullet = string | { text: string; linkText: string; url: string };
+import type { Bullet } from '../lib/timeline';
 
 interface Props {
   bullet: Bullet;

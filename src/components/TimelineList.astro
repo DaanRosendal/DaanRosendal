@@ -1,32 +1,9 @@
 ---
 import { Building2, ChevronDown } from '@lucide/astro';
 import EarlierDivider from './EarlierDivider.astro';
-import TimelineBullet, { type Bullet } from './TimelineBullet.astro';
-import TimelineLinks, { type TimelineLink } from './TimelineLinks.astro';
-
-export interface TimelineItem {
-  title: string;
-  titleShort?: string;
-  badge?: string;
-  subtitle: string;
-  subtitleShort?: string;
-  subtitleUrl?: string;
-  description?: string;
-  dates: string;
-  datesShort?: string;
-  location: string;
-  locationShort?: string;
-  logo?: string;
-  logoDark?: string;
-  rounded?: boolean;
-  bullets?: Bullet[];
-  /** Project links shown under the description, optionally with a GitHub star count. */
-  links?: TimelineLink[];
-  /** Shown under the bullets, for example "Via Rent Your Student Scrum Team (RYSST)" for roles that went through an agency. */
-  via?: TimelineLink;
-  /** Left off the resume: glows when the section is opened through its anchor link. */
-  earlier?: boolean;
-}
+import TimelineBullet from './TimelineBullet.astro';
+import TimelineLinks from './TimelineLinks.astro';
+import type { TimelineItem } from '../lib/timeline';
 
 interface Props {
   heading: string;

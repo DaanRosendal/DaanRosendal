@@ -1,0 +1,67 @@
+import type { TimelineItem } from './timeline';
+
+export const education: TimelineItem[] = [
+  {
+    title: 'Master of Science in Software Engineering',
+    titleShort: 'MSc. Software Engineering',
+    subtitle: 'University of Amsterdam',
+    subtitleUrl: 'https://www.uva.nl',
+    dates: 'Sep 2024 - Jul 2025',
+    datesShort: '2024 - 2025',
+    location: 'Amsterdam, The Netherlands',
+    locationShort: 'Amsterdam, NL',
+    logo: '/logos/uva.png',
+    description: 'Top 5% of 80 students (Cum Laude/With Honours)',
+    bullets: [
+      {
+        text: 'Published at IEEE Big Data 2025 and presented in Macao: client disagreement resolution in federated learning',
+        linkText: 'Published at IEEE Big Data 2025',
+        url: '/research/federated-learning-paper/',
+      },
+      'Relevant courses: Distributed Cloud Computing, Software Maintainability, Requirements Engineering, Embedded Systems Design',
+    ],
+  },
+  {
+    title: 'Bachelor of Science in Software Engineering',
+    titleShort: 'BSc. Software Engineering',
+    subtitle: 'Windesheim University',
+    subtitleUrl: 'https://www.windesheim.com',
+    dates: 'Sep 2020 - Jul 2024',
+    datesShort: '2020 - 2024',
+    location: 'Zwolle, The Netherlands',
+    locationShort: 'Zwolle, NL',
+    logo: '/logos/windesheim.png',
+    description: 'Top 1% of 500 students (Cum Laude/With Honours)',
+    bullets: [
+      {
+        text: 'Won Swisscom\'s LauzHack 2023 challenge at EPFL with a customisable chatbot capable of leveraging self-hosted LLMs',
+        linkText: 'Won Swisscom\'s LauzHack 2023 challenge at EPFL',
+        url: '/competitions/lauzhack-swisscom-challenge/',
+      },
+      {
+        text: 'Won the University Rocketeers Winter Cup in December 2021 against 200+ competing universities, becoming the best university team in Europe and qualifying directly for the European championship',
+        linkText: 'Won the University Rocketeers Winter Cup',
+        url: '/competitions/rocket-league-wintercup/',
+      },
+      'Major: Software Engineering',
+      'Minor: Data Science',
+      'Relevant courses: Data Structures & Algorithms, Design Patterns, Operating Systems, Discrete Mathematics, Data Analytics, Statistics',
+      'Extracurricular courses: Blockchain & Cryptocurrency, Chinese (HSK1)',
+    ],
+  },
+  {
+    title: 'Intermediate Vocational Degree in Software Development',
+    titleShort: 'Software Development',
+    subtitle: 'Deltion College',
+    subtitleUrl: 'https://www.deltion.nl',
+    dates: 'Sep 2018 - Jul 2020',
+    datesShort: '2018 - 2020',
+    location: 'Zwolle, The Netherlands',
+    locationShort: 'Zwolle, NL',
+    logo: '/logos/deltion-2026.png',
+    description: 'Top 1% of 200 students (Cum Laude/With Honours)',
+    bullets: [
+      'Relevant courses: Object-Oriented Programming, Front-End & Back-End Technologies, Database Design',
+    ],
+  },
+];

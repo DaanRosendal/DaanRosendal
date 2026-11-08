@@ -1,12 +1,6 @@
 ---
 import { ExternalLink } from '@lucide/astro';
-
-export interface TimelineLink {
-  label: string;
-  url: string;
-  /** GitHub stars, shown as a small star and count (for example "800+"). */
-  stars?: string;
-}
+import type { TimelineLink } from '../lib/timeline';
 
 interface Props {
   links?: TimelineLink[];

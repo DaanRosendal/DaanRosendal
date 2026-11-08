@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import ExperienceList from '../components/ExperienceList.astro';
 import EducationList from '../components/EducationList.astro';
 import Highlights from '../components/Highlights.astro';
+import AskDaan from '../components/AskDaan.astro';
 import { FileText, Mail, MapPin } from '@lucide/astro';
 ---
 <Layout
@@ -18,7 +19,7 @@ import { FileText, Mail, MapPin } from '@lucide/astro';
         Zürich, Switzerland
       </span>
     </div>
-    <nav aria-label="Profile links" class="flex justify-between items-center text-sm text-gray-600 dark:text-neutral-300">
+    <nav aria-label="Profile links" class="flex flex-wrap justify-between items-center text-sm text-gray-600 dark:text-neutral-300">
     <a href="/Daan_Rosendal_Resume.pdf" class="flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
       <FileText size={14} />
       <span>Resume</span>
@@ -39,6 +40,7 @@ import { FileText, Mail, MapPin } from '@lucide/astro';
       <Mail size={14} />
       <span>Email</span>
     </a>
+    <AskDaan />
   </nav>
   </header>
 

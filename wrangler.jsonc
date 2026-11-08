@@ -1,9 +1,20 @@
 {
   "name": "daanrosendal",
+  "main": "src/worker/index.ts",
   "compatibility_date": "2026-11-08",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "404-page"
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    // Only the chat API runs the Worker. Every other request is a static asset, which is free and unlimited.
+    "run_worker_first": ["/api/*"]
   },
-  "workers_dev": false
+  "workers_dev": false,
+  "vars": { "CHAT_ENABLED": "1" },
+  "ai": { "binding": "AI" },
+  "durable_objects": {
+    "bindings": [{ "name": "LIMITER", "class_name": "Limiter" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Limiter"] }],
+  "observability": { "enabled": true }
 }
