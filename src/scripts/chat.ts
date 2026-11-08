@@ -314,8 +314,8 @@ async function build() {
   const input = el('textarea', 'chat-input');
   input.rows = 1;
   input.maxLength = 600;
-  input.placeholder = 'Ask a question';
-  input.setAttribute('aria-label', 'Your question');
+  input.placeholder = 'Message Junior';
+  input.setAttribute('aria-label', 'Message Junior');
   input.enterKeyHint = 'send';
   input.value = draft;
   const send = el('button', 'chat-send', 'Send');

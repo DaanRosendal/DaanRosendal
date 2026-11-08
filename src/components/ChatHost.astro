@@ -1,5 +1,5 @@
 ---
-import { ArrowUp, Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
+import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
 ---
 
 <!-- The chat's static shell. The whole chat is driven by html[data-chat] (open, full, dock; absent means closed), which an
@@ -7,8 +7,8 @@ import { ArrowUp, Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
      The conversation itself (src/scripts/chat.ts) is fetched only when the chat is used or restored. -->
 <div class="chat-pill-wrap">
   <form class="chat-pill" autocomplete="off">
-    <Sparkles size={16} aria-hidden="true" />
-    <input class="chat-pill-input" type="text" name="q" maxlength="600" placeholder="Ask about Daan" aria-label="Ask about Daan" enterkeyhint="send" />
+    <img class="chat-avatar" src="/media/cat/junior.webp" alt="" width="32" height="32" decoding="async" />
+    <input class="chat-pill-input" type="text" name="q" maxlength="600" placeholder="Ask Junior about Daan" aria-label="Ask Junior about Daan" enterkeyhint="send" />
     <button type="submit" class="chat-pill-go" aria-label="Send"><ArrowUp size={16} aria-hidden="true" /></button>
   </form>
   <button type="button" class="chat-pill-x" data-chat-act="dismiss" aria-label="Hide the chat box">
@@ -16,9 +16,10 @@ import { ArrowUp, Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
   </button>
 </div>
 
-<section id="chat" class="chat" role="dialog" aria-label="Ask about Daan">
+<section id="chat" class="chat" role="dialog" aria-label="Chat with Junior">
   <header class="chat-head">
-    <h2 class="chat-title">Ask about Daan</h2>
+    <img class="chat-avatar" src="/media/cat/junior.webp" alt="" width="32" height="32" loading="lazy" decoding="async" />
+    <h2 class="chat-title">Junior</h2>
     <button type="button" class="chat-btn chat-btn-expand" data-chat-act="expand" aria-label="Expand the chat"><Maximize2 size={16} aria-hidden="true" /></button>
     <button type="button" class="chat-btn chat-btn-min" data-chat-act="minimise" aria-label="Minimise the chat"><Minimize2 size={16} aria-hidden="true" /></button>
     <button type="button" class="chat-btn" data-chat-act="close" aria-label="Close the chat"><X size={16} aria-hidden="true" /></button>
@@ -183,11 +184,20 @@ import { ArrowUp, Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
   html[data-chat='dock'] .chat-head {
     cursor: pointer;
   }
+  .chat-avatar {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    object-fit: cover;
+  }
+  .chat-head .chat-avatar {
+    margin-right: 0.6rem;
+  }
   .chat-title {
     flex: 1;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--c-muted);
+    font-size: 0.95rem;
+    font-weight: 600;
   }
   .chat-btn {
     display: grid;
@@ -250,7 +260,7 @@ import { ArrowUp, Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    padding: 0.3rem 0.35rem 0.3rem 1rem;
+    padding: 0.3rem 0.35rem 0.3rem 0.3rem;
     border: 1px solid var(--c-line);
     border-radius: 999px;
     background: var(--c-bg);
@@ -268,7 +278,7 @@ import { ArrowUp, Maximize2, Minimize2, Sparkles, X } from '@lucide/astro';
   .chat-pill-input {
     flex: 1;
     min-width: 0;
-    padding: 0.45rem 0;
+    padding: 0.55rem 0;
     border: 0;
     outline: 0;
     background: transparent;
