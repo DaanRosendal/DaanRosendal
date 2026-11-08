@@ -8,10 +8,9 @@ order: 4
 date: 2025-12-08
 thumbnail: /media/ieee/presenting.webp
 cardImage: /media/ieee/card.webp
-gallery:
-  - src: /media/ieee/presenting.webp
-    full: /media/ieee/full/presenting.webp
-    alt: Presenting the paper on stage in Macao, with its title on the screen behind me
+thumbnailAlt: Presenting the paper on stage in Macao, with its title on the screen behind me
+thumbnailFull: /media/ieee/full/presenting.webp
+photoGrid:
   - src: /media/ieee/cable-car.webp
     full: /media/ieee/full/cable-car.webp
     alt: My brother and me in a cable car above water and green hills
@@ -37,7 +36,6 @@ gallery:
   - src: /media/ieee/sunset.webp
     full: /media/ieee/full/sunset.webp
     alt: The sun setting behind a large tree next to a stone building with a reflecting pool
-galleryBelow: true
 links:
   - label: Paper (IEEE)
     url: https://doi.org/10.1109/BigData66926.2025.11401516

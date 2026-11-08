@@ -34,8 +34,13 @@ const highlights = defineCollection({
       .array(z.object({ src: z.string(), alt: z.string(), full: z.string().optional(), position: z.string().optional() }))
       .default([]),
     galleryVideo: z.string().optional(),
-    // Show the gallery after the text and links instead of above them.
-    galleryBelow: z.boolean().default(false),
+    // Alt text and enlarged photo for the lead image when the page shows a single thumbnail.
+    thumbnailAlt: z.string().optional(),
+    thumbnailFull: z.string().optional(),
+    // A grid of photos that sits with the last paragraph of the text, after the links.
+    photoGrid: z
+      .array(z.object({ src: z.string(), alt: z.string(), full: z.string().optional(), position: z.string().optional() }))
+      .default([]),
     links: z.array(z.object({ label: z.string(), url: z.string().url() })).default([]),
   }),
 });

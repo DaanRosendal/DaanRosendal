@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import HighlightVideo from '../../components/HighlightVideo.astro';
 import HighlightGallery from '../../components/HighlightGallery.astro';
+import HighlightPhotoGrid from '../../components/HighlightPhotoGrid.astro';
 import PhotoViewer from '../../components/PhotoViewer.astro';
 import LiveCounts from '../../components/LiveCounts.astro';
 import { getCollection } from 'astro:content';
@@ -20,9 +21,13 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const track = tracks.find((t) => t.id === entry.data.track)!;
-const { title, when, youtube, thumbnail, gallery, galleryVideo, galleryBelow, links } = entry.data;
+const { title, when, youtube, thumbnail, thumbnailAlt, thumbnailFull, gallery, galleryVideo, photoGrid, links } = entry.data;
 const { statHtml, summary, fillHtml } = await resolveHighlightText(entry);
-const body = fillHtml(entry.rendered?.html ?? '');
+const html = fillHtml(entry.rendered?.html ?? '');
+// With a photo grid, the last paragraph moves after the links and shares a section with the photos.
+const split = photoGrid.length > 0 ? html.lastIndexOf('<p>') : -1;
+const body = split >= 0 ? html.slice(0, split) : html;
+const closing = split >= 0 ? html.slice(split) : '';
 const thumbnailSize = thumbnail ? await imageSize(thumbnail) : undefined;
 ---
 <Layout title={`${title} - Daan Rosendal`} description={summary}>
@@ -41,7 +46,7 @@ const thumbnailSize = thumbnail ? await imageSize(thumbnail) : undefined;
       <h1 class="text-4xl font-bold">{title}</h1>
     </header>
 
-    {gallery.length > 0 && galleryBelow ? null : gallery.length > 0 ? (
+    {gallery.length > 0 ? (
       <div class={gallery.length === 1 && !galleryVideo ? '' : 'mb-8'}>
         <HighlightGallery photos={gallery} video={galleryVideo} />
       </div>
@@ -52,7 +57,7 @@ const thumbnailSize = thumbnail ? await imageSize(thumbnail) : undefined;
     ) : thumbnail && (
       <div class="mb-8">
         <a
-          href={thumbnail}
+          href={thumbnailFull ?? thumbnail}
           data-lightbox="0"
           target="_blank"
           rel="noopener noreferrer"
@@ -61,7 +66,7 @@ const thumbnailSize = thumbnail ? await imageSize(thumbnail) : undefined;
         >
           <img
             src={thumbnail}
-            alt={`Screenshot: ${title}`}
+            alt={thumbnailAlt ?? `Screenshot: ${title}`}
             width={thumbnailSize?.width}
             height={thumbnailSize?.height}
             loading="eager"
@@ -95,10 +100,12 @@ const thumbnailSize = thumbnail ? await imageSize(thumbnail) : undefined;
         ))}
       </ul>
     )}
-    {gallery.length > 0 && galleryBelow && (
-      <div class="mt-10">
-        <HighlightGallery photos={gallery} video={galleryVideo} eager={false} />
-      </div>
+    {closing && (
+      <section class="mt-10 space-y-6">
+        <div class="text-gray-700 dark:text-neutral-300"><Fragment set:html={closing} /></div>
+        <HighlightPhotoGrid photos={photoGrid} start={thumbnail ? 1 : 0} />
+        {!thumbnail && <PhotoViewer />}
+      </section>
     )}
   </article>
   {entry.data.marketplace && <LiveCounts />}

@@ -1,0 +1,52 @@
+---
+import { imageSize } from '../lib/image';
+
+interface Photo {
+  src: string;
+  alt: string;
+  full?: string;
+  position?: string;
+}
+
+interface Props {
+  photos: Photo[];
+  // Index of the first photo in the photo viewer, which numbers every tile on the page in order.
+  start: number;
+}
+
+const { photos, start } = Astro.props;
+const sizes = await Promise.all(photos.map((photo) => imageSize(photo.src)));
+// Every tile has a smaller "-sm" copy for phones: the browser picks the one that fits the tile's width.
+const smallSrc = (src: string) => src.replace(/\.webp$/, '-sm.webp');
+const smallSizes = await Promise.all(photos.map((photo) => imageSize(smallSrc(photo.src))));
+const srcset = (i: number) => smallSizes[i] && sizes[i] ? `${smallSrc(photos[i].src)} ${smallSizes[i]!.width}w, ${photos[i].src} ${sizes[i]!.width}w` : undefined;
+// Two columns on phones and four from the md breakpoint, in a container that is at most 768px wide.
+const tileWidth = '(min-width: 768px) calc((min(100vw, 768px) - 72px) / 4), calc((100vw - 40px) / 2)';
+---
+
+<ul class="grid grid-cols-2 gap-2 md:grid-cols-4">
+  {photos.map((photo, i) => (
+    <li>
+      <a
+        href={photo.full ?? photo.src}
+        data-lightbox={start + i}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="group relative block aspect-[3/2] overflow-hidden rounded-lg bg-gray-100 dark:bg-neutral-800"
+      >
+        <img
+          src={photo.src}
+          alt={photo.alt}
+          srcset={srcset(i)}
+          sizes={tileWidth}
+          width={sizes[i]?.width}
+          height={sizes[i]?.height}
+          loading="lazy"
+          decoding="async"
+          class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          style={photo.position && `object-position: ${photo.position}`}
+        />
+      </a>
+    </li>
+  ))}
+</ul>
