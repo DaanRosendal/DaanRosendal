@@ -67,10 +67,10 @@ const firstEarlier = items.findIndex((item) => item.earlier);
               {item.logo
                 ? item.logoDark
                   ? <>
-                      <img data-exp-logo src={item.logo}     alt={item.subtitle} class={`w-full h-full object-contain dark:hidden ${item.rounded ? 'rounded-sm' : ''}`} />
-                      <img data-exp-logo src={item.logoDark} alt={item.subtitle} class={`w-full h-full object-contain hidden dark:block ${item.rounded ? 'rounded-sm' : ''}`} />
+                      <img data-exp-logo src={item.logo}     alt="" class={`w-full h-full object-contain dark:hidden ${item.rounded ? 'rounded-sm' : ''}`} />
+                      <img data-exp-logo src={item.logoDark} alt="" class={`w-full h-full object-contain hidden dark:block ${item.rounded ? 'rounded-sm' : ''}`} />
                     </>
-                  : <img data-exp-logo src={item.logo} alt={item.subtitle} class={`w-full h-full object-contain ${item.rounded ? 'rounded-sm' : ''}`} />
+                  : <img data-exp-logo src={item.logo} alt="" class={`w-full h-full object-contain ${item.rounded ? 'rounded-sm' : ''}`} />
                 : <Building2 size={20} class="text-gray-500 dark:text-neutral-400" />
               }
             </div>
@@ -210,10 +210,10 @@ const firstEarlier = items.findIndex((item) => item.earlier);
                   {item.logo
                     ? item.logoDark
                       ? <>
-                          <img data-exp-logo src={item.logo}     alt={item.subtitle} class={`w-full h-full object-contain dark:hidden ${item.rounded ? 'rounded-sm' : ''}`} />
-                          <img data-exp-logo src={item.logoDark} alt={item.subtitle} class={`w-full h-full object-contain hidden dark:block ${item.rounded ? 'rounded-sm' : ''}`} />
+                          <img data-exp-logo src={item.logo}     alt="" class={`w-full h-full object-contain dark:hidden ${item.rounded ? 'rounded-sm' : ''}`} />
+                          <img data-exp-logo src={item.logoDark} alt="" class={`w-full h-full object-contain hidden dark:block ${item.rounded ? 'rounded-sm' : ''}`} />
                         </>
-                      : <img data-exp-logo src={item.logo} alt={item.subtitle} class={`w-full h-full object-contain ${item.rounded ? 'rounded-sm' : ''}`} />
+                      : <img data-exp-logo src={item.logo} alt="" class={`w-full h-full object-contain ${item.rounded ? 'rounded-sm' : ''}`} />
                     : <Building2 size={20} class="text-gray-500 dark:text-neutral-400" />
                   }
                 </div>

@@ -16,7 +16,7 @@ const entries = (await getCollection('highlights'))
   .sort((a, b) => a.data.order - b.data.order);
 ---
 <Layout title={`${track.label} - Daan Rosendal`} description={track.description}>
-  <nav class="mb-12 text-sm">
+  <nav aria-label="Breadcrumb" class="mb-12 text-sm">
     <a href="/" class="inline-flex items-center gap-1.5 text-gray-600 dark:text-neutral-300 hover:text-gray-900 dark:hover:text-white transition-colors">
       <ArrowLeft size={14} />
       Home

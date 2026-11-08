@@ -20,6 +20,9 @@ const [lead, ...rest] = photos;
 const sizes = await Promise.all(photos.map((photo) => imageSize(photo.src)));
 // Every tile has a smaller "-sm" copy for phones: the browser picks the one that fits the tile's width.
 const smallSrc = (src: string) => src.replace(/\.webp$/, '-sm.webp');
+// The demo video's tile shows a local copy of its YouTube thumbnail (public/media/youtube/<id>.webp), so the page makes no request to YouTube until the visitor plays it.
+const videoPoster = video ? `/media/youtube/${video}.webp` : undefined;
+const posterSize = videoPoster ? await imageSize(videoPoster) : undefined;
 const smallSizes = await Promise.all(photos.map((photo) => imageSize(smallSrc(photo.src))));
 const srcset = (i: number) => smallSizes[i] && sizes[i] ? `${smallSrc(photos[i].src)} ${smallSizes[i]!.width}w, ${photos[i].src} ${sizes[i]!.width}w` : undefined;
 // Tile width: a quarter of the four-column grid, which is at most 720px wide. The lead photo spans two columns.
@@ -62,7 +65,7 @@ const img = 'w-full h-full object-cover transition-transform duration-300 group-
       aria-label="Watch the demo video on YouTube"
       class={tile}
     >
-      <img src={`https://i.ytimg.com/vi/${video}/hqdefault.jpg`} alt="" loading="lazy" class={img} />
+      <img src={videoPoster} alt="" width={posterSize?.width} height={posterSize?.height} loading="lazy" decoding="async" class={img} />
       <span class="absolute inset-0 flex items-center justify-center bg-black/30">
         <Play size={18} fill="currentColor" class="text-white" />
       </span>

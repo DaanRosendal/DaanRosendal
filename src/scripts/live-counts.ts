@@ -26,6 +26,48 @@ async function fetchDownloads(id: string): Promise<number | null> {
   return typeof downloadCount === 'number' ? downloadCount : null;
 }
 
+const NOTES: Record<string, string> = {
+  installs: 'Fetched live from the VS Code Marketplace',
+  downloads: 'Fetched live from Open VSX',
+  total: 'Fetched live from the VS Code Marketplace and Open VSX',
+};
+
+// One small tooltip, shared by every live number. It is a real element (not CSS) so it can stay inside the viewport.
+const tip = document.createElement('div');
+tip.id = 'live-tip';
+tip.role = 'tooltip';
+tip.hidden = true;
+
+function showTip(node: HTMLElement) {
+  tip.textContent = node.dataset.note ?? '';
+  tip.hidden = false;
+  const rect = node.getBoundingClientRect();
+  const { width, height } = tip.getBoundingClientRect();
+  const left = Math.min(Math.max(8, rect.left + rect.width / 2 - width / 2), window.innerWidth - width - 8);
+  const top = rect.top - height - 8 >= 8 ? rect.top - height - 8 : rect.bottom + 8;
+  tip.style.left = `${left}px`;
+  tip.style.top = `${top}px`;
+}
+
+const hideTip = () => { tip.hidden = true; };
+
+// A number that came from a live request gets a dotted underline and the tooltip, on hover and on keyboard focus.
+function markLive(node: HTMLElement, key: string) {
+  if (!NOTES[key]) return;
+  if (!tip.isConnected) {
+    document.body.append(tip);
+    window.addEventListener('scroll', hideTip, { passive: true });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') hideTip(); });
+  }
+  node.dataset.note = NOTES[key];
+  node.tabIndex = 0;
+  node.setAttribute('aria-describedby', tip.id);
+  node.addEventListener('pointerenter', () => showTip(node));
+  node.addEventListener('pointerleave', hideTip);
+  node.addEventListener('focus', () => showTip(node));
+  node.addEventListener('blur', hideTip);
+}
+
 const attempt = (load: () => Promise<number | null>) => load().catch(() => null);
 
 // Replaces the counts from the build with the current ones. When a request fails the numbers from the build stay.
@@ -46,7 +88,10 @@ async function update(nodes: HTMLElement[]) {
   for (const node of nodes) {
     const key = node.dataset.live!;
     if (key === 'asOf') node.classList.toggle('invisible', !isLive);
-    else if (values[key]) node.textContent = values[key];
+    else if (values[key]) {
+      node.textContent = values[key];
+      markLive(node, key);
+    }
   }
 }
 
