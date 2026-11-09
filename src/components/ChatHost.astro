@@ -148,7 +148,6 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
   }
   html[data-chat='dock'] .chat {
     --w: min(23rem, calc(100% - 2rem));
-    --cw: min(23rem, calc(100vw - 2rem));
     --h: min(30rem, calc(100dvh - 2rem));
     --x: calc(100% - var(--w) - 1rem);
     --y: calc(100dvh - var(--h) - 1rem);
@@ -156,7 +155,6 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
   html[data-chat='full'] .chat {
     --c-bg: transparent;
     --w: 100%;
-    --cw: 100vw;
     --h: 100dvh;
     --x: 0px;
     --y: 0px;
@@ -167,7 +165,6 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
   @media (max-width: 40rem) {
     html[data-chat='dock'] .chat {
       --w: calc(100% - 1.5rem);
-      --cw: calc(100vw - 1.5rem);
       --h: 3.25rem;
       --x: 0.75rem;
       --y: calc(100dvh - 3.25rem - 0.75rem);
@@ -237,17 +234,30 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
   html[data-chat='full'] .chat-btn-min {
     display: grid;
   }
-  /* The content is laid out at the size the window is heading for (--cw, --h) and the window clips it while it grows or
-     shrinks, so the text does not re-wrap on every frame of a resize. */
-  .chat-head {
-    width: var(--cw);
-  }
   .chat-body {
-    flex: none;
-    width: var(--cw);
-    height: calc(var(--h) - 3.25rem - 2px);
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
+  }
+
+  /* While the water moves, the text waits: it fades out fast and comes back once the water has settled. */
+  .chat-head,
+  .chat-body {
+    transition: opacity 0.3s ease;
+  }
+  .chat-moving .chat-head,
+  .chat-moving .chat-body {
+    opacity: 0;
+    transition-duration: 0.12s;
+  }
+  .chat-btn-expand,
+  .chat-btn-min {
+    display: none;
+  }
+  html[data-chat='dock'] .chat-btn-expand,
+  html[data-chat='full'] .chat-btn-min {
+    display: grid;
   }
   .chat :focus-visible,
   .chat-pill-x:focus-visible {
