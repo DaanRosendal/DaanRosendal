@@ -200,6 +200,11 @@ async function readAnswer(response: Response, onPiece: (piece: string) => void) 
 
 // ---- Modes ----
 
+function pillRect() {
+  const r = document.querySelector('.chat-pill')?.getBoundingClientRect();
+  return r && r.width > 0 ? r : null;
+}
+
 let seaTimer: ReturnType<typeof setTimeout> | undefined;
 
 // The water: it rises from the bottom when the chat opens, grows out of the dock window when the dock expands,
@@ -215,6 +220,18 @@ function moveSea(sea: HTMLElement, from: Mode | undefined, to: Mode | undefined)
   if (to === 'full' && from === 'dock' && !reduceMotion.matches) {
     jump(() => sea.classList.add('up', 'docking'));
     sea.classList.remove('docking');
+  } else if (to === 'full' && !from && !reduceMotion.matches && pillRect()) {
+    // Out of the pill: the water starts as the pill's own shape and spreads over the screen.
+    const r = pillRect()!;
+    const right = document.documentElement.clientWidth - r.right;
+    const bottom = innerHeight - r.bottom;
+    jump(() => {
+      sea.classList.add('up');
+      sea.style.clipPath = `inset(${r.top}px ${right}px ${bottom}px ${r.left}px round ${r.height / 2}px)`;
+    });
+    sea.classList.add('from-pill');
+    sea.style.clipPath = '';
+    seaTimer = setTimeout(() => sea.classList.remove('from-pill'), 900);
   } else if (to === 'full') {
     sea.classList.remove('docking');
     sea.classList.add('up');
@@ -236,7 +253,7 @@ function setMode(next: Mode | undefined) {
   if ((next === 'full' || previous === 'full') && previous !== 'dock' && next !== 'dock' && !reduceMotion.matches) {
     root.classList.add('chat-moving');
     clearTimeout(movingTimer);
-    movingTimer = setTimeout(() => root.classList.remove('chat-moving'), next === 'full' ? 900 : 560);
+    movingTimer = setTimeout(() => root.classList.remove('chat-moving'), next === 'full' ? 850 : 560);
   }
   if (next) root.dataset.chat = next;
   else delete root.dataset.chat;

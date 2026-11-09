@@ -139,6 +139,16 @@ html[data-chat='full'] .chat-input {
     clip-path: inset(calc(100dvh - 4rem) 0.75rem 0.75rem 0.75rem round 1rem);
   }
 }
+/* Spreading out of the pill: slower than the dock's resize, and fading in so the pill's color hands over to the water. */
+.chat-sea.from-pill {
+  transition: clip-path 0.8s cubic-bezier(0.22, 0.8, 0.3, 1);
+  animation: sea-in 0.3s ease-out;
+}
+@keyframes sea-in {
+  from {
+    opacity: 0;
+  }
+}
 .chat-sea.instant {
   transition: none !important;
 }
