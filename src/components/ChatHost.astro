@@ -240,25 +240,6 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
     display: flex;
     flex-direction: column;
   }
-
-  /* While the water moves, the text waits: it fades out fast and comes back once the water has settled. */
-  .chat-head,
-  .chat-body {
-    transition: opacity 0.3s ease;
-  }
-  .chat-moving .chat-head,
-  .chat-moving .chat-body {
-    opacity: 0;
-    transition-duration: 0.12s;
-  }
-  .chat-btn-expand,
-  .chat-btn-min {
-    display: none;
-  }
-  html[data-chat='dock'] .chat-btn-expand,
-  html[data-chat='full'] .chat-btn-min {
-    display: grid;
-  }
   .chat :focus-visible,
   .chat-pill-x:focus-visible {
     outline: 2px solid var(--c-muted);
