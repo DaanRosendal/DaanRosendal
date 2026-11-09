@@ -1,13 +1,14 @@
 ---
 import '../styles/global.css';
 import ChatHost from '../components/ChatHost.astro';
+import { CHAT_UI_ENABLED } from '../lib/chat-flag';
 interface Props {
   title: string;
   description: string;
   noindex?: boolean;
   chat?: boolean;
 }
-const { title, description, noindex = false, chat = true } = Astro.props;
+const { title, description, noindex = false, chat = CHAT_UI_ENABLED } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/og.png', Astro.site);
 ---
