@@ -101,9 +101,6 @@ html[data-chat='full'] .chat-form,
 html[data-chat='full'] .chat-turnstile {
   padding-inline: max(1.1rem, calc((100% - 46rem) / 2));
 }
-html[data-chat='full'] .chat-log {
-  font-size: 1rem;
-}
 html[data-chat='full'] .chat-head {
   padding-inline: max(1.1rem, calc((100% - 46rem) / 2 - 0.5rem)) max(0.5rem, calc((100% - 46rem) / 2 - 0.5rem));
 }

@@ -283,6 +283,11 @@ export async function act(action: string) {
   const parts = await ensureUi();
   // The box was measured while the chat was hidden, so measure it again once it shows.
   requestAnimationFrame(parts.grow);
+  if (action === 'expand' || action === 'minimise') {
+    // The log changes height at once, so keep it pinned to the latest message instead of letting it jump.
+    requestAnimationFrame(parts.scroll);
+    setTimeout(parts.scroll, 480);
+  }
   if (action === 'expand') {
     setMode('full');
     focusSoon(parts.input);
@@ -478,7 +483,7 @@ async function build() {
   if (mode() !== 'dock') loadTurnstile().catch(() => {});
   else addEventListener('pointerdown', () => loadTurnstile().catch(() => {}), { once: true });
 
-  return { panel, sea, input, renderAll, grow, submit };
+  return { panel, sea, input, renderAll, grow, submit, scroll };
 }
 
 // A minimised chat from the previous page: bring its conversation back.
