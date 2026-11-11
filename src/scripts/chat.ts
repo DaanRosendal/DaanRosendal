@@ -39,6 +39,12 @@ let turns: Turn[] = [];
 let draft = '';
 // One random id per conversation, kept with the saved turns, so the answers of one chat are saved together.
 let conversation = '';
+// How far the log is scrolled up from its end, in px (0 means it follows the newest message). Kept with the saved turns, so a
+// page change or a refresh brings the log back to where it was.
+let fromBottom = 0;
+// Layout changes (a mode change, a re-render) make the browser move the log by itself: those scroll events are not the visitor's.
+let scrollLockUntil = 0;
+const lockScroll = (ms = 700) => (scrollLockUntil = performance.now() + ms);
 let widget: string | undefined;
 let pending: { resolve(token: string): void; reject(error: Error): void } | undefined;
 let turnstileLoading: Promise<void> | undefined;
@@ -65,6 +71,7 @@ function readStore() {
     turns = saved.turns.filter((turn: Turn) => (turn?.role === 'user' || turn?.role === 'assistant') && typeof turn.content === 'string');
     draft = typeof saved.draft === 'string' ? saved.draft : '';
     conversation = typeof saved.id === 'string' ? saved.id : '';
+    fromBottom = typeof saved.scroll === 'number' && isFinite(saved.scroll) ? Math.max(0, saved.scroll) : 0;
   } catch {
     // Storage can be blocked: the chat then just forgets between pages.
   }
@@ -74,7 +81,7 @@ function readStore() {
 function save() {
   try {
     const live = mode() !== undefined && turns.length > 0;
-    sessionStorage.setItem(STORE, JSON.stringify({ mode: live ? 'dock' : 'closed', turns: turns.slice(-12), draft, id: conversation }));
+    sessionStorage.setItem(STORE, JSON.stringify({ mode: live ? 'dock' : 'closed', turns: turns.slice(-12), draft, id: conversation, scroll: Math.round(fromBottom) }));
   } catch {
     // See readStore.
   }
@@ -286,6 +293,7 @@ function setMode(next: Mode | undefined) {
     clearTimeout(movingTimer);
     movingTimer = setTimeout(() => root.classList.remove('chat-moving'), next === 'full' ? 850 : 560);
   }
+  lockScroll();
   if (next) root.dataset.chat = next;
   else delete root.dataset.chat;
 
@@ -316,8 +324,8 @@ export async function act(action: string) {
   requestAnimationFrame(parts.grow);
   if (action === 'expand' || action === 'minimise') {
     // The log changes height at once, so keep it pinned to the latest message instead of letting it jump.
-    requestAnimationFrame(parts.scroll);
-    setTimeout(parts.scroll, 480);
+    requestAnimationFrame(parts.restore);
+    setTimeout(parts.restore, 480);
   }
   if (action === 'expand') {
     setMode('full');
@@ -329,7 +337,7 @@ export async function act(action: string) {
     resetDock();
     setTimeout(() => {
       parts.grow();
-      parts.scroll();
+      parts.restore();
     }, 480);
   } else if (action === 'close') {
     setMode(undefined);
@@ -400,10 +408,24 @@ async function build() {
 
   const slot = el('div', 'chat-turnstile');
 
+  // New text follows the log to its end. restore() puts the log back where the visitor left it.
   const scroll = () => {
+    fromBottom = 0;
     log.scrollTop = log.scrollHeight;
   };
-  const addMessage = (role: 'user' | 'assistant' | 'note', text: string) => {
+  const restore = () => {
+    log.scrollTop = Math.max(0, log.scrollHeight - log.clientHeight - fromBottom);
+  };
+  log.addEventListener(
+    'scroll',
+    () => {
+      // Hidden (the phone's bar) or being re-laid out: the browser moved it, not the visitor.
+      if (!log.clientHeight || performance.now() < scrollLockUntil) return;
+      fromBottom = Math.max(0, log.scrollHeight - log.clientHeight - log.scrollTop);
+    },
+    { passive: true },
+  );
+  const addMessage = (role: 'user' | 'assistant' | 'note', text: string, follow = true) => {
     const bubble = el('div', `chat-msg chat-${role === 'note' ? 'notice' : role === 'user' ? 'user' : 'bot'}`);
     if (role === 'assistant') {
       const markdown = renderer(bubble);
@@ -413,16 +435,19 @@ async function build() {
       bubble.textContent = text;
     }
     log.append(bubble);
-    scroll();
+    if (follow) scroll();
     return bubble;
   };
 
   const renderAll = () => {
+    const kept = fromBottom;
+    lockScroll();
     log.replaceChildren();
-    for (const turn of turns) addMessage(turn.role, turn.content);
+    for (const turn of turns) addMessage(turn.role, turn.content, false);
     input.value = draft;
     grow();
-    scroll();
+    fromBottom = kept;
+    restore();
   };
 
   const grow = () => {
@@ -513,7 +538,7 @@ async function build() {
   renderAll();
   attachDock(panel, () => {
     grow();
-    scroll();
+    restore();
   });
 
   document.addEventListener('keydown', (event) => {
@@ -526,7 +551,7 @@ async function build() {
   if (mode() !== 'dock') loadTurnstile().catch(() => {});
   else addEventListener('pointerdown', () => loadTurnstile().catch(() => {}), { once: true });
 
-  return { panel, sea, input, renderAll, grow, submit, scroll };
+  return { panel, sea, input, renderAll, grow, submit, scroll, restore };
 }
 
 // A minimised chat from the previous page: bring its conversation back.

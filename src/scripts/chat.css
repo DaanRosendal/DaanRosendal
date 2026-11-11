@@ -81,6 +81,19 @@
   font-size: 1rem;
   line-height: 1.4;
 }
+/* The field's own focus: a firmer border and a soft ring instead of the browser-style outline. The transparent outline
+   still shows up in forced-colors mode, where shadows are dropped. */
+.chat-input {
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.chat .chat-input:focus-visible {
+  border-color: var(--c-fg);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-fg) 14%, transparent);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
 .chat-input::placeholder {
   color: var(--c-muted);
 }

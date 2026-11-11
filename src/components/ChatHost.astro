@@ -365,6 +365,14 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
       0 2px 5px rgb(0 0 0 / 0.08),
       0 14px 32px rgb(0 0 0 / 0.16);
   }
+  .chat-pill:focus-within {
+    border-color: var(--c-fg);
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--c-fg) 14%, transparent),
+      0 14px 32px rgb(0 0 0 / 0.16);
+    outline: 2px solid transparent;
+    outline-offset: 3px;
+  }
   .chat-pill-input {
     flex: 1;
     min-width: 0;
