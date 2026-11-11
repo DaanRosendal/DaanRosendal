@@ -36,6 +36,8 @@ const root = document.documentElement;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let turns: Turn[] = [];
 let draft = '';
+// One random id per conversation, kept with the saved turns, so the answers of one chat are saved together.
+let conversation = '';
 let widget: string | undefined;
 let pending: { resolve(token: string): void; reject(error: Error): void } | undefined;
 let turnstileLoading: Promise<void> | undefined;
@@ -61,6 +63,7 @@ function readStore() {
     if (!saved || !Array.isArray(saved.turns)) return;
     turns = saved.turns.filter((turn: Turn) => (turn?.role === 'user' || turn?.role === 'assistant') && typeof turn.content === 'string');
     draft = typeof saved.draft === 'string' ? saved.draft : '';
+    conversation = typeof saved.id === 'string' ? saved.id : '';
   } catch {
     // Storage can be blocked: the chat then just forgets between pages.
   }
@@ -70,10 +73,29 @@ function readStore() {
 function save() {
   try {
     const live = mode() !== undefined && turns.length > 0;
-    sessionStorage.setItem(STORE, JSON.stringify({ mode: live ? 'dock' : 'closed', turns: turns.slice(-12), draft }));
+    sessionStorage.setItem(STORE, JSON.stringify({ mode: live ? 'dock' : 'closed', turns: turns.slice(-12), draft, id: conversation }));
   } catch {
     // See readStore.
   }
+}
+
+// What the Worker saves about the conversation besides the text: where the question was typed, how the visitor
+// got to the site (the host only, and only when it is another site), and the window size and color scheme.
+function clientInfo(from?: 'pill') {
+  let referrer = '';
+  try {
+    const host = new URL(document.referrer).hostname;
+    if (host && host !== location.hostname) referrer = host;
+  } catch {
+    // No referrer.
+  }
+  return {
+    conversation,
+    source: from ?? (mode() === 'dock' ? 'dock' : 'full'),
+    referrer,
+    viewport: innerWidth < 640 ? 'phone' : innerWidth < 1024 ? 'tablet' : 'desktop',
+    scheme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+  };
 }
 
 // ---- Links to pages on this site ----
@@ -308,7 +330,7 @@ export async function send(text: string) {
   const parts = await ensureUi();
   setMode('full');
   requestAnimationFrame(parts.grow);
-  parts.submit(text);
+  parts.submit(text, 'pill');
 }
 
 // The page came back from the browser's back-forward cache: the saved state may be newer than the frozen page.
@@ -413,7 +435,7 @@ async function build() {
     submit(input.value);
   });
 
-  async function submit(raw: string) {
+  async function submit(raw: string, from?: 'pill') {
     const text = raw.trim();
     if (!text || busy) return;
     if (!navigator.onLine) {
@@ -435,10 +457,11 @@ async function build() {
     try {
       const turnstile = await humanToken(slot);
       const page = { path: location.pathname, title: document.title.replace(/ - Daan Rosendal$/, '') };
+      conversation ||= crypto.randomUUID();
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ messages: turns.slice(-MAX_HISTORY), turnstile, page }),
+        body: JSON.stringify({ messages: turns.slice(-MAX_HISTORY), turnstile, page, client: clientInfo(from) }),
       });
       if (!response.ok || !response.body) {
         const problem = await response.json().catch(() => null);

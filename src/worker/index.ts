@@ -1,5 +1,6 @@
 import context from './context.generated.txt';
 import { Limiter } from './limiter';
+import { clearOld, describeVisit, fingerprint, readClient, saveTurn, type Outcome, type TurnRecord } from './log';
 import { SYSTEM_PROMPT } from './prompt';
 
 export { Limiter };
@@ -103,37 +104,60 @@ function readMessages(value: unknown): ChatMessage[] | null {
   return messages.at(-1)?.role === 'user' ? messages : null;
 }
 
-// The last chunk of a Workers AI stream carries the token counts (and the neuron cost), when the model reports them.
-async function readUsage(stream: ReadableStream<Uint8Array>) {
+// Reads the copy of the stream that goes to the log: the answer text, why it stopped, when the first words came, and the
+// token counts (the last chunk carries them, and the neuron cost, when the model reports it).
+async function readStream(stream: ReadableStream<Uint8Array>, since: number) {
   const reader = stream.getReader();
   const decoder = new TextDecoder();
-  let tail = '';
+  let buffer = '';
+  let answer = '';
+  let finish = undefined as string | undefined;
+  let firstWords = undefined as number | undefined;
+  // Set inside the line handler, which the compiler does not follow, hence the cast.
+  let usage = null as { prompt: number; completion: number; neurons?: number } | null;
+
+  const handle = (line: string) => {
+    if (!line.startsWith('data:')) return;
+    const payload = line.slice(5).trim();
+    if (!payload || payload === '[DONE]') return;
+    let chunk;
+    try {
+      chunk = JSON.parse(payload);
+    } catch {
+      return;
+    }
+    const piece = chunk.choices?.[0]?.delta?.content ?? chunk.response;
+    if (typeof piece === 'string' && piece) {
+      firstWords ??= Date.now() - since;
+      answer += piece;
+    }
+    const reason = chunk.choices?.[0]?.finish_reason;
+    if (typeof reason === 'string') finish = reason;
+    const counts = chunk.usage;
+    if (typeof counts?.prompt_tokens === 'number' && typeof counts?.completion_tokens === 'number') {
+      usage = {
+        prompt: counts.prompt_tokens as number,
+        completion: counts.completion_tokens as number,
+        // Workers AI reports the exact cost of the request, when it does.
+        neurons: typeof counts.neurons === 'number' ? (counts.neurons as number) : undefined,
+      };
+    }
+  };
+
   try {
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
-      tail = (tail + decoder.decode(value, { stream: true })).slice(-4000);
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+      lines.forEach(handle);
     }
+    handle(buffer);
   } catch {
-    return null;
+    // A broken stream: keep what arrived.
   }
-  for (const line of tail.split('\n').reverse()) {
-    if (!line.startsWith('data:') || !line.includes('"usage"')) continue;
-    try {
-      const usage = JSON.parse(line.slice(5)).usage;
-      if (typeof usage?.prompt_tokens === 'number' && typeof usage?.completion_tokens === 'number') {
-        return {
-          prompt: usage.prompt_tokens as number,
-          completion: usage.completion_tokens as number,
-          // Workers AI reports the exact cost of the request, when it does.
-          neurons: typeof usage.neurons === 'number' ? (usage.neurons as number) : undefined,
-        };
-      }
-    } catch {
-      // Not the line we wanted.
-    }
-  }
-  return null;
+  return { answer, finish, firstWords, usage };
 }
 
 // A canned stream for local testing (DRY_RUN in .dev.vars), so the limits and the page can be tried for free.
@@ -184,7 +208,7 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
 
   const raw = await request.text();
   if (raw.length > MAX_BODY_CHARS) return reply(413, 'bad_request');
-  let body: { messages?: unknown; turnstile?: unknown; page?: unknown };
+  let body: { messages?: unknown; turnstile?: unknown; page?: unknown; client?: unknown };
   try {
     body = JSON.parse(raw);
   } catch {
@@ -201,6 +225,8 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
   }
 
   const page = readPage(body.page);
+  const client = readClient(body.client);
+  const question = history.at(-1)!.content;
   const system = page ? `${PROMPT}\nThe visitor is currently viewing the page "${page.title}" (${page.path}).\n` : PROMPT;
   const messages = [{ role: 'system', content: system }, ...history];
   const promptChars = messages.reduce((sum, message) => sum + message.content.length, 0);
@@ -209,6 +235,23 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
 
   const key = await visitorKey(ip, env.TURNSTILE_SECRET);
   const day = new Date().toISOString().slice(0, 10);
+  // Saves the question and what came of it, after the response has gone out. A failing database never touches the chat.
+  const save = (turn: Pick<TurnRecord, 'outcome'> & Partial<TurnRecord>) =>
+    ctx.waitUntil(
+      (async () => {
+        try {
+          await saveTurn(env.DB, client, describeVisit(request, key), {
+            startedAt: new Date(started).toISOString(),
+            entryPath: page?.path ?? null,
+            question,
+            promptVersion: await fingerprint(SYSTEM_PROMPT),
+            ...turn,
+          });
+        } catch (error) {
+          log({ outcome: 'db_error', error: String(error).slice(0, 200) });
+        }
+      })(),
+    );
   const limiter = env.LIMITER.get(env.LIMITER.idFromName(`d:${day}`));
 
   let verdict;
@@ -221,6 +264,7 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
   }
   if (!verdict.ok) {
     log({ outcome: verdict.reason, visitor: key.slice(0, 6) });
+    save({ outcome: verdict.reason });
     return reply(429, verdict.reason);
   }
 
@@ -228,10 +272,18 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
 
   if (env.DRY_RUN === '1') {
     ctx.waitUntil(limiter.settle(key, estimate, 0));
-    return new Response(dryRunStream(), { headers });
+    const [toVisitor, toLog] = dryRunStream().tee();
+    const began = Date.now();
+    ctx.waitUntil(
+      readStream(toLog, began).then((seen) =>
+        save({ outcome: 'answered', answer: seen.answer, finishReason: 'stop', model: 'dry-run', ttftMs: seen.firstWords, ms: Date.now() - began }),
+      ),
+    );
+    return new Response(toVisitor, { headers });
   }
 
   for (const model of MODELS) {
+    const began = Date.now();
     try {
       const result = await env.AI.run(
         model.id as keyof AiModels,
@@ -242,10 +294,23 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
       const [toVisitor, toMeter] = result.tee();
       ctx.waitUntil(
         (async () => {
-          const usage = await readUsage(toMeter);
+          const seen = await readStream(toMeter, began);
+          const { usage } = seen;
           const actual = usage ? (usage.neurons ?? (usage.prompt * model.input + usage.completion * model.output) / 1_000_000) : estimate;
           await limiter.settle(key, estimate, actual);
           log({ outcome: 'answered', model: model.id, visitor: key.slice(0, 6), estimate: Math.round(estimate), actual: Math.round(actual), usage: !!usage, ms: Date.now() - started });
+          const outcome: Outcome = !seen.answer ? 'ai_error' : seen.finish === 'length' ? 'truncated' : 'answered';
+          save({
+            outcome,
+            answer: seen.answer || undefined,
+            finishReason: seen.finish,
+            model: model.id,
+            promptTokens: usage?.prompt,
+            completionTokens: usage?.completion,
+            neurons: usage ? actual : undefined,
+            ttftMs: seen.firstWords,
+            ms: Date.now() - began,
+          });
         })(),
       );
       return new Response(toVisitor, { headers });
@@ -256,6 +321,7 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
       // Error 3040 (out of capacity) is momentary, so it only fails this one request.
       if (/3036|daily free allocation/i.test(message)) {
         ctx.waitUntil(Promise.all([limiter.exhaust(), limiter.settle(key, estimate, 0)]));
+        save({ outcome: 'global', model: model.id });
         return reply(429, 'global');
       }
       // Model deprecated (5028) or not free anymore (5035): try the next one.
@@ -264,6 +330,7 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
     }
   }
   ctx.waitUntil(limiter.settle(key, estimate, 0));
+  save({ outcome: 'ai_error' });
   return reply(502, 'unavailable');
 }
 
@@ -275,5 +342,13 @@ export default {
       status: 404,
       headers: { ...HEADERS, 'content-type': 'application/json; charset=utf-8' },
     });
+  },
+  // The daily cron (wrangler.jsonc): chats older than 90 days lose the columns that point to a person.
+  async scheduled(_controller, env, ctx) {
+    ctx.waitUntil(
+      clearOld(env.DB)
+        .then((conversations) => log({ outcome: 'cleared', conversations }))
+        .catch((error) => log({ outcome: 'clear_error', error: String(error).slice(0, 200) })),
+    );
   },
 } satisfies ExportedHandler<Env>;

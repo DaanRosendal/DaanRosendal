@@ -16,5 +16,12 @@
     "bindings": [{ "name": "LIMITER", "class_name": "Limiter" }]
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Limiter"] }],
+  // The saved chats (schema in migrations/). The id below is a placeholder for local runs: create the real database in the
+  // EU (`npx wrangler d1 create daanrosendal-chats --jurisdiction eu`), put its id here, and apply the migrations with --remote.
+  "d1_databases": [
+    { "binding": "DB", "database_name": "daanrosendal-chats", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+  ],
+  // Every day at 03:17 UTC: chats older than 90 days lose the columns that point to a person (src/worker/log.ts).
+  "triggers": { "crons": ["17 3 * * *"] },
   "observability": { "enabled": true }
 }
