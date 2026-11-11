@@ -72,7 +72,7 @@ npm run build && npx wrangler dev   # Run the site and the chat Worker locally o
 │       └── global.css     # @import "tailwindcss"
 ├── migrations/            # D1 schema for the saved chats (see Chat), applied with wrangler d1 migrations apply
 ├── public/
-│   ├── _redirects         # Old site URLs (/portfolio, /resumes/..., /achievements/...) redirected to current ones, plus the /go/ tracked links
+│   ├── _redirects         # Old site URLs (/portfolio, /home, /contact, /resumes/..., /achievements/...) redirected to current ones, plus the /go/ tracked links
 │   ├── _headers           # Cache rules and the security headers
 │   ├── og.png             # Social preview image
 │   ├── media/cat/         # The 404 page's cat photos, one 540 x 720 WebP each
