@@ -161,13 +161,18 @@ function loadTurnstile() {
 async function humanToken(slot: HTMLElement) {
   await loadTurnstile();
   const turnstile = window.turnstile!;
+  delete slot.dataset.done;
   if (!widget) {
     widget = turnstile.render(slot, {
       sitekey: SITEKEY,
       action: 'chat',
       appearance: 'interaction-only',
       execution: 'execute',
-      callback: (token: string) => pending?.resolve(token),
+      callback: (token: string) => {
+        pending?.resolve(token);
+        // The "Success!" box would otherwise stay on screen until the next message.
+        setTimeout(() => (slot.dataset.done = ''), 700);
+      },
       'error-callback': () => pending?.reject(new Error('The human check failed. Please reload the page and try again.')),
       'expired-callback': () => pending?.reject(new Error('The human check expired. Please try again.')),
       'timeout-callback': () => pending?.reject(new Error('The human check timed out. Please try again.')),

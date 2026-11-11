@@ -51,7 +51,8 @@
     opacity: 0.45;
   }
 }
-.chat-turnstile:empty {
+.chat-turnstile:empty,
+.chat-turnstile[data-done] {
   display: none;
 }
 .chat-turnstile {
