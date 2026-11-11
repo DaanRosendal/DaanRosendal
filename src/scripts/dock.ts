@@ -8,7 +8,7 @@ const KEY = 'chat:dock';
 const KEYS = ['r', 'b', 'w', 'h'] as const;
 type Key = (typeof KEYS)[number];
 type Geo = Partial<Record<Key, number>>;
-type Edge = 'n' | 'w' | 'nw';
+type Edge = 'n' | 's' | 'w' | 'e' | 'nw' | 'ne' | 'sw' | 'se';
 
 const root = document.documentElement;
 // The phone's one-line bar and a short window keep the default dock.
@@ -60,9 +60,19 @@ export function resetDock() {
   write({});
 }
 
-const CURSORS: Record<Edge | 'move', string> = { move: 'grabbing', n: 'ns-resize', w: 'ew-resize', nw: 'nwse-resize' };
+const CURSORS: Record<Edge | 'move', string> = {
+  move: 'grabbing',
+  n: 'ns-resize',
+  s: 'ns-resize',
+  w: 'ew-resize',
+  e: 'ew-resize',
+  nw: 'nwse-resize',
+  se: 'nwse-resize',
+  ne: 'nesw-resize',
+  sw: 'nesw-resize',
+};
 
-/** Adds the three resize handles and the header drag. `resized` runs after a resize, so the text box and the log can catch up. */
+/** Adds the eight resize handles (four edges, four corners) and the header drag. `resized` runs after a resize, so the text box and the log can catch up. */
 export function attachDock(panel: HTMLElement, resized: () => void) {
   const head = panel.querySelector<HTMLElement>('.chat-head')!;
 
@@ -94,7 +104,8 @@ export function attachDock(panel: HTMLElement, resized: () => void) {
           moved = true;
           root.classList.add('chat-dragging');
           root.style.setProperty('--drag-cursor', CURSORS[kind]);
-          root.dataset.dockEdge = kind;
+          // The edges that move, one letter each ("n e"), so the stylesheet can light them.
+          if (kind !== 'move') root.dataset.dockEdge = [...kind].join(' ');
         }
         if (kind === 'move') {
           next.r = clamp(from.r - dx, margin, width - from.w - margin);
@@ -103,8 +114,19 @@ export function attachDock(panel: HTMLElement, resized: () => void) {
           if (Math.abs(next.r - unit) < 12) next.r = unit;
           if (Math.abs(next.b - unit) < 12) next.b = unit;
         } else {
-          if (kind.includes('w')) next.w = clamp(from.w - dx, 21 * unit, Math.min(40 * unit, width - from.r - margin));
-          if (kind.includes('n')) next.h = clamp(from.h - dy, 20 * unit, height - from.b - margin);
+          // The edge opposite to the one being dragged stays where it is, and nothing leaves the window (the margin).
+          const minW = 21 * unit;
+          const minH = 20 * unit;
+          if (kind.includes('w')) next.w = clamp(from.w - dx, minW, width - from.r - margin);
+          if (kind.includes('e')) {
+            next.w = clamp(from.w + dx, minW, from.w + from.r - margin);
+            next.r = from.r - (next.w - from.w);
+          }
+          if (kind.includes('n')) next.h = clamp(from.h - dy, minH, height - from.b - margin);
+          if (kind.includes('s')) {
+            next.h = clamp(from.h + dy, minH, from.h + from.b - margin);
+            next.b = from.b - (next.h - from.h);
+          }
         }
         frame ||= requestAnimationFrame(show);
       },
@@ -138,7 +160,7 @@ export function attachDock(panel: HTMLElement, resized: () => void) {
     gesture(event, head, 'move');
   });
 
-  for (const edge of ['n', 'w', 'nw'] as const) {
+  for (const edge of ['n', 's', 'w', 'e', 'nw', 'ne', 'sw', 'se'] as const) {
     const handle = document.createElement('div');
     handle.className = `chat-h chat-h-${edge}`;
     handle.setAttribute('aria-hidden', 'true');

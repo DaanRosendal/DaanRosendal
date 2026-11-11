@@ -368,7 +368,8 @@ html[data-chat='full'] .chat-input {
   font-style: italic;
 }
 
-/* Moving and resizing the dock (dock.ts): only with room to spare, never on the phone's one-line bar. */
+/* Moving and resizing the dock (dock.ts): only with room to spare, never on the phone's one-line bar. Every edge and corner
+   is a handle. The corners are 1.75rem squares (2.5rem on touch screens) and the edges run between them. Hovering one lights it (nothing shows at rest). */
 .chat-h {
   --grip: var(--c-muted);
   display: none;
@@ -385,50 +386,123 @@ html[data-chat='full'] .chat-input {
     z-index: 3;
     touch-action: none;
   }
+  /* The buttons and the message field stay usable where a corner handle overlaps them, and the corner is still grabbable around them. */
+  html[data-chat='dock'] .chat-head {
+    padding-right: 0.9rem;
+  }
+  html[data-chat='dock'] .chat-head .chat-btn,
+  html[data-chat='dock'] .chat-input,
+  html[data-chat='dock'] .chat-send {
+    position: relative;
+    z-index: 4;
+  }
+  /* Keeps the log's scrollbar off the right edge handle. */
+  html[data-chat='dock'] .chat-log {
+    margin-right: 0.5rem;
+  }
   .chat-h-n {
     top: 0;
-    left: 1.25rem;
-    right: 0;
-    height: 0.5rem;
+    left: 1.75rem;
+    right: 1.75rem;
+    height: 0.625rem;
+    cursor: ns-resize;
+  }
+  .chat-h-s {
+    bottom: 0;
+    left: 1.75rem;
+    right: 1.75rem;
+    height: 0.625rem;
     cursor: ns-resize;
   }
   .chat-h-w {
     left: 0;
-    top: 1.25rem;
-    bottom: 0;
-    width: 0.5rem;
+    top: 1.75rem;
+    bottom: 1.75rem;
+    width: 0.625rem;
+    cursor: ew-resize;
+  }
+  .chat-h-e {
+    right: 0;
+    top: 1.75rem;
+    bottom: 1.75rem;
+    width: 0.625rem;
     cursor: ew-resize;
   }
   .chat-h-nw {
-    left: 0;
     top: 0;
-    width: 1.25rem;
-    height: 1.25rem;
+    left: 0;
+    width: 1.75rem;
+    height: 1.75rem;
     cursor: nwse-resize;
   }
-  /* The corner mark: the window's own rounded corner, lit. It sits on the border, so it never covers the avatar or the text.
-     It shows only over the handle (or while dragging), so nothing sits on the window at rest. */
-  .chat-h-nw::before {
+  .chat-h-ne {
+    top: 0;
+    right: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    cursor: nesw-resize;
+  }
+  .chat-h-sw {
+    bottom: 0;
+    left: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    cursor: nesw-resize;
+  }
+  .chat-h-se {
+    bottom: 0;
+    right: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    cursor: nwse-resize;
+  }
+  /* The corner mark: the window's own rounded corner, lit. It sits on the border, so it never covers the avatar or the text. */
+  .chat-h-nw::before,
+  .chat-h-ne::before,
+  .chat-h-sw::before,
+  .chat-h-se::before {
     content: '';
     position: absolute;
-    left: 0;
-    top: 0;
-    width: 1.25rem;
-    height: 1.25rem;
-    border-left: 2px solid var(--grip);
-    border-top: 2px solid var(--grip);
-    border-top-left-radius: calc(1rem - 1px);
+    inset: 0;
     opacity: 0;
     transition: opacity 0.15s;
     forced-color-adjust: none;
   }
+  .chat-h-nw::before {
+    border-left: 2px solid var(--grip);
+    border-top: 2px solid var(--grip);
+    border-top-left-radius: calc(1rem - 1px);
+  }
+  .chat-h-ne::before {
+    border-right: 2px solid var(--grip);
+    border-top: 2px solid var(--grip);
+    border-top-right-radius: calc(1rem - 1px);
+  }
+  .chat-h-sw::before {
+    border-left: 2px solid var(--grip);
+    border-bottom: 2px solid var(--grip);
+    border-bottom-left-radius: calc(1rem - 1px);
+  }
+  .chat-h-se::before {
+    border-right: 2px solid var(--grip);
+    border-bottom: 2px solid var(--grip);
+    border-bottom-right-radius: calc(1rem - 1px);
+  }
   html[data-chat='dock'] .chat .chat-h-nw:hover::before,
-  html[data-chat][data-dock-edge='nw'] .chat .chat-h-nw::before {
+  html[data-chat][data-dock-edge='n w'] .chat .chat-h-nw::before,
+  html[data-chat='dock'] .chat .chat-h-ne:hover::before,
+  html[data-chat][data-dock-edge='n e'] .chat .chat-h-ne::before,
+  html[data-chat='dock'] .chat .chat-h-sw:hover::before,
+  html[data-chat][data-dock-edge='s w'] .chat .chat-h-sw::before,
+  html[data-chat='dock'] .chat .chat-h-se:hover::before,
+  html[data-chat][data-dock-edge='s e'] .chat .chat-h-se::before {
     opacity: 0.9;
   }
-  /* The edge highlight: a soft line along the edge that a drag from here would move. The corner lights both of its edges. */
+  /* The edge highlight: a soft line along the edge that a drag from here would move. A corner lights both of its edges. */
   .chat-h-n::after,
-  .chat-h-w::after {
+  .chat-h-s::after,
+  .chat-h-w::after,
+  .chat-h-e::after {
     content: '';
     position: absolute;
     border-radius: 2px;
@@ -437,44 +511,67 @@ html[data-chat='full'] .chat-input {
     transition: opacity 0.15s;
     forced-color-adjust: none;
   }
-  .chat-h-n::after {
+  .chat-h-n::after,
+  .chat-h-s::after {
     left: 0;
-    right: 1rem;
-    top: 0;
+    right: 0;
     height: 2px;
   }
-  .chat-h-w::after {
+  .chat-h-n::after {
     top: 0;
-    bottom: 1rem;
-    left: 0;
+  }
+  .chat-h-s::after {
+    bottom: 0;
+  }
+  .chat-h-w::after,
+  .chat-h-e::after {
+    top: 0;
+    bottom: 0;
     width: 2px;
+  }
+  .chat-h-w::after {
+    left: 0;
+  }
+  .chat-h-e::after {
+    right: 0;
   }
   .chat-h-n:hover::after,
   .chat:has(.chat-h-nw:hover) .chat-h-n::after,
-  html[data-dock-edge='n'] .chat-h-n::after,
-  html[data-dock-edge='nw'] .chat-h-n::after,
+  .chat:has(.chat-h-ne:hover) .chat-h-n::after,
+  html[data-dock-edge~='n'] .chat-h-n::after,
+  .chat-h-s:hover::after,
+  .chat:has(.chat-h-sw:hover) .chat-h-s::after,
+  .chat:has(.chat-h-se:hover) .chat-h-s::after,
+  html[data-dock-edge~='s'] .chat-h-s::after,
   .chat-h-w:hover::after,
   .chat:has(.chat-h-nw:hover) .chat-h-w::after,
-  html[data-dock-edge='w'] .chat-h-w::after,
-  html[data-dock-edge='nw'] .chat-h-w::after {
+  .chat:has(.chat-h-sw:hover) .chat-h-w::after,
+  html[data-dock-edge~='w'] .chat-h-w::after,
+  .chat-h-e:hover::after,
+  .chat:has(.chat-h-ne:hover) .chat-h-e::after,
+  .chat:has(.chat-h-se:hover) .chat-h-e::after,
+  html[data-dock-edge~='e'] .chat-h-e::after {
     opacity: 0.55;
   }
   @media (pointer: coarse) {
-    .chat-h-n {
-      left: 2rem;
-      height: 0.75rem;
+    .chat-h-n,
+    .chat-h-s {
+      left: 2.5rem;
+      right: 2.5rem;
+      height: 0.875rem;
     }
-    .chat-h-w {
-      top: 2rem;
-      width: 0.75rem;
+    .chat-h-w,
+    .chat-h-e {
+      top: 2.5rem;
+      bottom: 2.5rem;
+      width: 0.875rem;
     }
-    .chat-h-nw {
-      width: 2rem;
-      height: 2rem;
-    }
-    .chat-h-nw::before {
-      width: 2rem;
-      height: 2rem;
+    .chat-h-nw,
+    .chat-h-ne,
+    .chat-h-sw,
+    .chat-h-se {
+      width: 2.5rem;
+      height: 2.5rem;
     }
   }
 }
