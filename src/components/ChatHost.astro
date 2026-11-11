@@ -127,7 +127,9 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
   }
 
   .chat,
+  .chat-grab,
   .chat-pill-wrap {
+    --c-ground: rgb(0 0 0 / 0.3);
     --c-bg: #fff;
     /* Text on a --c-fg button: the window color, which --c-bg no longer is in full screen (there it is transparent). */
     --c-on-fg: #fff;
@@ -139,7 +141,9 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
   }
   @media (prefers-color-scheme: dark) {
     .chat,
+    .chat-grab,
     .chat-pill-wrap {
+      --c-ground: rgb(0 0 0 / 0.75);
       --c-bg: #171717;
       --c-on-fg: #171717;
       --c-fg: #fff;
@@ -301,6 +305,26 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
   .chat-pill-wrap:focus-within {
     animation-play-state: running, paused;
   }
+  /* The ground shadow: a blurred ellipse under the pill that stays put while the pill bobs, and gets smaller and lighter
+     as the pill rises, so it reads as floating. It rides the same timing as chat-float. */
+  .chat-pill-wrap::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 8%;
+    right: 8%;
+    bottom: -0.8rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    background: var(--c-ground);
+    filter: blur(8px);
+    pointer-events: none;
+    animation: chat-ground 6s ease-in-out 0.9s infinite;
+  }
+  .chat-pill-wrap:hover::after,
+  .chat-pill-wrap:focus-within::after {
+    animation-play-state: paused;
+  }
   html[data-off] .chat-pill-wrap {
     display: none;
   }
@@ -317,6 +341,13 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
   @keyframes chat-float {
     50% {
       transform: translateY(-3px);
+    }
+  }
+  /* The ground shadow answers the bob: opposite lift keeps it still on the page, smaller and lighter while the object is up. */
+  @keyframes chat-ground {
+    50% {
+      transform: translateY(3px) scale(0.9);
+      opacity: 0.6;
     }
   }
   @keyframes chat-float-dock {
@@ -449,6 +480,9 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
       transition: none;
     }
     html[data-chat='dock'] .chat {
+      animation: none;
+    }
+    .chat-pill-wrap::after {
       animation: none;
     }
     .chat-pill-wrap {

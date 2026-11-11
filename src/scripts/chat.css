@@ -422,6 +422,30 @@ html[data-chat='full'] .chat-input {
     pointer-events: auto;
     touch-action: none;
   }
+  /* The dock's ground shadow, in the layer behind the window (the window clips its own children): it stays put while the window
+     bobs and gets smaller and lighter while it is up. Same timing as the dock's float. */
+  .chat-ground {
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    bottom: -0.9rem;
+    height: 1.3rem;
+    border-radius: 50%;
+    background: var(--c-ground);
+    filter: blur(9px);
+    pointer-events: none;
+    animation: chat-ground 7s ease-in-out infinite;
+  }
+  html:has(.chat:hover) .chat-ground,
+  html:has(.chat:focus-within) .chat-ground,
+  html.chat-dragging .chat-ground {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chat-ground {
+      animation: none;
+    }
+  }
   .chat-h-n {
     top: 0;
     left: 1.75rem;

@@ -174,5 +174,8 @@ export function attachDock(panel: HTMLElement, resized: () => void) {
       parent.append(handle);
     }
   }
+  const ground = document.createElement('div');
+  ground.className = 'chat-ground';
+  grab.prepend(ground);
   document.body.append(grab);
 }
