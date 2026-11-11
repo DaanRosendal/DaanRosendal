@@ -72,7 +72,7 @@
   resize: none;
   overflow-y: hidden;
   min-height: 2.6rem;
-  padding: 0.55rem 0.9rem;
+  padding: 0.5rem 0.9rem;
   border: 1px solid var(--c-line);
   border-radius: 1.1rem;
   background: transparent;
@@ -87,7 +87,9 @@
 .chat-send {
   flex: none;
   cursor: pointer;
-  padding: 0.55rem 1.1rem;
+  /* As tall as a one-line input (its min-height), and it stays at the bottom while the input grows. */
+  height: 2.625rem;
+  padding: 0 1.2rem;
   border-radius: 999px;
   background: var(--c-fg);
   color: var(--c-bg);
