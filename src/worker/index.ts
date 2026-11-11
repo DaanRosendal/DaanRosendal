@@ -1,6 +1,7 @@
 import context from './context.generated.txt';
 import { Limiter } from './limiter';
-import { clearOld, describeVisit, fingerprint, readClient, saveTurn, type Outcome, type TurnRecord } from './log';
+import { describePing, pingTelegram } from './notify';
+import { clearOld,describeVisit, fingerprint, readClient, saveTurn, type Outcome, type TurnRecord } from './log';
 import { SYSTEM_PROMPT } from './prompt';
 
 export { Limiter };
@@ -239,8 +240,13 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
   const save = (turn: Pick<TurnRecord, 'outcome'> & Partial<TurnRecord>) =>
     ctx.waitUntil(
       (async () => {
+        const visit = describeVisit(request, key);
+        // One ping per conversation (its first question), and none for visitors who hit a limit.
+        if (history.length === 1 && !turn.outcome.startsWith('ip_')) {
+          ctx.waitUntil(pingTelegram(env, describePing(visit, page?.path ?? null, question)));
+        }
         try {
-          await saveTurn(env.DB, client, describeVisit(request, key), {
+          await saveTurn(env.DB, client, visit, {
             startedAt: new Date(started).toISOString(),
             entryPath: page?.path ?? null,
             question,
