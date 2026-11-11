@@ -92,7 +92,7 @@
   padding: 0 1.2rem;
   border-radius: 999px;
   background: var(--c-fg);
-  color: var(--c-bg);
+  color: var(--c-on-fg);
   font-size: 0.875rem;
   font-weight: 600;
 }

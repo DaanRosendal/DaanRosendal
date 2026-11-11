@@ -129,6 +129,8 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
   .chat,
   .chat-pill-wrap {
     --c-bg: #fff;
+    /* Text on a --c-fg button: the window color, which --c-bg no longer is in full screen (there it is transparent). */
+    --c-on-fg: #fff;
     --c-fg: #111827;
     --c-muted: #4b5563;
     --c-line: #d1d5db;
@@ -139,6 +141,7 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
     .chat,
     .chat-pill-wrap {
       --c-bg: #171717;
+      --c-on-fg: #171717;
       --c-fg: #fff;
       --c-muted: #a3a3a3;
       --c-line: #404040;
