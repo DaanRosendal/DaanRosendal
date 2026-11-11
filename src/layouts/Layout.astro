@@ -32,7 +32,7 @@ const ogImage = new URL('/og.png', Astro.site);
     <meta property="og:image:alt" content="Daan Rosendal, Software Engineer, Zürich" />
     <meta name="twitter:card" content="summary_large_image" />
     {noindex && <meta name="robots" content="noindex" />}
-    {chat && <script is:inline>try{var d=document.documentElement,s=JSON.parse(sessionStorage.getItem('chat:v1'));if(s&&s.mode==='dock')d.dataset.chat='dock';var o=+localStorage.getItem('chat:off');if(o&&Date.now()-o<2592e6)d.dataset.off=''}catch(e){}</script>}
+    {chat && <script is:inline>try{var d=document.documentElement,s=JSON.parse(sessionStorage.getItem('chat:v1'));if(s&&s.mode==='dock')d.dataset.chat='dock'}catch(e){}try{var o=+localStorage.getItem('chat:off');if(o&&Date.now()-o<2592e6)d.dataset.off='';var g=JSON.parse(localStorage.getItem('chat:dock'));['r','b','w','h'].forEach(function(k){if(typeof g[k]=='number'&&isFinite(g[k])){d.style.setProperty('--s-'+k,g[k]+'px');d.dataset.dockCustom=''}})}catch(e){}</script>}
   </head>
   <body class:list={["max-w-3xl mx-auto px-6 py-12 bg-white text-gray-900 dark:bg-neutral-900 dark:text-white", chat && "pb-24"]}>
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:text-gray-900 focus:shadow dark:focus:bg-neutral-800 dark:focus:text-white">Skip to content</a>

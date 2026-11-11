@@ -128,11 +128,9 @@ html[data-chat='full'] .chat-input {
     clip-path 0.45s cubic-bezier(0.22, 0.8, 0.3, 1);
 }
 /* To and from the dock the water does not sink: it is clipped to the dock window (the same box as the dock in
-   ChatHost.astro) and the window grows or shrinks around it. */
+   ChatHost.astro, from the same --dock-* variables) and the window grows or shrinks around it. */
 .chat-sea.docking {
-  --dw: min(23rem, calc(100% - 2rem));
-  --dh: min(30rem, calc(100dvh - 2rem));
-  clip-path: inset(calc(100dvh - var(--dh) - 1rem) 1rem 1rem calc(100% - var(--dw) - 1rem) round 1rem);
+  clip-path: inset(calc(100dvh - var(--dock-h) - var(--dock-b)) var(--dock-r) var(--dock-b) calc(100% - var(--dock-w) - var(--dock-r)) round 1rem);
 }
 @media (max-width: 40rem) {
   .chat-sea.docking {
@@ -351,4 +349,98 @@ html[data-chat='full'] .chat-input {
 .shj-syn-cmnt {
   color: var(--c-muted);
   font-style: italic;
+}
+
+/* Moving and resizing the dock (dock.ts): only with room to spare, never on the phone's one-line bar. */
+.chat-h {
+  display: none;
+}
+@media (min-width: 40.0625rem) and (min-height: 34rem) {
+  html[data-chat='dock'] .chat-head {
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+  html[data-chat='dock'] .chat-h {
+    display: block;
+    position: absolute;
+    z-index: 3;
+    touch-action: none;
+  }
+  .chat-h-n {
+    top: 0;
+    left: 1.25rem;
+    right: 0;
+    height: 0.5rem;
+    cursor: ns-resize;
+  }
+  .chat-h-w {
+    left: 0;
+    top: 1.25rem;
+    bottom: 0;
+    width: 0.5rem;
+    cursor: ew-resize;
+  }
+  .chat-h-nw {
+    left: 0;
+    top: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: nwse-resize;
+  }
+  /* A small corner arc that hints at the handle: on hover, and always on touch screens. */
+  .chat-h-nw::before {
+    content: '';
+    position: absolute;
+    left: 0.45rem;
+    top: 0.45rem;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-left: 2px solid var(--c-muted);
+    border-top: 2px solid var(--c-muted);
+    border-top-left-radius: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  html[data-chat='dock'] .chat:hover .chat-h-nw::before,
+  html[data-chat='dock'] .chat:focus-within .chat-h-nw::before {
+    opacity: 0.55;
+  }
+  html.chat-dragging .chat-h-nw::before {
+    opacity: 0.55;
+  }
+  @media (pointer: coarse) {
+    .chat-h-n {
+      left: 2rem;
+      height: 0.75rem;
+    }
+    .chat-h-w {
+      top: 2rem;
+      width: 0.75rem;
+    }
+    .chat-h-nw {
+      width: 2rem;
+      height: 2rem;
+    }
+    .chat-h-nw::before {
+      opacity: 0.55;
+    }
+  }
+}
+/* While the window follows the pointer it must not lag behind it. */
+html.chat-dragging {
+  user-select: none;
+}
+html.chat-dragging * {
+  cursor: var(--drag-cursor, grabbing) !important;
+}
+html.chat-dragging .chat {
+  transition: none;
+  border-color: var(--c-muted);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.28);
+}
+@media (forced-colors: active) {
+  .chat-h-nw::before {
+    border-color: Highlight;
+  }
 }

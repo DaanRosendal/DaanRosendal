@@ -1,5 +1,5 @@
 ---
-import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
+import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
 ---
 
 <!-- The chat's static shell. The whole chat is driven by html[data-chat] (open, full, dock; absent means closed), which an
@@ -20,6 +20,7 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
   <header class="chat-head">
     <img class="chat-avatar" src="/media/cat/junior-clean.webp" alt="" width="32" height="32" loading="lazy" decoding="async" />
     <h2 class="chat-title">Junior</h2>
+    <button type="button" class="chat-btn chat-btn-reset" data-chat-act="reset" aria-label="Reset the chat position and size" title="Reset position and size"><RotateCcw size={16} aria-hidden="true" /></button>
     <button type="button" class="chat-btn chat-btn-expand" data-chat-act="expand" aria-label="Expand the chat"><Maximize2 size={16} aria-hidden="true" /></button>
     <button type="button" class="chat-btn chat-btn-min" data-chat-act="minimise" aria-label="Minimise the chat"><Minimize2 size={16} aria-hidden="true" /></button>
     <button type="button" class="chat-btn" data-chat-act="close" aria-label="Close the chat"><X size={16} aria-hidden="true" /></button>
@@ -100,6 +101,16 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
     view-transition-name: chat;
   }
 
+  /* The dock's box, shared by the window and the water's clip (chat.css). --s-r, --s-b, --s-w and --s-h are the visitor's
+     saved distance from the right and bottom edge and size in px (set by the head script in Layout and by dock.ts). They
+     are only clamped here, never rewritten: a window shrunk and enlarged again returns to the saved place. */
+  html {
+    --dock-w: min(max(var(--s-w, 23rem), 21rem), 100% - 1rem);
+    --dock-h: min(max(var(--s-h, 30rem), 20rem), 100dvh - 1rem);
+    --dock-r: clamp(0.5rem, var(--s-r, 1rem), calc(100% - var(--dock-w) - 0.5rem));
+    --dock-b: clamp(0.5rem, var(--s-b, 1rem), calc(100dvh - var(--dock-h) - 0.5rem));
+  }
+
   .chat,
   .chat-pill-wrap {
     --c-bg: #fff;
@@ -147,10 +158,10 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
     display: flex;
   }
   html[data-chat='dock'] .chat {
-    --w: min(23rem, calc(100% - 2rem));
-    --h: min(30rem, calc(100dvh - 2rem));
-    --x: calc(100% - var(--w) - 1rem);
-    --y: calc(100dvh - var(--h) - 1rem);
+    --w: var(--dock-w);
+    --h: var(--dock-h);
+    --x: calc(100% - var(--w) - var(--dock-r));
+    --y: calc(100dvh - var(--h) - var(--dock-b));
   }
   html[data-chat='full'] .chat {
     --c-bg: transparent;
@@ -227,8 +238,14 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
     transition-duration: 0.12s;
   }
   .chat-btn-expand,
-  .chat-btn-min {
+  .chat-btn-min,
+  .chat-btn-reset {
     display: none;
+  }
+  @media (min-width: 40.0625rem) {
+    html[data-chat='dock'][data-dock-custom] .chat-btn-reset {
+      display: grid;
+    }
   }
   html[data-chat='dock'] .chat-btn-expand,
   html[data-chat='full'] .chat-btn-min {
@@ -252,7 +269,7 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
     left: 50%;
     bottom: 1.25rem;
     translate: -50% 0;
-    width: min(22rem, calc(100% - 2rem));
+    width: min(32rem, calc(100% - 2rem));
     opacity: 0;
     pointer-events: none;
     animation: chat-fade 0.6s ease 1.5s forwards;
@@ -333,13 +350,19 @@ import { ArrowUp, Maximize2, Minimize2, X } from '@lucide/astro';
     bottom: -0.55rem;
     display: grid;
     place-items: center;
-    width: 1.4rem;
-    height: 1.4rem;
+    width: 1.5rem;
+    height: 1.5rem;
     border-radius: 999px;
     border: 1px solid var(--c-line);
     background: var(--c-bg);
     color: var(--c-muted);
     cursor: pointer;
+  }
+  /* A bigger target than the 24px circle, growing outward only so it never covers the send button. */
+  .chat-pill-x::after {
+    content: '';
+    position: absolute;
+    inset: -0.4rem -0.4rem -0.4rem 0;
   }
   .chat-pill-x:hover {
     color: var(--c-fg);

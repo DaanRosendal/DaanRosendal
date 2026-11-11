@@ -5,6 +5,7 @@
 import { createRenderer } from '../vendor/limmat';
 import limmatCss from '../vendor/limmat/style.css?inline';
 import css from './chat.css?inline';
+import { applyDock, attachDock, resetDock } from './dock';
 
 const SITEKEY = ['localhost', '127.0.0.1'].includes(location.hostname) ? '1x00000000000000000000AA' : '0x4AAAAAAF5IJpF-SESG-Kls';
 const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
@@ -324,6 +325,12 @@ export async function act(action: string) {
   } else if (action === 'minimise') {
     setMode('dock');
     focusSoon(parts.panel.querySelector<HTMLElement>('.chat-btn-expand'));
+  } else if (action === 'reset') {
+    resetDock();
+    setTimeout(() => {
+      parts.grow();
+      parts.scroll();
+    }, 480);
   } else if (action === 'close') {
     setMode(undefined);
     focusSoon(document.querySelector<HTMLElement>('.chat-pill-input'));
@@ -341,6 +348,7 @@ export async function send(text: string) {
 // The page came back from the browser's back-forward cache: the saved state may be newer than the frozen page.
 export function sync() {
   readStore();
+  applyDock();
   if (!ui) return;
   ui.renderAll();
   try {
@@ -503,6 +511,10 @@ async function build() {
 
   body.append(log, slot, form);
   renderAll();
+  attachDock(panel, () => {
+    grow();
+    scroll();
+  });
 
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape' || event.defaultPrevented) return;
