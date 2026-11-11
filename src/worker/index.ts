@@ -241,18 +241,20 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(
       (async () => {
         const visit = describeVisit(request, key);
-        // One ping per conversation (its first question), and none for visitors who hit a limit.
-        if (history.length === 1 && !turn.outcome.startsWith('ip_')) {
-          ctx.waitUntil(pingTelegram(env, describePing(visit, page?.path ?? null, question)));
+        const record = {
+          startedAt: new Date(started).toISOString(),
+          entryPath: page?.path ?? null,
+          question,
+          promptVersion: await fingerprint(SYSTEM_PROMPT),
+          ...turn,
+        };
+        // A ping for every question and its answer, but none for a visitor who hit a limit (that could be a flood).
+        if (!record.outcome.startsWith('ip_')) {
+          const turnNumber = history.filter((message) => message.role === 'user').length;
+          ctx.waitUntil(pingTelegram(env, describePing({ turnNumber, visit, client, turn: record })));
         }
         try {
-          await saveTurn(env.DB, client, visit, {
-            startedAt: new Date(started).toISOString(),
-            entryPath: page?.path ?? null,
-            question,
-            promptVersion: await fingerprint(SYSTEM_PROMPT),
-            ...turn,
-          });
+          await saveTurn(env.DB, client, visit, record);
         } catch (error) {
           log({ outcome: 'db_error', error: String(error).slice(0, 200) });
         }
