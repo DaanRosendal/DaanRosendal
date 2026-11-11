@@ -127,6 +127,7 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
   }
 
   .chat,
+  .chat-floor,
   .chat-grab,
   .chat-pill-wrap {
     --c-ground: rgb(0 0 0 / 0.3);
@@ -141,6 +142,7 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
   }
   @media (prefers-color-scheme: dark) {
     .chat,
+    .chat-floor,
     .chat-grab,
     .chat-pill-wrap {
       --c-ground: rgb(0 0 0 / 0.75);
@@ -182,6 +184,7 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
     display: flex;
   }
   html[data-chat='dock'] .chat,
+  html[data-chat='dock'] .chat-floor,
   html[data-chat='dock'] .chat-grab {
     --w: var(--dock-w);
     --h: var(--dock-h);

@@ -160,7 +160,7 @@ export function attachDock(panel: HTMLElement, resized: () => void) {
     gesture(event, head, 'move');
   });
 
-  // Each handle twice: inside the window, and in a layer behind it that reaches a little outside (see chat.css).
+  // Each handle twice: inside the window, and in a frame above it that reaches a little outside (see chat.css).
   const grab = document.createElement('div');
   grab.className = 'chat-grab';
   grab.setAttribute('aria-hidden', 'true');
@@ -174,8 +174,12 @@ export function attachDock(panel: HTMLElement, resized: () => void) {
       parent.append(handle);
     }
   }
+  // Below the window: the ground shadow (see chat.css).
+  const floor = document.createElement('div');
+  floor.className = 'chat-floor';
+  floor.setAttribute('aria-hidden', 'true');
   const ground = document.createElement('div');
   ground.className = 'chat-ground';
-  grab.prepend(ground);
-  document.body.append(grab);
+  floor.append(ground);
+  document.body.append(floor, grab);
 }

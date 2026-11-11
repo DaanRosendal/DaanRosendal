@@ -369,14 +369,17 @@ html[data-chat='full'] .chat-input {
 }
 
 /* Moving and resizing the dock (dock.ts): only with room to spare, never on the phone's one-line bar. Every edge and corner
-   is a handle, twice: inside the window (.chat-h, the corners are 1.75rem squares and the edges run between them) and in a
-   layer just behind the window (.chat-o), which sticks out 0.75rem around it, because the window itself clips anything
-   outside its rounded box. Hovering a handle lights the window's border there (nothing shows at rest). */
+   is a handle, twice. Inside the window (.chat-h): the corners are 1.1rem squares (the width of the form's side padding, so
+   they never overlap the buttons and the message field) and the edges run between them. And in a layer above the window
+   (.chat-o) that covers only a frame around its box: 0.75rem outside plus the 1px border, which the window itself cannot
+   hold (it clips its children, and its border is not part of its content). The corners of that frame are L shapes, a little thicker inward so they also cover the gap inside the window's rounded corners.
+   Hovering a handle lights the window's border there (nothing shows at rest). */
 .chat-h {
   --grip: var(--c-muted);
   display: none;
 }
-.chat-grab {
+.chat-grab,
+.chat-floor {
   display: none;
 }
 @media (min-width: 40.0625rem) and (min-height: 34rem) {
@@ -384,6 +387,7 @@ html[data-chat='full'] .chat-input {
     cursor: grab;
     touch-action: none;
     user-select: none;
+    padding-right: 1.1rem;
   }
   html[data-chat='dock'] .chat-h {
     display: block;
@@ -391,143 +395,114 @@ html[data-chat='full'] .chat-input {
     z-index: 3;
     touch-action: none;
   }
-  /* The buttons and the message field stay usable where a corner handle overlaps them, and the corner is still grabbable around them. */
-  html[data-chat='dock'] .chat-head {
-    padding-right: 0.9rem;
-  }
-  html[data-chat='dock'] .chat-head .chat-btn,
-  html[data-chat='dock'] .chat-input,
-  html[data-chat='dock'] .chat-send {
-    position: relative;
-    z-index: 4;
-  }
   /* Keeps the log's scrollbar off the right edge handle. */
   html[data-chat='dock'] .chat-log {
     margin-right: 0.5rem;
   }
-  /* The outer handles live in a layer with the window's exact box (the same variables), behind the window: where the window
-     covers them its own handles win, and outside its rounded corners they take over. */
-  html[data-chat='dock'] .chat-grab {
+  /* Two layers with the window's exact box (the same variables): the frame of outer handles above it, the ground shadow below it. */
+  html[data-chat='dock'] .chat-grab,
+  html[data-chat='dock'] .chat-floor {
     display: block;
     position: fixed;
-    z-index: 59;
     left: var(--x);
     top: var(--y);
     width: var(--w);
     height: var(--h);
     pointer-events: none;
   }
+  html[data-chat='dock'] .chat-grab {
+    z-index: 61;
+  }
+  html[data-chat='dock'] .chat-floor {
+    z-index: 59;
+  }
   .chat-o {
     position: absolute;
     pointer-events: auto;
     touch-action: none;
   }
-  /* The dock's ground shadow, in the layer behind the window (the window clips its own children): it stays put while the window
-     bobs and gets smaller and lighter while it is up. Same timing as the dock's float. */
-  .chat-ground {
-    position: absolute;
-    left: 6%;
-    right: 6%;
-    bottom: -0.9rem;
-    height: 1.3rem;
-    border-radius: 50%;
-    background: var(--c-ground);
-    filter: blur(9px);
-    pointer-events: none;
-    animation: chat-ground 7s ease-in-out infinite;
-  }
-  html:has(.chat:hover) .chat-ground,
-  html:has(.chat:focus-within) .chat-ground,
-  html.chat-dragging .chat-ground {
-    animation-play-state: paused;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .chat-ground {
-      animation: none;
-    }
-  }
   .chat-h-n {
     top: 0;
-    left: 1.75rem;
-    right: 1.75rem;
+    left: 1.1rem;
+    right: 1.1rem;
     height: 0.625rem;
     cursor: ns-resize;
   }
   .chat-h-s {
     bottom: 0;
-    left: 1.75rem;
-    right: 1.75rem;
+    left: 1.1rem;
+    right: 1.1rem;
     height: 0.625rem;
     cursor: ns-resize;
   }
   .chat-h-w {
     left: 0;
-    top: 1.75rem;
-    bottom: 1.75rem;
+    top: 1.1rem;
+    bottom: 1.1rem;
     width: 0.625rem;
     cursor: ew-resize;
   }
   .chat-h-e {
     right: 0;
-    top: 1.75rem;
-    bottom: 1.75rem;
+    top: 1.1rem;
+    bottom: 1.1rem;
     width: 0.625rem;
     cursor: ew-resize;
   }
   .chat-h-nw {
     top: 0;
     left: 0;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 1.1rem;
+    height: 1.1rem;
     cursor: nwse-resize;
   }
   .chat-h-ne {
     top: 0;
     right: 0;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 1.1rem;
+    height: 1.1rem;
     cursor: nesw-resize;
   }
   .chat-h-sw {
     bottom: 0;
     left: 0;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 1.1rem;
+    height: 1.1rem;
     cursor: nesw-resize;
   }
   .chat-h-se {
     bottom: 0;
     right: 0;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 1.1rem;
+    height: 1.1rem;
     cursor: nwse-resize;
   }
   .chat-o-n {
     top: -0.75rem;
     left: 1.75rem;
     right: 1.75rem;
-    height: 1rem;
+    height: calc(0.75rem + 1px);
     cursor: ns-resize;
   }
   .chat-o-s {
     bottom: -0.75rem;
     left: 1.75rem;
     right: 1.75rem;
-    height: 1rem;
+    height: calc(0.75rem + 1px);
     cursor: ns-resize;
   }
   .chat-o-w {
     left: -0.75rem;
     top: 1.75rem;
     bottom: 1.75rem;
-    width: 1rem;
+    width: calc(0.75rem + 1px);
     cursor: ew-resize;
   }
   .chat-o-e {
     right: -0.75rem;
     top: 1.75rem;
     bottom: 1.75rem;
-    width: 1rem;
+    width: calc(0.75rem + 1px);
     cursor: ew-resize;
   }
   .chat-o-nw {
@@ -535,6 +510,7 @@ html[data-chat='full'] .chat-input {
     left: -0.75rem;
     width: 2.5rem;
     height: 2.5rem;
+    clip-path: polygon(0 0, 100% 0, 100% 1.25rem, 1.25rem 1.25rem, 1.25rem 100%, 0 100%);
     cursor: nwse-resize;
   }
   .chat-o-ne {
@@ -542,6 +518,7 @@ html[data-chat='full'] .chat-input {
     right: -0.75rem;
     width: 2.5rem;
     height: 2.5rem;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, calc(100% - 1.25rem) 100%, calc(100% - 1.25rem) 1.25rem, 0 1.25rem);
     cursor: nesw-resize;
   }
   .chat-o-sw {
@@ -549,6 +526,7 @@ html[data-chat='full'] .chat-input {
     left: -0.75rem;
     width: 2.5rem;
     height: 2.5rem;
+    clip-path: polygon(0 0, 1.25rem 0, 1.25rem calc(100% - 1.25rem), 100% calc(100% - 1.25rem), 100% 100%, 0 100%);
     cursor: nesw-resize;
   }
   .chat-o-se {
@@ -556,6 +534,7 @@ html[data-chat='full'] .chat-input {
     right: -0.75rem;
     width: 2.5rem;
     height: 2.5rem;
+    clip-path: polygon(calc(100% - 1.25rem) 0, 100% 0, 100% 100%, 0 100%, 0 calc(100% - 1.25rem), calc(100% - 1.25rem) calc(100% - 1.25rem));
     cursor: nwse-resize;
   }
   /* The corner mark: the window's own rounded corner, lit. It sits on the border, so it never covers the avatar or the text. */
@@ -671,73 +650,101 @@ html[data-chat='full'] .chat-input {
   html[data-dock-edge~='e'] .chat-h-e::after {
     opacity: 0.55;
   }
+  /* The dock's ground shadow, in the layer below the window (the window clips its own children): it stays put while the window
+     bobs and gets smaller and lighter while it is up. Same timing as the dock's float. */
+  .chat-ground {
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    bottom: -0.9rem;
+    height: 1.3rem;
+    border-radius: 50%;
+    background: var(--c-ground);
+    filter: blur(9px);
+    pointer-events: none;
+    animation: chat-ground 7s ease-in-out infinite;
+  }
+  html:has(.chat:hover) .chat-ground,
+  html:has(.chat:focus-within) .chat-ground,
+  html.chat-dragging .chat-ground {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chat-ground {
+      animation: none;
+    }
+  }
   @media (pointer: coarse) {
     .chat-h-n,
     .chat-h-s {
-      left: 2.5rem;
-      right: 2.5rem;
+      left: 1.6rem;
+      right: 1.6rem;
       height: 0.875rem;
     }
     .chat-h-w,
     .chat-h-e {
-      top: 2.5rem;
-      bottom: 2.5rem;
+      top: 1.6rem;
+      bottom: 1.6rem;
       width: 0.875rem;
     }
     .chat-h-nw,
     .chat-h-ne,
     .chat-h-sw,
     .chat-h-se {
-      width: 2.5rem;
-      height: 2.5rem;
-    }
-    .chat-o-n,
-    .chat-o-s {
-      left: 2.5rem;
-      right: 2.5rem;
+      width: 1.6rem;
+      height: 1.6rem;
     }
     .chat-o-n {
       top: -1rem;
-      height: 1.25rem;
+      left: 2.5rem;
+      right: 2.5rem;
+      height: calc(1rem + 1px);
     }
     .chat-o-s {
       bottom: -1rem;
-      height: 1.25rem;
-    }
-    .chat-o-w,
-    .chat-o-e {
-      top: 2.5rem;
-      bottom: 2.5rem;
-      width: 1.25rem;
+      left: 2.5rem;
+      right: 2.5rem;
+      height: calc(1rem + 1px);
     }
     .chat-o-w {
       left: -1rem;
+      top: 2.5rem;
+      bottom: 2.5rem;
+      width: calc(1rem + 1px);
     }
     .chat-o-e {
       right: -1rem;
-    }
-    .chat-o-nw,
-    .chat-o-ne,
-    .chat-o-sw,
-    .chat-o-se {
-      width: 3.5rem;
-      height: 3.5rem;
+      top: 2.5rem;
+      bottom: 2.5rem;
+      width: calc(1rem + 1px);
     }
     .chat-o-nw {
       top: -1rem;
       left: -1rem;
+      width: 3.5rem;
+      height: 3.5rem;
+      clip-path: polygon(0 0, 100% 0, 100% 1.5rem, 1.5rem 1.5rem, 1.5rem 100%, 0 100%);
     }
     .chat-o-ne {
       top: -1rem;
       right: -1rem;
+      width: 3.5rem;
+      height: 3.5rem;
+      clip-path: polygon(0 0, 100% 0, 100% 100%, calc(100% - 1.5rem) 100%, calc(100% - 1.5rem) 1.5rem, 0 1.5rem);
     }
     .chat-o-sw {
       bottom: -1rem;
       left: -1rem;
+      width: 3.5rem;
+      height: 3.5rem;
+      clip-path: polygon(0 0, 1.5rem 0, 1.5rem calc(100% - 1.5rem), 100% calc(100% - 1.5rem), 100% 100%, 0 100%);
     }
     .chat-o-se {
       bottom: -1rem;
       right: -1rem;
+      width: 3.5rem;
+      height: 3.5rem;
+      clip-path: polygon(calc(100% - 1.5rem) 0, 100% 0, 100% 100%, 0 100%, 0 calc(100% - 1.5rem), calc(100% - 1.5rem) calc(100% - 1.5rem));
     }
   }
 }
