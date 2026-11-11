@@ -33,6 +33,7 @@ export async function sitePages() {
   return [
     { path: '/', title: 'Home: experience, education, and highlights' },
     { path: '/#earlier-experience', title: 'Home, earlier experience' },
+    { path: '/privacy/', title: 'Privacy: what the chat with Junior saves' },
     ...tracks.map((track) => ({ path: `/${track.section}/`, title: track.label })),
     ...entries.map((entry) => ({ path: highlightUrl(entry), title: entry.data.title })),
   ];
