@@ -175,8 +175,11 @@ async function readAnswer(response: Response, onPiece: (piece: string) => void) 
     if (!data || data === '[DONE]') return;
     try {
       const chunk = JSON.parse(data);
-      const piece = chunk.choices?.[0]?.delta?.content ?? chunk.response ?? '';
-      if (typeof piece === 'string' && piece) {
+      const raw = chunk.choices?.[0]?.delta?.content ?? chunk.response ?? '';
+      // The prompt asks the model not to write em or en dashes, and this catches the ones that slip through
+      // (a dash is a single character, so it never straddles two chunks).
+      const piece = typeof raw === 'string' ? raw.replace(/[\u2013\u2014]/g, '-') : '';
+      if (piece) {
         answer += piece;
         onPiece(piece);
       }
