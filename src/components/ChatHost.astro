@@ -160,7 +160,9 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
     color: var(--c-fg);
     border: 1px solid var(--c-line);
     border-radius: 1rem;
-    box-shadow: 0 8px 30px rgb(0 0 0 / 0.14);
+    box-shadow:
+      0 2px 6px rgb(0 0 0 / 0.08),
+      0 16px 40px rgb(0 0 0 / 0.16);
     transition:
       left 0.45s var(--ease),
       top 0.45s var(--ease),
@@ -287,7 +289,13 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
     width: min(32rem, calc(100% - 2rem));
     opacity: 0;
     pointer-events: none;
-    animation: chat-fade 0.6s ease 1.5s forwards;
+    animation:
+      chat-fade 0.6s ease 1.5s forwards,
+      chat-float 6s ease-in-out 2.1s infinite;
+  }
+  .chat-pill-wrap:hover,
+  .chat-pill-wrap:focus-within {
+    animation-play-state: running, paused;
   }
   html[data-off] .chat-pill-wrap {
     display: none;
@@ -300,6 +308,26 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
       opacity 0.2s ease,
       visibility 0s 0.2s;
   }
+  /* A slow, small bob so the pill and the minimised chat feel afloat. It stops while the pointer is over them or they
+     have focus, while the dock is dragged, and with reduced motion. */
+  @keyframes chat-float {
+    50% {
+      transform: translateY(-3px);
+    }
+  }
+  @keyframes chat-float-dock {
+    50% {
+      translate: 0 -3px;
+    }
+  }
+  html[data-chat='dock'] .chat {
+    animation: chat-float-dock 7s ease-in-out infinite;
+  }
+  html[data-chat='dock'] .chat:hover,
+  html[data-chat='dock'] .chat:focus-within,
+  html.chat-dragging .chat {
+    animation-play-state: paused;
+  }
   @keyframes chat-fade {
     to {
       opacity: 1;
@@ -310,13 +338,15 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
     display: flex;
     align-items: flex-end;
     gap: 0.6rem;
-    /* A little more room on the left than above and below, so the round avatar follows the curve of the pill's end. */
-    padding: 0.3rem 0.35rem 0.3rem 0.45rem;
+    /* The same gap all around the 2rem avatar and the send button, so they sit concentric in the pill's round ends (0.45rem + 2rem + 0.45rem is the old pill's height). */
+    padding: 0.45rem;
     border: 1px solid var(--c-line);
     border-radius: 999px;
     background: var(--c-bg);
     color: var(--c-muted);
-    box-shadow: 0 4px 16px rgb(0 0 0 / 0.1);
+    box-shadow:
+      0 1px 3px rgb(0 0 0 / 0.07),
+      0 8px 24px rgb(0 0 0 / 0.12);
     transition:
       border-color 0.15s,
       box-shadow 0.15s,
@@ -328,7 +358,9 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
   .chat-pill:hover,
   .chat-pill:focus-within {
     border-color: var(--c-muted);
-    box-shadow: 0 6px 22px rgb(0 0 0 / 0.14);
+    box-shadow:
+      0 2px 5px rgb(0 0 0 / 0.08),
+      0 14px 32px rgb(0 0 0 / 0.16);
   }
   .chat-pill-input {
     flex: 1;
@@ -403,6 +435,12 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
     .chat,
     .chat-pill {
       transition: none;
+    }
+    html[data-chat='dock'] .chat {
+      animation: none;
+    }
+    .chat-pill-wrap {
+      animation: chat-fade 0.6s ease 1.5s forwards;
     }
   }
   @media (forced-colors: active) {
