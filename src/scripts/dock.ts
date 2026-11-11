@@ -74,7 +74,9 @@ export function attachDock(panel: HTMLElement, resized: () => void) {
     const width = root.clientWidth;
     const height = innerHeight;
     // Start from what is on screen, not from what is saved: CSS may have clamped it.
-    const from = { r: width - rect.right, b: height - rect.bottom, w: rect.width, h: rect.height };
+    // (Minus the float animation's current lift, which is not part of the place.)
+    const lift = parseFloat(getComputedStyle(panel).translate.split(' ')[1]) || 0;
+    const from = { r: width - rect.right, b: height - (rect.bottom - lift), w: rect.width, h: rect.height };
     const next = { ...from };
     const threshold = kind === 'move' ? (event.pointerType === 'touch' ? 8 : 5) : 2;
     let moved = false;
@@ -92,6 +94,7 @@ export function attachDock(panel: HTMLElement, resized: () => void) {
           moved = true;
           root.classList.add('chat-dragging');
           root.style.setProperty('--drag-cursor', CURSORS[kind]);
+          root.dataset.dockEdge = kind;
         }
         if (kind === 'move') {
           next.r = clamp(from.r - dx, margin, width - from.w - margin);
@@ -109,6 +112,7 @@ export function attachDock(panel: HTMLElement, resized: () => void) {
         cancelAnimationFrame(frame);
         root.classList.remove('chat-dragging');
         root.style.removeProperty('--drag-cursor');
+        delete root.dataset.dockEdge;
         if (!moved) return;
         // The click that ends a drag must not expand the chat (the header handles clicks).
         const swallow = (click: Event) => click.stopPropagation();

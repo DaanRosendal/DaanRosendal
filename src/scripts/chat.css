@@ -370,6 +370,7 @@ html[data-chat='full'] .chat-input {
 
 /* Moving and resizing the dock (dock.ts): only with room to spare, never on the phone's one-line bar. */
 .chat-h {
+  --grip: var(--c-muted);
   display: none;
 }
 @media (min-width: 40.0625rem) and (min-height: 34rem) {
@@ -405,25 +406,57 @@ html[data-chat='full'] .chat-input {
     height: 1.25rem;
     cursor: nwse-resize;
   }
-  /* A small corner arc that hints at the handle: on hover, and always on touch screens. */
+  /* The corner mark: the window's own rounded corner, lit. It sits on the border, so it never covers the avatar or the text.
+     It shows only over the handle (or while dragging), so nothing sits on the window at rest. */
   .chat-h-nw::before {
     content: '';
     position: absolute;
-    left: 0.45rem;
-    top: 0.45rem;
-    width: 0.6rem;
-    height: 0.6rem;
-    border-left: 2px solid var(--c-muted);
-    border-top: 2px solid var(--c-muted);
-    border-top-left-radius: 0.5rem;
+    left: 0;
+    top: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-left: 2px solid var(--grip);
+    border-top: 2px solid var(--grip);
+    border-top-left-radius: calc(1rem - 1px);
     opacity: 0;
     transition: opacity 0.15s;
+    forced-color-adjust: none;
   }
-  html[data-chat='dock'] .chat:hover .chat-h-nw::before,
-  html[data-chat='dock'] .chat:focus-within .chat-h-nw::before {
-    opacity: 0.55;
+  html[data-chat='dock'] .chat .chat-h-nw:hover::before,
+  html[data-chat][data-dock-edge='nw'] .chat .chat-h-nw::before {
+    opacity: 0.9;
   }
-  html.chat-dragging .chat-h-nw::before {
+  /* The edge highlight: a soft line along the edge that a drag from here would move. The corner lights both of its edges. */
+  .chat-h-n::after,
+  .chat-h-w::after {
+    content: '';
+    position: absolute;
+    border-radius: 2px;
+    background: var(--grip);
+    opacity: 0;
+    transition: opacity 0.15s;
+    forced-color-adjust: none;
+  }
+  .chat-h-n::after {
+    left: 0;
+    right: 1rem;
+    top: 0;
+    height: 2px;
+  }
+  .chat-h-w::after {
+    top: 0;
+    bottom: 1rem;
+    left: 0;
+    width: 2px;
+  }
+  .chat-h-n:hover::after,
+  .chat:has(.chat-h-nw:hover) .chat-h-n::after,
+  html[data-dock-edge='n'] .chat-h-n::after,
+  html[data-dock-edge='nw'] .chat-h-n::after,
+  .chat-h-w:hover::after,
+  .chat:has(.chat-h-nw:hover) .chat-h-w::after,
+  html[data-dock-edge='w'] .chat-h-w::after,
+  html[data-dock-edge='nw'] .chat-h-w::after {
     opacity: 0.55;
   }
   @media (pointer: coarse) {
@@ -440,7 +473,8 @@ html[data-chat='full'] .chat-input {
       height: 2rem;
     }
     .chat-h-nw::before {
-      opacity: 0.55;
+      width: 2rem;
+      height: 2rem;
     }
   }
 }
@@ -457,7 +491,7 @@ html.chat-dragging .chat {
   box-shadow: 0 18px 50px rgb(0 0 0 / 0.28);
 }
 @media (forced-colors: active) {
-  .chat-h-nw::before {
-    border-color: Highlight;
+  .chat-h {
+    --grip: Highlight;
   }
 }
