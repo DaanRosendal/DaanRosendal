@@ -369,9 +369,14 @@ html[data-chat='full'] .chat-input {
 }
 
 /* Moving and resizing the dock (dock.ts): only with room to spare, never on the phone's one-line bar. Every edge and corner
-   is a handle. The corners are 1.75rem squares (2.5rem on touch screens) and the edges run between them. Hovering one lights it (nothing shows at rest). */
+   is a handle, twice: inside the window (.chat-h, the corners are 1.75rem squares and the edges run between them) and in a
+   layer just behind the window (.chat-o), which sticks out 0.75rem around it, because the window itself clips anything
+   outside its rounded box. Hovering a handle lights the window's border there (nothing shows at rest). */
 .chat-h {
   --grip: var(--c-muted);
+  display: none;
+}
+.chat-grab {
   display: none;
 }
 @media (min-width: 40.0625rem) and (min-height: 34rem) {
@@ -399,6 +404,23 @@ html[data-chat='full'] .chat-input {
   /* Keeps the log's scrollbar off the right edge handle. */
   html[data-chat='dock'] .chat-log {
     margin-right: 0.5rem;
+  }
+  /* The outer handles live in a layer with the window's exact box (the same variables), behind the window: where the window
+     covers them its own handles win, and outside its rounded corners they take over. */
+  html[data-chat='dock'] .chat-grab {
+    display: block;
+    position: fixed;
+    z-index: 59;
+    left: var(--x);
+    top: var(--y);
+    width: var(--w);
+    height: var(--h);
+    pointer-events: none;
+  }
+  .chat-o {
+    position: absolute;
+    pointer-events: auto;
+    touch-action: none;
   }
   .chat-h-n {
     top: 0;
@@ -456,6 +478,62 @@ html[data-chat='full'] .chat-input {
     height: 1.75rem;
     cursor: nwse-resize;
   }
+  .chat-o-n {
+    top: -0.75rem;
+    left: 1.75rem;
+    right: 1.75rem;
+    height: 1rem;
+    cursor: ns-resize;
+  }
+  .chat-o-s {
+    bottom: -0.75rem;
+    left: 1.75rem;
+    right: 1.75rem;
+    height: 1rem;
+    cursor: ns-resize;
+  }
+  .chat-o-w {
+    left: -0.75rem;
+    top: 1.75rem;
+    bottom: 1.75rem;
+    width: 1rem;
+    cursor: ew-resize;
+  }
+  .chat-o-e {
+    right: -0.75rem;
+    top: 1.75rem;
+    bottom: 1.75rem;
+    width: 1rem;
+    cursor: ew-resize;
+  }
+  .chat-o-nw {
+    top: -0.75rem;
+    left: -0.75rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    cursor: nwse-resize;
+  }
+  .chat-o-ne {
+    top: -0.75rem;
+    right: -0.75rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    cursor: nesw-resize;
+  }
+  .chat-o-sw {
+    bottom: -0.75rem;
+    left: -0.75rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    cursor: nesw-resize;
+  }
+  .chat-o-se {
+    bottom: -0.75rem;
+    right: -0.75rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    cursor: nwse-resize;
+  }
   /* The corner mark: the window's own rounded corner, lit. It sits on the border, so it never covers the avatar or the text. */
   .chat-h-nw::before,
   .chat-h-ne::before,
@@ -489,12 +567,16 @@ html[data-chat='full'] .chat-input {
     border-bottom-right-radius: calc(1rem - 1px);
   }
   html[data-chat='dock'] .chat .chat-h-nw:hover::before,
+  html:has(.chat-o-nw:hover) .chat .chat-h-nw::before,
   html[data-chat][data-dock-edge='n w'] .chat .chat-h-nw::before,
   html[data-chat='dock'] .chat .chat-h-ne:hover::before,
+  html:has(.chat-o-ne:hover) .chat .chat-h-ne::before,
   html[data-chat][data-dock-edge='n e'] .chat .chat-h-ne::before,
   html[data-chat='dock'] .chat .chat-h-sw:hover::before,
+  html:has(.chat-o-sw:hover) .chat .chat-h-sw::before,
   html[data-chat][data-dock-edge='s w'] .chat .chat-h-sw::before,
   html[data-chat='dock'] .chat .chat-h-se:hover::before,
+  html:has(.chat-o-se:hover) .chat .chat-h-se::before,
   html[data-chat][data-dock-edge='s e'] .chat .chat-h-se::before {
     opacity: 0.9;
   }
@@ -536,20 +618,32 @@ html[data-chat='full'] .chat-input {
     right: 0;
   }
   .chat-h-n:hover::after,
+  html:has(.chat-o-n:hover) .chat-h-n::after,
   .chat:has(.chat-h-nw:hover) .chat-h-n::after,
+  html:has(.chat-o-nw:hover) .chat-h-n::after,
   .chat:has(.chat-h-ne:hover) .chat-h-n::after,
+  html:has(.chat-o-ne:hover) .chat-h-n::after,
   html[data-dock-edge~='n'] .chat-h-n::after,
   .chat-h-s:hover::after,
+  html:has(.chat-o-s:hover) .chat-h-s::after,
   .chat:has(.chat-h-sw:hover) .chat-h-s::after,
+  html:has(.chat-o-sw:hover) .chat-h-s::after,
   .chat:has(.chat-h-se:hover) .chat-h-s::after,
+  html:has(.chat-o-se:hover) .chat-h-s::after,
   html[data-dock-edge~='s'] .chat-h-s::after,
   .chat-h-w:hover::after,
+  html:has(.chat-o-w:hover) .chat-h-w::after,
   .chat:has(.chat-h-nw:hover) .chat-h-w::after,
+  html:has(.chat-o-nw:hover) .chat-h-w::after,
   .chat:has(.chat-h-sw:hover) .chat-h-w::after,
+  html:has(.chat-o-sw:hover) .chat-h-w::after,
   html[data-dock-edge~='w'] .chat-h-w::after,
   .chat-h-e:hover::after,
+  html:has(.chat-o-e:hover) .chat-h-e::after,
   .chat:has(.chat-h-ne:hover) .chat-h-e::after,
+  html:has(.chat-o-ne:hover) .chat-h-e::after,
   .chat:has(.chat-h-se:hover) .chat-h-e::after,
+  html:has(.chat-o-se:hover) .chat-h-e::after,
   html[data-dock-edge~='e'] .chat-h-e::after {
     opacity: 0.55;
   }
@@ -572,6 +666,54 @@ html[data-chat='full'] .chat-input {
     .chat-h-se {
       width: 2.5rem;
       height: 2.5rem;
+    }
+    .chat-o-n,
+    .chat-o-s {
+      left: 2.5rem;
+      right: 2.5rem;
+    }
+    .chat-o-n {
+      top: -1rem;
+      height: 1.25rem;
+    }
+    .chat-o-s {
+      bottom: -1rem;
+      height: 1.25rem;
+    }
+    .chat-o-w,
+    .chat-o-e {
+      top: 2.5rem;
+      bottom: 2.5rem;
+      width: 1.25rem;
+    }
+    .chat-o-w {
+      left: -1rem;
+    }
+    .chat-o-e {
+      right: -1rem;
+    }
+    .chat-o-nw,
+    .chat-o-ne,
+    .chat-o-sw,
+    .chat-o-se {
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+    .chat-o-nw {
+      top: -1rem;
+      left: -1rem;
+    }
+    .chat-o-ne {
+      top: -1rem;
+      right: -1rem;
+    }
+    .chat-o-sw {
+      bottom: -1rem;
+      left: -1rem;
+    }
+    .chat-o-se {
+      bottom: -1rem;
+      right: -1rem;
     }
   }
 }

@@ -160,12 +160,19 @@ export function attachDock(panel: HTMLElement, resized: () => void) {
     gesture(event, head, 'move');
   });
 
+  // Each handle twice: inside the window, and in a layer behind it that reaches a little outside (see chat.css).
+  const grab = document.createElement('div');
+  grab.className = 'chat-grab';
+  grab.setAttribute('aria-hidden', 'true');
   for (const edge of ['n', 's', 'w', 'e', 'nw', 'ne', 'sw', 'se'] as const) {
-    const handle = document.createElement('div');
-    handle.className = `chat-h chat-h-${edge}`;
-    handle.setAttribute('aria-hidden', 'true');
-    handle.addEventListener('pointerdown', (event) => gesture(event, handle, edge));
-    handle.addEventListener('dblclick', () => resetDock());
-    panel.append(handle);
+    for (const [prefix, parent] of [['chat-h', panel], ['chat-o', grab]] as const) {
+      const handle = document.createElement('div');
+      handle.className = `${prefix} ${prefix}-${edge}`;
+      handle.setAttribute('aria-hidden', 'true');
+      handle.addEventListener('pointerdown', (event) => gesture(event, handle, edge));
+      handle.addEventListener('dblclick', () => resetDock());
+      parent.append(handle);
+    }
   }
+  document.body.append(grab);
 }
