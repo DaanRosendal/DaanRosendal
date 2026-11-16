@@ -1,5 +1,5 @@
 ---
-import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
+import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
 ---
 
 <!-- The chat's static shell. The whole chat is driven by html[data-chat] (open, full, dock; absent means closed), which an
@@ -11,10 +11,14 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
     <textarea class="chat-pill-input" name="q" rows="1" maxlength="600" placeholder="Chat with Daan's cat" aria-label="Chat with Daan's cat" enterkeyhint="send"></textarea>
     <button type="submit" class="chat-pill-go" aria-label="Send"><ArrowUp size={16} aria-hidden="true" /></button>
   </form>
-  <button type="button" class="chat-pill-x" data-chat-act="dismiss" aria-label="Hide the chat box">
-    <X size={12} aria-hidden="true" />
+  <button type="button" class="chat-pill-tuck" data-chat-act="tuck" aria-label="Tuck the chat box away to the side">
+    <ChevronRight size={14} aria-hidden="true" />
   </button>
 </div>
+<button type="button" class="chat-tab" data-chat-act="untuck" aria-label="Chat with Daan's cat">
+  <ChevronLeft size={14} aria-hidden="true" />
+  <img class="chat-avatar" src="/media/cat/junior-clean.webp" alt="" width="32" height="32" decoding="async" />
+</button>
 
 <section id="chat" class="chat" role="dialog" aria-label="Chat with Junior">
   <header class="chat-head">
@@ -28,13 +32,13 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
   <div class="chat-body"></div>
 </section>
 
-<noscript><style>.chat-pill-wrap,.chat-revive{display:none!important}</style></noscript>
+<noscript><style>.chat-pill-wrap,.chat-tab{display:none!important}</style></noscript>
 
 <script>
   const root = document.documentElement;
   let chat: Promise<typeof import('../scripts/chat')> | undefined;
   const load = () => (chat ??= import('../scripts/chat'));
-  const OFF_KEY = 'chat:off';
+  const TUCKED_KEY = 'chat:tucked';
 
   const pill = document.querySelector<HTMLFormElement>('.chat-pill')!;
   const field = pill.querySelector<HTMLTextAreaElement>('textarea')!;
@@ -70,18 +74,20 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
     const button = target.closest<HTMLElement>('[data-chat-act]');
     const act = button?.dataset.chatAct ?? (root.dataset.chat === 'dock' && target.closest('.chat-head') ? 'expand' : '');
     if (!act) return;
-    if (act === 'dismiss') {
+    // The pill slides out to a tab on the right edge (remembered, never expires) and slides back when the tab is used.
+    if (act === 'tuck') {
       try {
-        localStorage.setItem(OFF_KEY, String(Date.now()));
+        localStorage.setItem(TUCKED_KEY, '1');
       } catch {}
-      root.dataset.off = '';
+      root.dataset.tucked = '';
+      document.querySelector<HTMLElement>('.chat-tab')!.focus({ preventScroll: true });
       return;
     }
-    if (act === 'revive') {
+    if (act === 'untuck') {
       try {
-        localStorage.removeItem(OFF_KEY);
+        localStorage.removeItem(TUCKED_KEY);
       } catch {}
-      delete root.dataset.off;
+      delete root.dataset.tucked;
       requestAnimationFrame(() => field.focus());
       return;
     }
@@ -129,6 +135,7 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
   .chat,
   .chat-floor,
   .chat-grab,
+  .chat-tab,
   .chat-pill-wrap {
     --c-ground: rgb(0 0 0 / 0.3);
     --c-bg: #fff;
@@ -144,6 +151,7 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
     .chat,
     .chat-floor,
     .chat-grab,
+    .chat-tab,
     .chat-pill-wrap {
       --c-ground: rgb(0 0 0 / 0.75);
       --c-bg: #171717;
@@ -286,7 +294,8 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
     flex-direction: column;
   }
   .chat :focus-visible,
-  .chat-pill-x:focus-visible {
+  .chat-pill-tuck:focus-visible,
+  .chat-tab:focus-visible {
     outline: 2px solid var(--c-muted);
     outline-offset: 2px;
   }
@@ -328,8 +337,21 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
   .chat-pill-wrap:focus-within::after {
     animation-play-state: paused;
   }
-  html[data-off] .chat-pill-wrap {
-    display: none;
+  /* Tucked: the pill slides out past the right edge (its centre is at 50vw, so 50vw more clears it and its shadow), then
+     is hidden from focus and pointer for good. The tab slides in. Leaving the state uses the base rule, so the pill is
+     visible again at once and slides back. */
+  .chat-pill-wrap {
+    transition:
+      translate 0.35s var(--ease),
+      visibility 0s;
+  }
+  html[data-tucked] .chat-pill-wrap {
+    translate: calc(50vw + 2rem) 0;
+    visibility: hidden;
+    pointer-events: none !important;
+    transition:
+      translate 0.35s var(--ease),
+      visibility 0s 0.35s;
   }
   html[data-chat] .chat-pill-wrap {
     opacity: 0 !important;
@@ -447,10 +469,11 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
     opacity: 1;
     scale: 1;
   }
-  .chat-pill-x {
+  /* The tuck button sits on the pill's top-left corner, the far side from the send button. */
+  .chat-pill-tuck {
     position: absolute;
-    right: -0.3rem;
-    bottom: -0.55rem;
+    left: -0.3rem;
+    top: -0.55rem;
     display: grid;
     place-items: center;
     width: 1.5rem;
@@ -461,21 +484,52 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
     color: var(--c-muted);
     cursor: pointer;
   }
-  /* A bigger target than the 24px circle, growing outward only so it never covers the send button. */
-  .chat-pill-x::after {
+  /* A bigger target than the 24px circle, growing outward only so it never covers the avatar. */
+  .chat-pill-tuck::after {
     content: '';
     position: absolute;
-    inset: -0.4rem -0.4rem -0.4rem 0;
+    inset: -0.5rem 0 0 -0.5rem;
   }
-  .chat-pill-x:hover {
+  .chat-pill-tuck:hover {
     color: var(--c-fg);
     border-color: var(--c-muted);
   }
-  .chat-revive {
-    display: none;
+  /* The tab: Junior's face on the right edge, as tall as the pill (a 2.9rem tap target). */
+  .chat-tab {
+    position: fixed;
+    z-index: 50;
+    right: env(safe-area-inset-right);
+    bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.45rem 0.3rem 0.45rem 0.5rem;
+    border: 1px solid var(--c-line);
+    border-right: 0;
+    border-radius: 999px 0 0 999px;
+    background: var(--c-bg);
+    color: var(--c-muted);
+    box-shadow:
+      0 1px 3px rgb(0 0 0 / 0.07),
+      0 8px 24px rgb(0 0 0 / 0.12);
+    cursor: pointer;
+    translate: calc(100% + 2rem) 0;
+    visibility: hidden;
+    transition:
+      translate 0.35s var(--ease),
+      visibility 0s 0.35s,
+      color 0.15s;
   }
-  html[data-off]:not([data-chat]) .chat-revive {
-    display: block;
+  html[data-tucked]:not([data-chat]) .chat-tab {
+    translate: 0 0;
+    visibility: visible;
+    transition:
+      translate 0.35s var(--ease) 0.1s,
+      visibility 0s,
+      color 0.15s;
+  }
+  .chat-tab:hover {
+    color: var(--c-fg);
   }
   @media (prefers-reduced-motion: reduce) {
     .chat,
@@ -490,12 +544,17 @@ import { ArrowUp, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
     }
     .chat-pill-wrap {
       animation: chat-fade 0.4s ease 0.5s forwards;
+      transition: none;
+    }
+    .chat-tab {
+      transition: none;
     }
   }
   @media (forced-colors: active) {
     .chat,
     .chat-pill,
-    .chat-pill-x {
+    .chat-pill-tuck,
+    .chat-tab {
       border: 1px solid CanvasText;
       background: Canvas;
       color: CanvasText;

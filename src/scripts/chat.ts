@@ -302,7 +302,6 @@ function setMode(next: Mode | undefined) {
   if (full) ui?.panel.setAttribute('aria-modal', 'true');
   else ui?.panel.removeAttribute('aria-modal');
   document.querySelector('main')?.toggleAttribute('inert', full);
-  document.querySelector('.chat-revive')?.toggleAttribute('inert', full);
   root.style.overflow = full ? 'hidden' : '';
   save();
 }
