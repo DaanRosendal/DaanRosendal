@@ -35,6 +35,8 @@ interface Turn {
 
 const root = document.documentElement;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+// On a phone there is no dock: minimising goes back to the pill, which keeps the conversation (see ChatHost.astro).
+const phone = matchMedia('(max-width: 40rem)');
 let turns: Turn[] = [];
 let draft = '';
 // One random id per conversation, kept with the saved turns, so the answers of one chat are saved together.
@@ -49,6 +51,8 @@ let widget: string | undefined;
 let pending: { resolve(token: string): void; reject(error: Error): void } | undefined;
 let turnstileLoading: Promise<void> | undefined;
 let busy = false;
+// Counts the conversations ended on a phone, so an answer still on its way for an ended one is dropped.
+let epoch = 0;
 let pages = new Set<string>();
 let ui: Awaited<ReturnType<typeof build>> | undefined;
 let building: Promise<NonNullable<typeof ui>> | undefined;
@@ -75,10 +79,12 @@ function readStore() {
   } catch {
     // Storage can be blocked: the chat then just forgets between pages.
   }
+  root.toggleAttribute('data-talk', turns.length > 0);
 }
 
-// A chat that is open when the page goes away comes back minimised on the next page.
+// A chat that is open when the page goes away comes back minimised on the next page (as the pill on a phone).
 function save() {
+  root.toggleAttribute('data-talk', turns.length > 0);
   try {
     const live = mode() !== undefined && turns.length > 0;
     sessionStorage.setItem(STORE, JSON.stringify({ mode: live ? 'dock' : 'closed', turns: turns.slice(-12), draft, id: conversation, scroll: Math.round(fromBottom) }));
@@ -284,6 +290,7 @@ function moveSea(sea: HTMLElement, from: Mode | undefined, to: Mode | undefined)
 let movingTimer: ReturnType<typeof setTimeout> | undefined;
 
 function setMode(next: Mode | undefined) {
+  if (next === 'dock' && phone.matches) next = undefined;
   const previous = mode();
   if (previous === next) return;
   // The text hides while the water rises (or sinks) and returns when it has settled.
@@ -331,7 +338,7 @@ export async function act(action: string) {
     focusSoon(parts.input);
   } else if (action === 'minimise') {
     setMode('dock');
-    focusSoon(parts.panel.querySelector<HTMLElement>('.chat-btn-expand'));
+    focusSoon(phone.matches ? pillFace() : parts.panel.querySelector<HTMLElement>('.chat-btn-expand'));
   } else if (action === 'reset') {
     resetDock();
     setTimeout(() => {
@@ -339,9 +346,32 @@ export async function act(action: string) {
       parts.restore();
     }, 480);
   } else if (action === 'close') {
+    // On a phone the cross ends the conversation, so the pill starts fresh. On larger screens it only closes the window.
+    if (phone.matches) endChat();
     setMode(undefined);
-    focusSoon(document.querySelector<HTMLElement>('.chat-pill-input'));
+    focusSoon(phone.matches ? pillFace() : document.querySelector<HTMLElement>('.chat-pill-input'));
   }
+}
+
+const pillFace = () => document.querySelector<HTMLElement>('.chat-pill-avatar');
+
+function endChat() {
+  epoch++;
+  turns = [];
+  draft = '';
+  conversation = '';
+  fromBottom = 0;
+  ui?.renderAll();
+}
+
+// Junior's face in the pill (phones): back to the conversation that was minimised.
+export async function open() {
+  const parts = await ensureUi();
+  setMode('full');
+  requestAnimationFrame(parts.grow);
+  requestAnimationFrame(parts.restore);
+  setTimeout(parts.restore, 480);
+  focusSoon(parts.input);
 }
 
 // A question typed into the pill: the screen floods and the question goes out.
@@ -418,7 +448,7 @@ async function build() {
   log.addEventListener(
     'scroll',
     () => {
-      // Hidden (the phone's bar) or being re-laid out: the browser moved it, not the visitor.
+      // Hidden (the chat is closed) or being re-laid out: the browser moved it, not the visitor.
       if (!log.clientHeight || performance.now() < scrollLockUntil) return;
       fromBottom = Math.max(0, log.scrollHeight - log.clientHeight - log.scrollTop);
     },
@@ -480,6 +510,7 @@ async function build() {
       return;
     }
     busy = true;
+    const mine = epoch;
     send.disabled = true;
     input.value = draft = '';
     grow();
@@ -515,9 +546,11 @@ async function build() {
         scroll();
       });
       markdown.end();
+      if (mine !== epoch) return;
       if (!answer.trim()) throw new Error('No answer came back. Please try again.');
       turns.push({ role: 'assistant', content: answer.trim() });
     } catch (error) {
+      if (mine !== epoch) return;
       turns.pop();
       markdown.destroy();
       answerBubble.remove();
@@ -545,6 +578,12 @@ async function build() {
     if (mode() === 'full') void act('minimise');
   });
   addEventListener('pagehide', save);
+  // A dock left over from a wide window (or a window narrowed to a phone's width): the phone has no dock.
+  const noPhoneDock = () => {
+    if (phone.matches && mode() === 'dock') setMode(undefined);
+  };
+  phone.addEventListener('change', noPhoneDock);
+  noPhoneDock();
 
   // Load the human check now, so the first answer does not wait for it.
   if (mode() !== 'dock') loadTurnstile().catch(() => {});

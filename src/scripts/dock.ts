@@ -11,7 +11,7 @@ type Geo = Partial<Record<Key, number>>;
 type Edge = 'n' | 's' | 'w' | 'e' | 'nw' | 'ne' | 'sw' | 'se';
 
 const root = document.documentElement;
-// The phone's one-line bar and a short window keep the default dock.
+// A narrow window (the phone has no dock) and a short window keep the default dock.
 const roomy = matchMedia('(min-width: 40.0625rem) and (min-height: 34rem)');
 const rem = () => parseFloat(getComputedStyle(root).fontSize) || 16;
 const clamp = (value: number, low: number, high: number) => Math.max(low, Math.min(high, value));

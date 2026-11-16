@@ -149,11 +149,6 @@ html[data-chat='full'] .chat-input {
 .chat-sea.docking {
   clip-path: inset(calc(100dvh - var(--dock-h) - var(--dock-b)) var(--dock-r) var(--dock-b) calc(100% - var(--dock-w) - var(--dock-r)) round 1rem);
 }
-@media (max-width: 40rem) {
-  .chat-sea.docking {
-    clip-path: inset(calc(100dvh - 4rem) 0.75rem 0.75rem 0.75rem round 1rem);
-  }
-}
 /* Spreading out of the pill: slower than the dock's resize, and fading in so the pill's color hands over to the water. */
 .chat-sea.from-pill {
   transition: clip-path 0.8s cubic-bezier(0.22, 0.8, 0.3, 1);
@@ -368,7 +363,7 @@ html[data-chat='full'] .chat-input {
   font-style: italic;
 }
 
-/* Moving and resizing the dock (dock.ts): only with room to spare, never on the phone's one-line bar. Every edge and corner
+/* Moving and resizing the dock (dock.ts): only with room to spare, never on a phone. Every edge and corner
    is a handle, twice. Inside the window (.chat-h): the corners are 1.1rem squares (the width of the form's side padding, so
    they never overlap the buttons and the message field) and the edges run between them. And in a layer above the window
    (.chat-o) that covers only a frame around its box: 0.75rem outside plus the 1px border, which the window itself cannot

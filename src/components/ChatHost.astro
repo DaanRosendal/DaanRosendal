@@ -7,7 +7,9 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
      The conversation itself (src/scripts/chat.ts) is fetched only when the chat is used or restored. -->
 <div class="chat-pill-wrap">
   <form class="chat-pill" autocomplete="off">
-    <img class="chat-avatar" src="/media/cat/junior-clean.webp" alt="" width="32" height="32" decoding="async" />
+    <button type="button" class="chat-pill-avatar" data-chat-act="open" aria-label="Chat with Junior">
+      <img class="chat-avatar" src="/media/cat/junior-clean.webp" alt="" width="32" height="32" decoding="async" />
+    </button>
     <textarea class="chat-pill-input" name="q" rows="1" maxlength="600" placeholder="Chat with Daan's cat" aria-label="Chat with Daan's cat" enterkeyhint="send"></textarea>
     <button type="submit" class="chat-pill-go" aria-label="Send"><ArrowUp size={16} aria-hidden="true" /></button>
   </form>
@@ -42,6 +44,20 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
 
   const pill = document.querySelector<HTMLFormElement>('.chat-pill')!;
   const field = pill.querySelector<HTMLTextAreaElement>('textarea')!;
+  // On a phone there is no dock: a minimised chat is the pill again. While a conversation is kept (html[data-talk], set by the
+  // head script and by chat.ts), the pill says so, and Junior's face in it reopens the conversation.
+  const phone = matchMedia('(max-width: 40rem)');
+  const faceButton = pill.querySelector<HTMLElement>('.chat-pill-avatar')!;
+  const applyTalk = () => {
+    const talk = phone.matches && root.hasAttribute('data-talk');
+    field.placeholder = talk ? 'Continue with Junior' : "Chat with Daan's cat";
+    field.setAttribute('aria-label', field.placeholder);
+    faceButton.setAttribute('aria-label', talk ? 'Reopen the chat with Junior' : 'Chat with Junior');
+  };
+  new MutationObserver(applyTalk).observe(root, { attributes: true, attributeFilter: ['data-talk'] });
+  phone.addEventListener('change', applyTalk);
+  applyTalk();
+
   pill.addEventListener('pointerenter', load, { once: true });
   field.addEventListener('focus', load, { once: true });
   // Shift+Enter adds a line break and the box grows upward (the pill is anchored at the bottom), up to about five lines.
@@ -83,6 +99,11 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
       document.querySelector<HTMLElement>('.chat-tab')!.focus({ preventScroll: true });
       return;
     }
+    if (act === 'open') {
+      if (phone.matches && root.hasAttribute('data-talk')) load().then((chat) => chat.open());
+      else field.focus();
+      return;
+    }
     if (act === 'untuck') {
       try {
         localStorage.removeItem(TUCKED_KEY);
@@ -104,9 +125,9 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
     try {
       mode = JSON.parse(sessionStorage.getItem('chat:v1') ?? 'null')?.mode;
     } catch {}
-    if (mode === 'dock') root.dataset.chat = 'dock';
+    if (mode === 'dock' && !phone.matches) root.dataset.chat = 'dock';
     else delete root.dataset.chat;
-    if (chat || mode === 'dock') load().then((chat) => chat.sync());
+    if (chat || (mode === 'dock' && !phone.matches)) load().then((chat) => chat.sync());
   });
 </script>
 
@@ -209,17 +230,6 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
     border-color: transparent;
     box-shadow: none;
   }
-  @media (max-width: 40rem) {
-    html[data-chat='dock'] .chat {
-      --w: calc(100% - 1.5rem);
-      --h: 3.25rem;
-      --x: 0.75rem;
-      --y: calc(100dvh - 3.25rem - 0.75rem);
-    }
-    html[data-chat='dock'] .chat-body {
-      display: none;
-    }
-  }
 
   .chat-head {
     display: flex;
@@ -294,6 +304,7 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
     flex-direction: column;
   }
   .chat :focus-visible,
+  .chat-pill-avatar:focus-visible,
   .chat-pill-tuck:focus-visible,
   .chat-tab:focus-visible {
     outline: 2px solid var(--c-muted);
@@ -429,6 +440,17 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
       0 14px 32px rgb(0 0 0 / 0.16);
     outline: 2px solid transparent;
     outline-offset: 3px;
+  }
+  .chat-pill-avatar {
+    flex: none;
+    display: block;
+    border-radius: 999px;
+    cursor: default;
+  }
+  @media (max-width: 40rem) {
+    html[data-talk] .chat-pill-avatar {
+      cursor: pointer;
+    }
   }
   .chat-pill-input {
     flex: 1;
