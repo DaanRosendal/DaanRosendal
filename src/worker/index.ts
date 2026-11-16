@@ -2,7 +2,7 @@ import context from './context.generated.txt';
 import { Limiter } from './limiter';
 import { describePing, pingTelegram } from './notify';
 import { clearOld,describeVisit, fingerprint, readClient, saveTurn, type Outcome, type TurnRecord } from './log';
-import { SYSTEM_PROMPT } from './prompt';
+import { SYSTEM_PROMPT, todayLine } from './prompt';
 
 export { Limiter };
 
@@ -228,7 +228,7 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
   const page = readPage(body.page);
   const client = readClient(body.client);
   const question = history.at(-1)!.content;
-  const system = page ? `${PROMPT}\nThe visitor is currently viewing the page "${page.title}" (${page.path}).\n` : PROMPT;
+  const system = `${PROMPT}\n${todayLine(new Date())}${page ? `The visitor is currently viewing the page "${page.title}" (${page.path}).\n` : ''}`;
   const messages = [{ role: 'system', content: system }, ...history];
   const promptChars = messages.reduce((sum, message) => sum + message.content.length, 0);
   const estimate =
