@@ -1,5 +1,5 @@
 ---
-import { ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
+import { ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maximize2, Minimize2, RotateCcwSquare, X } from '@lucide/astro';
 ---
 
 <!-- The chat's static shell. The whole chat is driven by html[data-chat] (open, full, dock; absent means closed), which an
@@ -27,7 +27,7 @@ import { ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maximize2, Minimize2
   <header class="chat-head">
     <img class="chat-avatar" src="/media/cat/junior-clean.webp" alt="" width="32" height="32" loading="lazy" decoding="async" />
     <h2 class="chat-title">Junior</h2>
-    <button type="button" class="chat-btn chat-btn-reset" data-chat-act="reset" aria-label="Reset the chat position and size" title="Reset position and size"><RotateCcw size={16} aria-hidden="true" /></button>
+    <button type="button" class="chat-btn chat-btn-reset" data-chat-act="reset" aria-label="Reset the chat position and size" title="Reset position and size"><RotateCcwSquare size={16} aria-hidden="true" /></button>
     <button type="button" class="chat-btn chat-btn-expand" data-chat-act="expand" aria-label="Expand the chat"><Maximize2 size={16} aria-hidden="true" /></button>
     <button type="button" class="chat-btn chat-btn-min" data-chat-act="minimise" aria-label="Minimise the chat"><Minimize2 size={16} aria-hidden="true" /></button>
     <button type="button" class="chat-btn" data-chat-act="close" aria-label="Close the chat"><X size={16} aria-hidden="true" /></button>
