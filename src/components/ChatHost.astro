@@ -1,5 +1,5 @@
 ---
-import { ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maximize2, Minimize2, RotateCcwSquare, X } from '@lucide/astro';
+import { ArrowDownRight, ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maximize2, RotateCcwSquare, X } from '@lucide/astro';
 ---
 
 <!-- The chat's static shell. The whole chat is driven by html[data-chat] (open, full, dock; absent means closed), which an
@@ -7,9 +7,7 @@ import { ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maximize2, Minimize2
      The conversation itself (src/scripts/chat.ts) is fetched only when the chat is used or restored. -->
 <div class="chat-pill-wrap">
   <form class="chat-pill" autocomplete="off">
-    <button type="button" class="chat-pill-avatar" data-chat-act="open" aria-label="Chat with Junior">
-      <img class="chat-avatar" src="/media/cat/junior-clean.webp" alt="" width="32" height="32" decoding="async" />
-    </button>
+    <img class="chat-avatar" src="/media/cat/junior-clean.webp" alt="" width="32" height="32" decoding="async" />
     <textarea class="chat-pill-input" name="q" rows="1" maxlength="600" placeholder="Chat with Daan's cat" aria-label="Chat with Daan's cat" enterkeyhint="send"></textarea>
     <button type="submit" class="chat-pill-go" aria-label="Send"><ArrowUp size={16} aria-hidden="true" /></button>
   </form>
@@ -29,7 +27,7 @@ import { ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maximize2, Minimize2
     <h2 class="chat-title">Junior</h2>
     <button type="button" class="chat-btn chat-btn-reset" data-chat-act="reset" aria-label="Reset the chat position and size" title="Reset position and size"><RotateCcwSquare size={16} aria-hidden="true" /></button>
     <button type="button" class="chat-btn chat-btn-expand" data-chat-act="expand" aria-label="Expand the chat"><Maximize2 size={16} aria-hidden="true" /></button>
-    <button type="button" class="chat-btn chat-btn-min" data-chat-act="minimise" aria-label="Minimise the chat"><Minimize2 size={16} aria-hidden="true" /></button>
+    <button type="button" class="chat-btn chat-btn-min" data-chat-act="minimise" aria-label="Minimise the chat"><ArrowDownRight size={16} aria-hidden="true" /></button>
     <button type="button" class="chat-btn" data-chat-act="close" aria-label="Close the chat"><X size={16} aria-hidden="true" /></button>
   </header>
   <div class="chat-body"></div>
@@ -45,22 +43,14 @@ import { ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maximize2, Minimize2
 
   const pill = document.querySelector<HTMLFormElement>('.chat-pill')!;
   const field = pill.querySelector<HTMLTextAreaElement>('textarea')!;
-  // On a phone there is no dock: a minimised chat is the pill again. While a conversation is kept (html[data-talk], set by the
-  // head script and by chat.ts), the pill says so, and Junior's face in it reopens the conversation.
+  // A phone has no dock (a minimised chat there is the tab too). While a conversation is kept (html[data-talk], set by the
+  // head script and by chat.ts), the closed chat is Junior in the tab, which reopens it.
   const phone = matchMedia('(max-width: 40rem)');
-  const faceButton = pill.querySelector<HTMLElement>('.chat-pill-avatar')!;
   const tab = document.querySelector<HTMLElement>('.chat-tab')!;
   const applyTalk = () => {
-    const kept = root.hasAttribute('data-talk');
-    const talk = phone.matches && kept;
-    field.placeholder = talk ? 'Continue with Junior' : "Chat with Daan's cat";
-    field.setAttribute('aria-label', field.placeholder);
-    faceButton.setAttribute('aria-label', talk ? 'Reopen the chat with Junior' : 'Chat with Junior');
-    // On larger screens a kept conversation that is closed lives in the tab, which reopens the dock.
-    tab.setAttribute('aria-label', kept && !phone.matches ? 'Reopen the chat with Junior' : "Chat with Daan's cat");
+    tab.setAttribute('aria-label', root.hasAttribute('data-talk') ? 'Reopen the chat with Junior' : "Chat with Daan's cat");
   };
   new MutationObserver(applyTalk).observe(root, { attributes: true, attributeFilter: ['data-talk'] });
-  phone.addEventListener('change', applyTalk);
   applyTalk();
 
   pill.addEventListener('pointerenter', load, { once: true });
@@ -104,15 +94,10 @@ import { ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maximize2, Minimize2
       document.querySelector<HTMLElement>('.chat-tab')!.focus({ preventScroll: true });
       return;
     }
-    if (act === 'open') {
-      if (phone.matches && root.hasAttribute('data-talk')) load().then((chat) => chat.open());
-      else field.focus();
-      return;
-    }
     if (act === 'untuck') {
-      // A kept conversation on a larger screen: the tab opens the dock, not the pill.
-      if (!phone.matches && root.hasAttribute('data-talk')) {
-        load().then((chat) => chat.openDock());
+      // A kept conversation: the tab opens it (the dock, or the full screen on a phone), not the pill.
+      if (root.hasAttribute('data-talk')) {
+        load().then((chat) => chat.openFromTab());
         return;
       }
       try {
@@ -316,7 +301,6 @@ import { ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maximize2, Minimize2
     flex-direction: column;
   }
   .chat :focus-visible,
-  .chat-pill-avatar:focus-visible,
   .chat-pill-tuck:focus-visible,
   .chat-tab:focus-visible {
     outline: 2px solid var(--c-muted);
@@ -464,17 +448,6 @@ import { ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maximize2, Minimize2
     outline: 2px solid transparent;
     outline-offset: 3px;
   }
-  .chat-pill-avatar {
-    flex: none;
-    display: block;
-    border-radius: 999px;
-    cursor: default;
-  }
-  @media (max-width: 40rem) {
-    html[data-talk] .chat-pill-avatar {
-      cursor: pointer;
-    }
-  }
   .chat-pill-input {
     flex: 1;
     min-width: 0;
@@ -574,33 +547,30 @@ import { ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maximize2, Minimize2
       visibility 0s,
       color 0.15s;
   }
-  /* On larger screens a kept conversation that is closed (no dock) is Junior in the tab, and the pill steps aside: the dock
-     has its own field. (A phone has no dock: there the pill itself says "Continue with Junior".) */
-  /* The chevron says the pill slides out of the tab; a kept conversation (larger screens) opens the dock instead, which a
-     chat bubble says. Same size, so the tab keeps its width. */
+  /* A kept conversation that is closed (no dock, or minimised on a phone) is Junior in the tab, and the pill steps aside: the
+     chat has its own field. The chevron says the pill slides out of the tab; a kept conversation opens the chat instead,
+     which a chat bubble says. Same size, so the tab keeps its width. */
   .chat-tab-chat {
     display: none;
   }
-  @media (min-width: 40.0625rem) {
-    html[data-talk] .chat-tab-slide {
-      display: none;
-    }
-    html[data-talk] .chat-tab-chat {
-      display: block;
-    }
-    html[data-talk]:not([data-chat]) .chat-pill-wrap {
-      visibility: hidden;
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
-    html[data-talk]:not([data-chat]) .chat-tab {
-      opacity: 1;
-      visibility: visible;
-      transition:
-        opacity 0.1s ease,
-        visibility 0s,
-        color 0.15s;
-    }
+  html[data-talk] .chat-tab-slide {
+    display: none;
+  }
+  html[data-talk] .chat-tab-chat {
+    display: block;
+  }
+  html[data-talk]:not([data-chat]) .chat-pill-wrap {
+    visibility: hidden;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  html[data-talk]:not([data-chat]) .chat-tab {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 0.1s ease,
+      visibility 0s,
+      color 0.15s;
   }
   .chat-tab:hover {
     color: var(--c-fg);

@@ -116,7 +116,7 @@ function clientInfo(from?: 'pill') {
 
 // The chat steps aside into the dock, then the page changes, and the dock is already there on the next page.
 function go(path: string) {
-  if (mode() !== 'dock') setMode('dock');
+  if (mode() !== 'dock') setMode('dock', null, phone.matches && root.hasAttribute('data-talk') ? tabSpot() : null);
   save();
   const target = new URL(path, location.href);
   const delay = reduceMotion.matches ? 0 : 320;
@@ -252,8 +252,9 @@ function pillRect() {
 let seaTimer: ReturnType<typeof setTimeout> | undefined;
 
 // The water: it rises from the bottom when the chat opens, grows out of the dock window when the dock expands,
-// shrinks into the dock window on minimise, and sinks when the chat closes from full screen.
-function moveSea(sea: HTMLElement, from: Mode | undefined, to: Mode | undefined) {
+// shrinks into the dock window on minimise, and sinks when the chat closes from full screen. On a phone it spreads out of
+// the pill or the tab (`fromSpot`) and shrinks into the tab on minimise (`toSpot`).
+function moveSea(sea: HTMLElement, from: Mode | undefined, to: Mode | undefined, fromSpot?: Spot | null, toSpot?: Spot | null) {
   clearTimeout(seaTimer);
   const jump = (change: () => void) => {
     sea.classList.add('instant');
@@ -264,14 +265,14 @@ function moveSea(sea: HTMLElement, from: Mode | undefined, to: Mode | undefined)
   if (to === 'full' && from === 'dock' && !reduceMotion.matches) {
     jump(() => sea.classList.add('up', 'docking'));
     sea.classList.remove('docking');
-  } else if (to === 'full' && !from && !reduceMotion.matches && pillRect()) {
-    // Out of the pill: the water starts as the pill's own shape and spreads over the screen.
-    const r = pillRect()!;
+  } else if (to === 'full' && !from && !reduceMotion.matches && (fromSpot || pillRect())) {
+    // Out of the pill or the tab: the water starts as its own shape and spreads over the screen.
+    const r = fromSpot?.rect ?? pillRect()!;
     const right = document.documentElement.clientWidth - r.right;
     const bottom = innerHeight - r.bottom;
     jump(() => {
       sea.classList.add('up');
-      sea.style.clipPath = `inset(${r.top}px ${right}px ${bottom}px ${r.left}px round ${r.height / 2}px)`;
+      sea.style.clipPath = `inset(${r.top}px ${right}px ${bottom}px ${r.left}px round ${fromSpot?.radius ?? `${r.height / 2}px`})`;
     });
     sea.classList.add('from-pill');
     sea.style.clipPath = '';
@@ -282,6 +283,20 @@ function moveSea(sea: HTMLElement, from: Mode | undefined, to: Mode | undefined)
   } else if (from === 'full' && to === 'dock' && !reduceMotion.matches) {
     sea.classList.add('docking');
     seaTimer = setTimeout(() => jump(() => sea.classList.remove('up', 'docking')), 480);
+  } else if (from === 'full' && !to && toSpot && !reduceMotion.matches) {
+    // Into the tab (a phone's minimise): the water shrinks to the tab's own shape, then the tab is all that is left.
+    const r = toSpot.rect;
+    const right = document.documentElement.clientWidth - r.right;
+    const bottom = innerHeight - r.bottom;
+    sea.style.clipPath = `inset(${r.top}px ${right}px ${bottom}px ${r.left}px round ${toSpot.radius})`;
+    seaTimer = setTimeout(
+      () =>
+        jump(() => {
+          sea.classList.remove('up');
+          sea.style.clipPath = '';
+        }),
+      480,
+    );
   } else {
     sea.classList.remove('up', 'docking');
   }
@@ -372,8 +387,9 @@ function closeDock() {
   return true;
 }
 
-// `from` is the pill's or the tab's box when the chat opens out of it into the dock.
-function setMode(next: Mode | undefined, from?: Spot | null) {
+// `from` is the pill's or the tab's box when the chat opens out of it (into the dock, or onto the screen on a phone);
+// `to` is the tab's box when a phone's full screen collapses into it.
+function setMode(next: Mode | undefined, from?: Spot | null, to?: Spot | null) {
   if (next === 'dock' && phone.matches) next = undefined;
   const previous = mode();
   if (previous === next) return;
@@ -391,7 +407,7 @@ function setMode(next: Mode | undefined, from?: Spot | null) {
   if (growing) growFromSpot(from!);
 
   const full = next === 'full';
-  if (ui) moveSea(ui.sea, previous, next);
+  if (ui) moveSea(ui.sea, previous, next, from, to);
   if (full) ui?.panel.setAttribute('aria-modal', 'true');
   else ui?.panel.removeAttribute('aria-modal');
   document.querySelector('main')?.toggleAttribute('inert', full);
@@ -423,8 +439,9 @@ export async function act(action: string) {
     setMode('full');
     focusSoon(parts.input);
   } else if (action === 'minimise') {
-    setMode('dock');
-    focusSoon(phone.matches ? pillFace() : parts.panel.querySelector<HTMLElement>('.chat-btn-expand'));
+    // A phone has no dock: with a conversation the full screen collapses into the tab, without one it just sinks to the pill.
+    setMode('dock', null, phone.matches && root.hasAttribute('data-talk') ? tabSpot() : null);
+    focusSoon(phone.matches ? document.querySelector<HTMLElement>('.chat-tab') : parts.panel.querySelector<HTMLElement>('.chat-btn-expand'));
   } else if (action === 'reset') {
     resetDock();
     setTimeout(() => {
@@ -432,39 +449,37 @@ export async function act(action: string) {
       parts.restore();
     }, 480);
   } else if (action === 'close') {
-    // On a phone the cross ends the conversation, so the pill starts fresh. On larger screens it only closes the window.
-    if (phone.matches) endChat();
-    else if (closeDock()) return;
+    // On a phone the cross ends the conversation, so the pill starts fresh (focus stays off its field: that opens the keyboard).
+    // On larger screens it only closes the window.
+    if (phone.matches) {
+      endChat();
+      setMode(undefined);
+      return;
+    }
+    if (closeDock()) return;
     setMode(undefined);
-    focusSoon(phone.matches ? pillFace() : document.querySelector<HTMLElement>(closedInTab() ? '.chat-tab' : '.chat-pill-input'));
+    focusSoon(document.querySelector<HTMLElement>(closedInTab() ? '.chat-tab' : '.chat-pill-input'));
   }
 }
 
-const pillFace = () => document.querySelector<HTMLElement>('.chat-pill-avatar');
-
 function endChat() {
   epoch++;
+  // A question still on its way is dropped with its answer, and the new conversation can start at once.
+  busy = false;
   turns = [];
   draft = '';
   conversation = '';
   fromBottom = 0;
+  ui?.unlock();
   ui?.renderAll();
 }
 
-// The tab (larger screens, a conversation is kept): the dock opens out of it.
-export async function openDock() {
+// The tab (a conversation is kept): the dock opens out of it, or on a phone the full screen does.
+export async function openFromTab() {
   const parts = await ensureUi();
-  setMode('dock', tabSpot());
-  // (No measuring of the field here: the window is still the tab's size. growFromSpot measures it again later.)
-  requestAnimationFrame(parts.restore);
-  focusSoon(parts.input);
-}
-
-// Junior's face in the pill (phones): back to the conversation that was minimised.
-export async function open() {
-  const parts = await ensureUi();
-  setMode('full');
-  requestAnimationFrame(parts.grow);
+  setMode(phone.matches ? 'full' : 'dock', tabSpot());
+  // (No measuring of the field on larger screens: the window is still the tab's size. growFromSpot measures it again later.)
+  if (phone.matches) requestAnimationFrame(parts.grow);
   requestAnimationFrame(parts.restore);
   setTimeout(parts.restore, 480);
   focusSoon(parts.input);
@@ -670,9 +685,12 @@ async function build() {
       input.value = draft = text;
       grow();
     } finally {
-      log.removeAttribute('aria-busy');
-      busy = false;
-      send.disabled = false;
+      // A conversation ended meanwhile (see endChat) has already freed the field, and a newer question may be on its way.
+      if (mine === epoch) {
+        log.removeAttribute('aria-busy');
+        busy = false;
+        send.disabled = false;
+      }
       save();
       // A dock the visitor is not typing in is left alone: the answer must not steal focus from the page.
       if (mode() !== 'dock' || document.getElementById('chat')!.contains(document.activeElement)) input.focus({ preventScroll: true });
@@ -702,7 +720,12 @@ async function build() {
   if (mode() !== 'dock') loadTurnstile().catch(() => {});
   else addEventListener('pointerdown', () => loadTurnstile().catch(() => {}), { once: true });
 
-  return { panel, sea, input, renderAll, grow, submit, scroll, restore };
+  // Frees the field of a question that is still on its way (its answer is dropped, see endChat).
+  const unlock = () => {
+    log.removeAttribute('aria-busy');
+    send.disabled = false;
+  };
+  return { panel, sea, input, renderAll, grow, submit, scroll, restore, unlock };
 }
 
 // A minimised chat from the previous page: bring its conversation back.
