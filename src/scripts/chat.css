@@ -411,6 +411,67 @@ html[data-chat='full'] .chat-input {
   html[data-chat='dock'] .chat-floor {
     z-index: 59;
   }
+  /* While the dock opens out of the pill (chat.ts, growFromPill): the body waits and fades in once the window has grown,
+     and the layers that sit at the dock's final box (ground shadow, outer handles) wait with it. */
+  html.chat-growing .chat-body {
+    opacity: 0;
+    transition-duration: 0.12s;
+  }
+  /* Slower and softer than the dock's other moves: a gentle start and a long tail, because the window travels a long way
+     (a front-loaded curve covered most of it in the first 60 ms and read as a snap). A running transition keeps the timing
+     it started with, so dropping the class halfway does not change it. Order: left, top, width, height, border-radius,
+     background-color. */
+  html.chat-growing .chat {
+    transition-duration: 0.65s, 0.65s, 0.65s, 0.65s, 0.65s, 0.4s;
+    transition-timing-function: cubic-bezier(0.45, 0, 0.1, 1);
+  }
+  .chat-floor {
+    transition: opacity 0.35s ease;
+  }
+  html.chat-growing .chat-floor {
+    opacity: 0;
+    transition-duration: 0s;
+  }
+  html.chat-growing .chat-grab,
+  html.chat-closing .chat-grab {
+    visibility: hidden;
+  }
+  /* Closing the dock back into the pill (chat.ts, closeToPill), the opening in reverse: the window shrinks into the pill's
+     box while its content fades out, the dock's own bob and the pill's float stand still (so the box it shrinks to stays
+     where the pill is), and for the last moments (chat-landing) the real pill shows under the window while the window
+     fades away over it. Order of the durations: left, top, width, height, border-radius, background-color, opacity. */
+  html.chat-closing .chat {
+    animation: none;
+    transition-duration: 0.5s, 0.5s, 0.5s, 0.5s, 0.5s, 0.4s, 0.15s;
+    transition-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
+  }
+  html.chat-closing .chat-head,
+  html.chat-closing .chat-body {
+    opacity: 0;
+    transition-duration: 0.15s;
+  }
+  html.chat-closing .chat-floor {
+    opacity: 0;
+  }
+  html.chat-closing .chat-pill-wrap {
+    animation-play-state: running, paused;
+  }
+  html.chat-closing .chat-pill-wrap::after {
+    animation-play-state: paused;
+  }
+  html[data-chat].chat-landing-pill .chat-pill-wrap {
+    opacity: 1 !important;
+    visibility: visible;
+    transition: opacity 0.12s ease;
+  }
+  html[data-chat].chat-landing-tab .chat-tab {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.12s ease;
+  }
+  html.chat-landing .chat {
+    opacity: 0;
+  }
   .chat-o {
     position: absolute;
     pointer-events: auto;

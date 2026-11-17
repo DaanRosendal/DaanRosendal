@@ -289,7 +289,91 @@ function moveSea(sea: HTMLElement, from: Mode | undefined, to: Mode | undefined)
 
 let movingTimer: ReturnType<typeof setTimeout> | undefined;
 
-function setMode(next: Mode | undefined) {
+let growTimer: ReturnType<typeof setTimeout> | undefined;
+
+// Where the dock opens out of, or closes into: the pill, or the edge tab (Junior's face on the right edge, which is also
+// what a collapsed conversation looks like on larger screens). The box and the corner radius are read by the caller before
+// the dock opens or starts to close: a style read after that would make the browser compute the dock's final box first and
+// use it as the transition's start, and the window would animate the wrong way.
+interface Spot {
+  rect: DOMRect;
+  radius: string;
+}
+
+function pillSpot(): Spot | null {
+  const rect = pillRect();
+  if (!rect) return null;
+  const corner = parseFloat(getComputedStyle(document.querySelector('.chat-pill')!).borderTopLeftRadius) || 24;
+  return { rect, radius: `${Math.min(corner, rect.height / 2)}px` };
+}
+
+// The tab is flush with the right edge: round on its left side only.
+function tabSpot(): Spot | null {
+  const rect = document.querySelector('.chat-tab')?.getBoundingClientRect();
+  if (!rect || rect.width === 0) return null;
+  return { rect, radius: `${rect.height / 2}px 0 0 ${rect.height / 2}px` };
+}
+
+// On larger screens a conversation that is closed (and a tucked pill) lives in the tab, otherwise in the pill.
+const closedInTab = () => !phone.matches && (root.hasAttribute('data-talk') || root.hasAttribute('data-tucked'));
+
+// The dock window opening out of the pill or the tab: it starts as that box (same colors, border and corner radius) and
+// grows into the dock's box, while its body fades in after it. Its header is there from the start, so the avatar carries
+// over into it. Setting the start box inline, reading the layout, and removing it again lets the window's own transitions
+// (left, top, width, height, border-radius) run from there to the dock.
+function growFromSpot({ rect, radius }: Spot) {
+  const panel = document.getElementById('chat')!;
+  const box = { '--x': `${rect.left}px`, '--y': `${rect.top}px`, '--w': `${rect.width}px`, '--h': `${rect.height}px` };
+  root.classList.add('chat-growing');
+  for (const [name, value] of Object.entries(box)) panel.style.setProperty(name, value);
+  panel.style.borderRadius = radius;
+  void panel.offsetWidth;
+  for (const name of Object.keys(box)) panel.style.removeProperty(name);
+  panel.style.removeProperty('border-radius');
+  clearTimeout(growTimer);
+  // The body starts to fade in while the window is nearly there, and is fully in as it settles.
+  growTimer = setTimeout(() => root.classList.remove('chat-growing'), 330);
+  // A draft was last measured at another size: measure it again when the window is nearly, and then fully, at its final width.
+  setTimeout(() => ui?.grow(), 450);
+  setTimeout(() => ui?.grow(), 700);
+}
+
+let closing = false;
+
+// The cross on the dock, the opening in reverse (see the chat-closing rules in chat.css): the window shrinks into the tab
+// (a conversation is kept) or the pill, while its content fades, the real tab or pill shows under it for the last moments,
+// and the window fades away over it. Returns false when it does not apply (not the dock, or reduced motion): the caller
+// then just closes. The pill is measured after the class that stops its float.
+function closeDock() {
+  if (closing) return true;
+  if (mode() !== 'dock' || reduceMotion.matches) return false;
+  const toTab = closedInTab();
+  root.classList.add('chat-closing');
+  const spot = toTab ? tabSpot() : pillSpot();
+  if (!spot) {
+    root.classList.remove('chat-closing');
+    return false;
+  }
+  closing = true;
+  const panel = document.getElementById('chat')!;
+  const landing = toTab ? 'chat-landing-tab' : 'chat-landing-pill';
+  const box = { '--x': `${spot.rect.left}px`, '--y': `${spot.rect.top}px`, '--w': `${spot.rect.width}px`, '--h': `${spot.rect.height}px` };
+  for (const [name, value] of Object.entries(box)) panel.style.setProperty(name, value);
+  panel.style.borderRadius = spot.radius;
+  setTimeout(() => root.classList.add('chat-landing', landing), 340);
+  setTimeout(() => {
+    for (const name of Object.keys(box)) panel.style.removeProperty(name);
+    panel.style.removeProperty('border-radius');
+    root.classList.remove('chat-closing', 'chat-landing', landing);
+    setMode(undefined);
+    closing = false;
+    focusSoon(document.querySelector<HTMLElement>(toTab ? '.chat-tab' : '.chat-pill-input'));
+  }, 520);
+  return true;
+}
+
+// `from` is the pill's or the tab's box when the chat opens out of it into the dock.
+function setMode(next: Mode | undefined, from?: Spot | null) {
   if (next === 'dock' && phone.matches) next = undefined;
   const previous = mode();
   if (previous === next) return;
@@ -301,8 +385,10 @@ function setMode(next: Mode | undefined) {
     movingTimer = setTimeout(() => root.classList.remove('chat-moving'), next === 'full' ? 850 : 560);
   }
   lockScroll();
+  const growing = !!from && next === 'dock' && !previous && !reduceMotion.matches;
   if (next) root.dataset.chat = next;
   else delete root.dataset.chat;
+  if (growing) growFromSpot(from!);
 
   const full = next === 'full';
   if (ui) moveSea(ui.sea, previous, next);
@@ -348,8 +434,9 @@ export async function act(action: string) {
   } else if (action === 'close') {
     // On a phone the cross ends the conversation, so the pill starts fresh. On larger screens it only closes the window.
     if (phone.matches) endChat();
+    else if (closeDock()) return;
     setMode(undefined);
-    focusSoon(phone.matches ? pillFace() : document.querySelector<HTMLElement>('.chat-pill-input'));
+    focusSoon(phone.matches ? pillFace() : document.querySelector<HTMLElement>(closedInTab() ? '.chat-tab' : '.chat-pill-input'));
   }
 }
 
@@ -364,6 +451,15 @@ function endChat() {
   ui?.renderAll();
 }
 
+// The tab (larger screens, a conversation is kept): the dock opens out of it.
+export async function openDock() {
+  const parts = await ensureUi();
+  setMode('dock', tabSpot());
+  // (No measuring of the field here: the window is still the tab's size. growFromSpot measures it again later.)
+  requestAnimationFrame(parts.restore);
+  focusSoon(parts.input);
+}
+
 // Junior's face in the pill (phones): back to the conversation that was minimised.
 export async function open() {
   const parts = await ensureUi();
@@ -374,10 +470,16 @@ export async function open() {
   focusSoon(parts.input);
 }
 
-// A question typed into the pill: the screen floods and the question goes out.
+// A question typed into the pill. On a phone the screen floods; elsewhere the dock opens out of the pill. Then the question goes out.
 export async function send(text: string) {
   const parts = await ensureUi();
-  setMode('full');
+  if (phone.matches) {
+    setMode('full');
+  } else {
+    setMode('dock', pillSpot());
+    requestAnimationFrame(parts.restore);
+    focusSoon(parts.input);
+  }
   requestAnimationFrame(parts.grow);
   parts.submit(text, 'pill');
 }
@@ -480,6 +582,13 @@ async function build() {
   };
 
   const grow = () => {
+    // Empty: one line. Measuring an empty field would count the wrapped placeholder, and while the dock opens out of the
+    // tab the field is only a few px wide.
+    if (!input.value) {
+      input.style.height = '';
+      input.style.overflowY = 'hidden';
+      return;
+    }
     input.style.height = 'auto';
     const border = input.offsetHeight - input.clientHeight;
     const wanted = input.scrollHeight + border;
@@ -516,6 +625,9 @@ async function build() {
     grow();
     addMessage('user', text);
     turns.push({ role: 'user', content: text });
+    // A conversation exists from the moment the question is sent (the cross on the dock goes to the tab, not the pill),
+    // and a failure takes it back out below.
+    save();
     const answerBubble = el('div', 'chat-msg chat-bot chat-thinking', 'Thinking...');
     log.append(answerBubble);
     scroll();
@@ -562,7 +674,8 @@ async function build() {
       busy = false;
       send.disabled = false;
       save();
-      if (mode() !== 'dock') input.focus({ preventScroll: true });
+      // A dock the visitor is not typing in is left alone: the answer must not steal focus from the page.
+      if (mode() !== 'dock' || document.getElementById('chat')!.contains(document.activeElement)) input.focus({ preventScroll: true });
     }
   }
 

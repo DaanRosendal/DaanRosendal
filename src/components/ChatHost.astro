@@ -1,5 +1,5 @@
 ---
-import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
+import { ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maximize2, Minimize2, RotateCcw, X } from '@lucide/astro';
 ---
 
 <!-- The chat's static shell. The whole chat is driven by html[data-chat] (open, full, dock; absent means closed), which an
@@ -18,7 +18,8 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
   </button>
 </div>
 <button type="button" class="chat-tab" data-chat-act="untuck" aria-label="Chat with Daan's cat">
-  <ChevronLeft size={14} aria-hidden="true" />
+  <ChevronLeft class="chat-tab-slide" size={14} aria-hidden="true" />
+  <MessageCircle class="chat-tab-chat" size={14} aria-hidden="true" />
   <img class="chat-avatar" src="/media/cat/junior-clean.webp" alt="" width="32" height="32" decoding="async" />
 </button>
 
@@ -48,11 +49,15 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
   // head script and by chat.ts), the pill says so, and Junior's face in it reopens the conversation.
   const phone = matchMedia('(max-width: 40rem)');
   const faceButton = pill.querySelector<HTMLElement>('.chat-pill-avatar')!;
+  const tab = document.querySelector<HTMLElement>('.chat-tab')!;
   const applyTalk = () => {
-    const talk = phone.matches && root.hasAttribute('data-talk');
+    const kept = root.hasAttribute('data-talk');
+    const talk = phone.matches && kept;
     field.placeholder = talk ? 'Continue with Junior' : "Chat with Daan's cat";
     field.setAttribute('aria-label', field.placeholder);
     faceButton.setAttribute('aria-label', talk ? 'Reopen the chat with Junior' : 'Chat with Junior');
+    // On larger screens a kept conversation that is closed lives in the tab, which reopens the dock.
+    tab.setAttribute('aria-label', kept && !phone.matches ? 'Reopen the chat with Junior' : "Chat with Daan's cat");
   };
   new MutationObserver(applyTalk).observe(root, { attributes: true, attributeFilter: ['data-talk'] });
   phone.addEventListener('change', applyTalk);
@@ -105,6 +110,11 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
       return;
     }
     if (act === 'untuck') {
+      // A kept conversation on a larger screen: the tab opens the dock, not the pill.
+      if (!phone.matches && root.hasAttribute('data-talk')) {
+        load().then((chat) => chat.openDock());
+        return;
+      }
       try {
         localStorage.removeItem(TUCKED_KEY);
       } catch {}
@@ -208,7 +218,8 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
       width 0.45s var(--ease),
       height 0.45s var(--ease),
       border-radius 0.45s var(--ease),
-      background-color 0.4s ease;
+      background-color 0.4s ease,
+      opacity 0.15s ease;
   }
   html[data-chat] .chat {
     display: flex;
@@ -350,7 +361,7 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
     animation-play-state: paused;
   }
   /* Tucked: the pill slides to the window's right edge (left: 100%, translated back by its own width, so its right edge meets
-     the tab's) while a clip wipes it away from the left, down to the last 3.9rem: the tab's footprint, with rounded
+     the tab's) while a clip wipes it away from the left, down to the last 4.45rem: the tab's footprint (keep the two in step), with rounded
      corners. Nothing is stretched. The tab is invisible until then and fades in over that remnant in the last 0.1 s, when
      the pill is hidden from focus and pointer for good. The clip is -4rem at rest so it never cuts the shadow or the tuck
      button. An ease-in-out curve keeps the start visible (a front-loaded one moved the pill most of the way in 75 ms and
@@ -367,7 +378,7 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
   html[data-tucked] .chat-pill-wrap {
     left: calc(100% - env(safe-area-inset-right));
     translate: -100% 0;
-    clip-path: inset(0 -4rem 0 calc(100% - 3.9rem) round 999px);
+    clip-path: inset(0 -4rem 0 calc(100% - 4.45rem) round 999px);
     visibility: hidden;
     pointer-events: none !important;
     transition:
@@ -536,8 +547,8 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
     bottom: 1.25rem;
     display: flex;
     align-items: center;
-    gap: 0.15rem;
-    padding: 0.45rem 0.3rem 0.45rem 0.5rem;
+    gap: 0.45rem;
+    padding: 0.45rem 0.3rem 0.45rem 0.75rem;
     border: 1px solid var(--c-line);
     border-right: 0;
     border-radius: 999px 0 0 999px;
@@ -562,6 +573,34 @@ import { ArrowUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, RotateCcw, X 
       opacity 0.1s ease 0.4s,
       visibility 0s,
       color 0.15s;
+  }
+  /* On larger screens a kept conversation that is closed (no dock) is Junior in the tab, and the pill steps aside: the dock
+     has its own field. (A phone has no dock: there the pill itself says "Continue with Junior".) */
+  /* The chevron says the pill slides out of the tab; a kept conversation (larger screens) opens the dock instead, which a
+     chat bubble says. Same size, so the tab keeps its width. */
+  .chat-tab-chat {
+    display: none;
+  }
+  @media (min-width: 40.0625rem) {
+    html[data-talk] .chat-tab-slide {
+      display: none;
+    }
+    html[data-talk] .chat-tab-chat {
+      display: block;
+    }
+    html[data-talk]:not([data-chat]) .chat-pill-wrap {
+      visibility: hidden;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    html[data-talk]:not([data-chat]) .chat-tab {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity 0.1s ease,
+        visibility 0s,
+        color 0.15s;
+    }
   }
   .chat-tab:hover {
     color: var(--c-fg);
