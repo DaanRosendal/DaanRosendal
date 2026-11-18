@@ -290,9 +290,14 @@ import { ArrowDownRight, ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maxi
       display: grid;
     }
   }
-  html[data-chat='dock'] .chat-btn-expand,
-  html[data-chat='full'] .chat-btn-min {
+  html[data-chat='dock'] .chat-btn-expand {
     display: grid;
+  }
+  /* Full screen has a minimise button only where there is a dock to go to; a phone's one button is the cross. */
+  @media (min-width: 40.0625rem) {
+    html[data-chat='full'] .chat-btn-min {
+      display: grid;
+    }
   }
   .chat-body {
     flex: 1;
@@ -344,9 +349,10 @@ import { ArrowDownRight, ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maxi
   .chat-pill-wrap:focus-within::after {
     animation-play-state: paused;
   }
-  /* Tucked: the pill slides to the window's right edge (left: 100%, translated back by its own width, so its right edge meets
-     the tab's) while a clip wipes it away from the left, down to the last 4.45rem: the tab's footprint (keep the two in step), with rounded
-     corners. Nothing is stretched. The tab is invisible until then and fades in over that remnant in the last 0.1 s, when
+  /* Tucked: the pill slides to the window's right edge (left: 100%, translated back by its own width) while a clip wipes it
+     away from the left, down to the last 4.45rem: the tab's footprint (keep the two in step), with rounded corners on its
+     left. The pill goes 1.6rem past the edge, so its own rounded right end is outside the window and the remnant's right
+     side is flat, like the tab's: no corners appear at the handover. Nothing is stretched. The tab is invisible until then and fades in over that remnant in the last 0.1 s, when
      the pill is hidden from focus and pointer for good. The clip is -4rem at rest so it never cuts the shadow or the tuck
      button. An ease-in-out curve keeps the start visible (a front-loaded one moved the pill most of the way in 75 ms and
      read as a snap). Leaving the state uses the base rule: the pill is visible again at once, where the tab was, and
@@ -360,9 +366,9 @@ import { ArrowDownRight, ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maxi
       visibility 0s;
   }
   html[data-tucked] .chat-pill-wrap {
-    left: calc(100% - env(safe-area-inset-right));
+    left: calc(100% - env(safe-area-inset-right) + 1.6rem);
     translate: -100% 0;
-    clip-path: inset(0 -4rem 0 calc(100% - 4.45rem) round 999px);
+    clip-path: inset(0 -4rem 0 calc(100% - 4.45rem - 1.6rem) round 999px);
     visibility: hidden;
     pointer-events: none !important;
     transition:

@@ -51,8 +51,6 @@ let widget: string | undefined;
 let pending: { resolve(token: string): void; reject(error: Error): void } | undefined;
 let turnstileLoading: Promise<void> | undefined;
 let busy = false;
-// Counts the conversations ended on a phone, so an answer still on its way for an ended one is dropped.
-let epoch = 0;
 let pages = new Set<string>();
 let ui: Awaited<ReturnType<typeof build>> | undefined;
 let building: Promise<NonNullable<typeof ui>> | undefined;
@@ -276,7 +274,7 @@ function moveSea(sea: HTMLElement, from: Mode | undefined, to: Mode | undefined,
     });
     sea.classList.add('from-pill');
     sea.style.clipPath = '';
-    seaTimer = setTimeout(() => sea.classList.remove('from-pill'), 900);
+    seaTimer = setTimeout(() => sea.classList.remove('from-pill'), 760);
   } else if (to === 'full') {
     sea.classList.remove('docking');
     sea.classList.add('up');
@@ -288,14 +286,15 @@ function moveSea(sea: HTMLElement, from: Mode | undefined, to: Mode | undefined,
     const r = toSpot.rect;
     const right = document.documentElement.clientWidth - r.right;
     const bottom = innerHeight - r.bottom;
+    sea.classList.add('to-tab');
     sea.style.clipPath = `inset(${r.top}px ${right}px ${bottom}px ${r.left}px round ${toSpot.radius})`;
     seaTimer = setTimeout(
       () =>
         jump(() => {
-          sea.classList.remove('up');
+          sea.classList.remove('up', 'to-tab');
           sea.style.clipPath = '';
         }),
-      480,
+      640,
     );
   } else {
     sea.classList.remove('up', 'docking');
@@ -398,7 +397,7 @@ function setMode(next: Mode | undefined, from?: Spot | null, to?: Spot | null) {
   if ((next === 'full' || previous === 'full') && previous !== 'dock' && next !== 'dock' && !reduceMotion.matches) {
     root.classList.add('chat-moving');
     clearTimeout(movingTimer);
-    movingTimer = setTimeout(() => root.classList.remove('chat-moving'), next === 'full' ? 850 : 560);
+    movingTimer = setTimeout(() => root.classList.remove('chat-moving'), next === 'full' ? 620 : 560);
   }
   lockScroll();
   const growing = !!from && next === 'dock' && !previous && !reduceMotion.matches;
@@ -449,29 +448,16 @@ export async function act(action: string) {
       parts.restore();
     }, 480);
   } else if (action === 'close') {
-    // On a phone the cross ends the conversation, so the pill starts fresh (focus stays off its field: that opens the keyboard).
-    // On larger screens it only closes the window.
+    // On a phone the only button in the full screen is the cross, and it collapses the chat like the minimise button does on
+    // larger screens: into the tab when a conversation exists. (Focus stays off the pill's field: that opens the keyboard.)
     if (phone.matches) {
-      endChat();
-      setMode(undefined);
+      void act('minimise');
       return;
     }
     if (closeDock()) return;
     setMode(undefined);
     focusSoon(document.querySelector<HTMLElement>(closedInTab() ? '.chat-tab' : '.chat-pill-input'));
   }
-}
-
-function endChat() {
-  epoch++;
-  // A question still on its way is dropped with its answer, and the new conversation can start at once.
-  busy = false;
-  turns = [];
-  draft = '';
-  conversation = '';
-  fromBottom = 0;
-  ui?.unlock();
-  ui?.renderAll();
 }
 
 // The tab (a conversation is kept): the dock opens out of it, or on a phone the full screen does.
@@ -634,7 +620,6 @@ async function build() {
       return;
     }
     busy = true;
-    const mine = epoch;
     send.disabled = true;
     input.value = draft = '';
     grow();
@@ -673,11 +658,9 @@ async function build() {
         scroll();
       });
       markdown.end();
-      if (mine !== epoch) return;
       if (!answer.trim()) throw new Error('No answer came back. Please try again.');
       turns.push({ role: 'assistant', content: answer.trim() });
     } catch (error) {
-      if (mine !== epoch) return;
       turns.pop();
       markdown.destroy();
       answerBubble.remove();
@@ -685,12 +668,9 @@ async function build() {
       input.value = draft = text;
       grow();
     } finally {
-      // A conversation ended meanwhile (see endChat) has already freed the field, and a newer question may be on its way.
-      if (mine === epoch) {
-        log.removeAttribute('aria-busy');
-        busy = false;
-        send.disabled = false;
-      }
+      log.removeAttribute('aria-busy');
+      busy = false;
+      send.disabled = false;
       save();
       // A dock the visitor is not typing in is left alone: the answer must not steal focus from the page.
       if (mode() !== 'dock' || document.getElementById('chat')!.contains(document.activeElement)) input.focus({ preventScroll: true });
@@ -720,12 +700,7 @@ async function build() {
   if (mode() !== 'dock') loadTurnstile().catch(() => {});
   else addEventListener('pointerdown', () => loadTurnstile().catch(() => {}), { once: true });
 
-  // Frees the field of a question that is still on its way (its answer is dropped, see endChat).
-  const unlock = () => {
-    log.removeAttribute('aria-busy');
-    send.disabled = false;
-  };
-  return { panel, sea, input, renderAll, grow, submit, scroll, restore, unlock };
+  return { panel, sea, input, renderAll, grow, submit, scroll, restore };
 }
 
 // A minimised chat from the previous page: bring its conversation back.
