@@ -2,8 +2,8 @@
 // (see ChatHost.astro for the static shell and the html[data-chat] modes). Everything the model writes is added as
 // text nodes, never as HTML.
 // The conversation's styles ride along with this script (an inline string), so pages that never use the chat do not carry them.
-import { createRenderer } from '../vendor/limmat';
-import limmatCss from '../vendor/limmat/style.css?inline';
+import { createRenderer } from 'limmat';
+import limmatCss from 'limmat/style.css?inline';
 import css from './chat.css?inline';
 import { applyDock, attachDock, resetDock } from './dock';
 
