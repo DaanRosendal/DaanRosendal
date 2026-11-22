@@ -7,6 +7,7 @@ import { speedHighlight } from 'limmat/highlight';
 import limmatCss from 'limmat/style.css?inline';
 import css from './chat.css?inline';
 import { applyDock, attachDock, resetDock } from './dock';
+import { thinking } from './thinking';
 
 const SITEKEY = ['localhost', '127.0.0.1'].includes(location.hostname) ? '1x00000000000000000000AA' : '0x4AAAAAAF5IJpF-SESG-Kls';
 const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
@@ -675,10 +676,12 @@ async function build() {
     // A conversation exists from the moment the question is sent (the cross on the dock goes to the tab, not the pill),
     // and a failure takes it back out below.
     save();
-    const answerBubble = el('div', 'chat-msg chat-bot chat-thinking', 'Thinking...');
+    const answerBubble = el('div', 'chat-msg chat-bot chat-thinking');
+    answerBubble.append(thinking());
     log.append(answerBubble);
     scroll();
-    const markdown = renderer(answerBubble);
+    // The renderer empties its container when it is made, so it is made with the first words (the bubble shows a waiting animation until then).
+    let markdown: ReturnType<typeof renderer> | undefined;
     // Screen readers wait for the whole answer instead of announcing every streamed chunk.
     log.setAttribute('aria-busy', 'true');
     try {
@@ -694,24 +697,22 @@ async function build() {
         const problem = await response.json().catch(() => null);
         throw new Error(problem?.message ?? `The chat is unavailable right now. Please email ${CONTACT} instead.`);
       }
-      let started = false;
       const answer = await readAnswer(response, (piece) => {
-        if (!started) {
-          started = true;
+        if (!markdown) {
           answerBubble.classList.remove('chat-thinking');
-          answerBubble.textContent = '';
+          markdown = renderer(answerBubble);
         }
         markdown.write(piece);
         // Follow the answer only while the visitor is at its end: scrolling up to reread something is left alone.
         if (following) scroll();
       });
-      markdown.end();
+      markdown?.end();
       settle([answerBubble]);
       if (!answer.trim()) throw new Error('No answer came back. Please try again.');
       turns.push({ role: 'assistant', content: answer.trim() });
     } catch (error) {
       turns.pop();
-      markdown.destroy();
+      markdown?.destroy();
       answerBubble.remove();
       addMessage('note', error instanceof Error ? error.message : 'Something went wrong. Please try again.');
       input.value = draft = text;
