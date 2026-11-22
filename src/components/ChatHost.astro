@@ -140,12 +140,43 @@ import { ArrowDownRight, ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maxi
 
   /* The dock's box, shared by the window and the water's clip (chat.css). --s-r, --s-b, --s-w and --s-h are the visitor's
      saved distance from the right and bottom edge and size in px (set by the head script in Layout and by dock.ts). They
-     are only clamped here, never rewritten: a window shrunk and enlarged again returns to the saved place. */
+     are only clamped here, never rewritten: a window shrunk and enlarged again returns to the saved place. Without a saved
+     size the dock is as tall as the window allows (see --dock-h-auto), so a tall window gets a taller chat. */
   html {
+    /* Where the page can slide aside (a window of 72rem and more, see 'Making room' below) the dock is the full height with the
+       same 1rem gap at the top as at the bottom, at most 64rem. On narrower windows it still overlaps the page, so it takes 86%. */
+    --dock-h-auto: clamp(26rem, 86dvh, 60rem);
     --dock-w: min(max(var(--s-w, 23rem), 21rem), 100% - 1rem);
-    --dock-h: min(max(var(--s-h, 30rem), 20rem), 100dvh - 1rem);
+    --dock-h: min(max(var(--s-h, var(--dock-h-auto)), 20rem), 100dvh - 1rem);
     --dock-r: clamp(0.5rem, var(--s-r, 1rem), calc(100% - var(--dock-w) - 0.5rem));
     --dock-b: clamp(0.5rem, var(--s-b, 1rem), calc(100dvh - var(--dock-h) - 0.5rem));
+  }
+
+  @media (min-width: 72rem) {
+    html {
+      --dock-h-auto: clamp(26rem, 100dvh - 2rem, 64rem);
+    }
+  }
+
+  /* Making room for the dock. The page is a centered 48rem column (Layout), so on a wide screen the dock would sit over its
+     right edge. While the dock is open the column slides left by just the overlap (plus a 0.5rem gap), never further than its
+     own side margin, so its text keeps the 1.5rem side padding. The width stays the same: squeezing it would shrink the cards.
+     Below about 1,000px the margin is too small to clear the dock and the rest overlaps, as before (the dock can be moved
+     and resized). A dock moved to the left half of the window leaves the column alone (the clamp in the last term is 0 there).
+     Only 'left' changes on a relative body: a transform would become the containing block of the fixed chat. */
+  html body {
+    position: relative;
+    left: 0;
+    transition: left 0.45s ease;
+  }
+  html.chat-dragging body {
+    transition: none;
+  }
+  html[data-chat='dock'] body {
+    --margin: calc((100% - 48rem) / 2);
+    left: calc(
+      -1 * max(0px, min(var(--dock-w) + var(--dock-r) - var(--margin) - 0.5rem, var(--margin), clamp(0px, (50% - var(--dock-r) - var(--dock-w) / 2) * 10000, 100000px)))
+    );
   }
 
   .chat,
@@ -594,6 +625,9 @@ import { ArrowDownRight, ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maxi
     }
     .chat-pill-wrap {
       animation: chat-fade 0.4s ease 0.5s forwards;
+      transition: none;
+    }
+    html body {
       transition: none;
     }
     .chat-tab {

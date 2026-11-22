@@ -551,7 +551,12 @@ async function build() {
   const slot = el('div', 'chat-turnstile');
 
   // New text follows the log to its end. restore() puts the log back where the visitor left it.
+  // Whether new text pulls the log along. It stops at the first sign that the visitor scrolls up (a wheel tick, a touch drag, a key,
+  // or the scrollbar), not once they are far enough away: a gentle start would otherwise be undone by the next chunk. It starts
+  // again when they reach the end.
+  let following = true;
   const scroll = () => {
+    following = true;
     fromBottom = 0;
     log.scrollTop = log.scrollHeight;
   };
@@ -572,12 +577,28 @@ async function build() {
     for (const bubble of bubbles) settling.observe(bubble);
   };
   for (const type of ['wheel', 'touchstart', 'pointerdown', 'keydown']) log.addEventListener(type, () => (settleUntil = 0), { passive: true });
+  log.addEventListener('wheel', (event) => event.deltaY < 0 && (following = false), { passive: true });
+  let touchY = 0;
+  log.addEventListener('touchstart', (event) => (touchY = event.touches[0].clientY), { passive: true });
+  log.addEventListener(
+    'touchmove',
+    (event) => {
+      const y = event.touches[0].clientY;
+      if (y > touchY) following = false;
+      touchY = y;
+    },
+    { passive: true },
+  );
+  log.addEventListener('keydown', (event) => ['ArrowUp', 'PageUp', 'Home'].includes(event.key) && (following = false), { passive: true });
   log.addEventListener(
     'scroll',
     () => {
       // Hidden (the chat is closed) or being re-laid out: the browser moved it, not the visitor.
       if (!log.clientHeight || performance.now() < scrollLockUntil) return;
       fromBottom = Math.max(0, log.scrollHeight - log.clientHeight - log.scrollTop);
+      // The scrollbar, or a drag, took the visitor away from the end (or back to it).
+      if (fromBottom > 40) following = false;
+      else if (fromBottom < 4) following = true;
     },
     { passive: true },
   );
@@ -603,6 +624,7 @@ async function build() {
     input.value = draft;
     grow();
     fromBottom = kept;
+    following = kept < 4;
     restore();
     settle(log.children);
   };
@@ -681,7 +703,7 @@ async function build() {
         }
         markdown.write(piece);
         // Follow the answer only while the visitor is at its end: scrolling up to reread something is left alone.
-        if (fromBottom < 40) scroll();
+        if (following) scroll();
       });
       markdown.end();
       settle([answerBubble]);
