@@ -558,6 +558,20 @@ async function build() {
   const restore = () => {
     log.scrollTop = Math.max(0, log.scrollHeight - log.clientHeight - fromBottom);
   };
+  // Math and code colors arrive a moment after a message is drawn and change its height, which would move the log off the
+  // place restore() chose. For a short while the place is put back whenever a message resizes, until the visitor takes over.
+  let settleUntil = 0;
+  const settling = new ResizeObserver(() => {
+    if (performance.now() >= settleUntil) return;
+    lockScroll();
+    restore();
+  });
+  const settle = (bubbles: Iterable<Element>) => {
+    settling.disconnect();
+    settleUntil = performance.now() + 3000;
+    for (const bubble of bubbles) settling.observe(bubble);
+  };
+  for (const type of ['wheel', 'touchstart', 'pointerdown', 'keydown']) log.addEventListener(type, () => (settleUntil = 0), { passive: true });
   log.addEventListener(
     'scroll',
     () => {
@@ -590,6 +604,7 @@ async function build() {
     grow();
     fromBottom = kept;
     restore();
+    settle(log.children);
   };
 
   const grow = () => {
@@ -668,6 +683,7 @@ async function build() {
         scroll();
       });
       markdown.end();
+      settle([answerBubble]);
       if (!answer.trim()) throw new Error('No answer came back. Please try again.');
       turns.push({ role: 'assistant', content: answer.trim() });
     } catch (error) {
