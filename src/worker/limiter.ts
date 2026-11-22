@@ -1,13 +1,13 @@
 import { DurableObject } from 'cloudflare:workers';
 
-// Free-tier budget: Workers AI allows 10,000 neurons a day (resets 00:00 UTC). The gate stops at 7,000 so the
+// Free-tier budget: Workers AI allows 10,000 neurons a day (resets 00:00 UTC). The gate stops at 8,000 so the
 // estimates can be off and the real visitors still never hit Cloudflare's own hard stop.
 export const LIMITS = {
-  globalNeurons: 7000,
-  ipPerDay: 20,
-  ipPerMinute: 3,
-  // One visitor may use about a quarter of the budget.
-  ipNeurons: 2000,
+  globalNeurons: 8000,
+  ipPerDay: 50,
+  ipPerMinute: 20,
+  // One visitor may use half of the gate's budget.
+  ipNeurons: 4000,
 };
 
 export type Verdict = { ok: true } | { ok: false; reason: 'global' | 'ip_day' | 'ip_minute' | 'ip_budget' };

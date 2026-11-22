@@ -46,7 +46,7 @@ const MESSAGES = {
   bad_request: 'That message could not be read. Please try again.',
   forbidden: 'This request was not allowed.',
   turnstile: 'Could not verify that you are human. Please reload the page and try again.',
-  ip_day: `You have used today's 20 messages. Please come back tomorrow, or email ${CONTACT}.`,
+  ip_day: `You have used today's 50 messages. Please come back tomorrow, or email ${CONTACT}.`,
   ip_minute: 'Please slow down a little and try again in a minute.',
   ip_budget: `You have used your share of today's chat budget. Please come back tomorrow, or email ${CONTACT}.`,
   global: `The chat has used up its free daily budget and rests until 00:00 UTC. Please try again later, or email ${CONTACT}.`,
