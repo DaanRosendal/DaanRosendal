@@ -680,7 +680,8 @@ async function build() {
           answerBubble.textContent = '';
         }
         markdown.write(piece);
-        scroll();
+        // Follow the answer only while the visitor is at its end: scrolling up to reread something is left alone.
+        if (fromBottom < 40) scroll();
       });
       markdown.end();
       settle([answerBubble]);
