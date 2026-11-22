@@ -3,6 +3,7 @@
 // text nodes, never as HTML.
 // The conversation's styles ride along with this script (an inline string), so pages that never use the chat do not carry them.
 import { createRenderer } from 'limmat';
+import { speedHighlight } from 'limmat/highlight';
 import limmatCss from 'limmat/style.css?inline';
 import css from './chat.css?inline';
 import { applyDock, attachDock, resetDock } from './dock';
@@ -134,13 +135,22 @@ function go(path: string) {
 
 const LANGS: Record<string, string> = { typescript: 'ts', tsx: 'ts', javascript: 'js', jsx: 'js', mjs: 'js', python: 'py', shell: 'bash', sh: 'bash', zsh: 'bash', yml: 'yaml', rust: 'rs', golang: 'go', cpp: 'c', 'c++': 'c', markdown: 'md', text: 'plain', txt: 'plain' };
 
+// Skips very large blocks and very long lines, which the highlighter would take seconds on.
+const highlightCode = speedHighlight();
+
 function renderer(target: HTMLElement) {
   return createRenderer(target, {
     // The highlighter and each language load as their own small files, only when a code block closes.
-    highlight: async (code, _text, lang) => {
-      const { highlightElement } = await import('@speed-highlight/core');
-      const name = lang.toLowerCase();
-      await highlightElement(code, LANGS[name] ?? (name || 'plain'));
+    highlight: (code, text, lang) => highlightCode(code, text, LANGS[lang.toLowerCase()] ?? lang.toLowerCase()),
+    // KaTeX and its stylesheet (the fonts load from /_astro/ when a formula needs them) load only when an answer contains a formula.
+    renderMath: async (box, tex, info) => {
+      const [{ default: katex }, { katexMath }, { default: katexCss }] = await Promise.all([import('katex'), import('limmat/katex'), import('katex/dist/katex.min.css?inline')]);
+      if (!document.getElementById('katex-css')) {
+        const style = el('style', undefined, katexCss);
+        style.id = 'katex-css';
+        document.head.append(style);
+      }
+      await katexMath(katex)(box, tex, info);
     },
     isInternalPath: (path) => pages.has(path.split(/[?#]/)[0]),
     onLinkClick: (href, event) => {
