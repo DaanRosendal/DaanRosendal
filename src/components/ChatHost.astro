@@ -146,7 +146,7 @@ import { ArrowDownRight, ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maxi
     /* Where the page can slide aside (a window of 72rem and more, see 'Making room' below) the dock is the full height with the
        same 1rem gap at the top as at the bottom, at most 64rem. On narrower windows it still overlaps the page, so it takes 86%. */
     --dock-h-auto: clamp(26rem, 86dvh, 60rem);
-    --dock-w: min(max(var(--s-w, 23rem), 21rem), 100% - 1rem);
+    --dock-w: min(max(var(--s-w, clamp(21rem, 30vw, 23rem)), 21rem), 100% - 1rem);
     --dock-h: min(max(var(--s-h, var(--dock-h-auto)), 20rem), 100dvh - 1rem);
     --dock-r: clamp(0.5rem, var(--s-r, 1rem), calc(100% - var(--dock-w) - 0.5rem));
     --dock-b: clamp(0.5rem, var(--s-b, 1rem), calc(100dvh - var(--dock-h) - 0.5rem));
@@ -158,25 +158,31 @@ import { ArrowDownRight, ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maxi
     }
   }
 
-  /* Making room for the dock. The page is a centered 48rem column (Layout), so on a wide screen the dock would sit over its
-     right edge. While the dock is open the column slides left by just the overlap (plus a 0.5rem gap), never further than its
-     own side margin, so its text keeps the 1.5rem side padding. The width stays the same: squeezing it would shrink the cards.
-     Below about 1,000px the margin is too small to clear the dock and the rest overlaps, as before (the dock can be moved
-     and resized). A dock moved to the left half of the window leaves the column alone (the clamp in the last term is 0 there).
-     Only 'left' changes on a relative body: a transform would become the containing block of the fixed chat. */
-  html body {
-    position: relative;
-    left: 0;
-    transition: left 0.45s ease;
+  /* Making room for the dock. The page is a centered 48rem column (this is what max-w-3xl mx-auto is on a page without the chat),
+     so on a wide screen the dock would sit over its right edge. While the dock is open the column keeps to the space left of
+     the dock (a 1rem gap between its text and the dock, counted from the padding): it slides left by the overlap, and when it cannot slide any further (its side margin is used up)
+     it gets narrower, down to 42.5rem, where the site's own 3-column layout starts (680px of window plus the 1.5rem padding).
+     Below that the rest overlaps, as before (the dock can be moved and resized). A dock moved to the left half of the window
+     leaves the column alone (the clamp in --reserved is 0 there). margin-left and max-width ease with the dock. */
+  .chat-page {
+    max-width: 48rem;
+    margin-left: max(0px, calc((100% - 48rem) / 2));
+    margin-right: auto;
+    transition:
+      margin-left 0.45s ease,
+      max-width 0.45s ease;
   }
-  html.chat-dragging body {
+  html.chat-dragging .chat-page {
     transition: none;
   }
-  html[data-chat='dock'] body {
-    --margin: calc((100% - 48rem) / 2);
-    left: calc(
-      -1 * max(0px, min(var(--dock-w) + var(--dock-r) - var(--margin) - 0.5rem, var(--margin), clamp(0px, (50% - var(--dock-r) - var(--dock-w) / 2) * 10000, 100000px)))
+  html[data-chat='dock'] .chat-page {
+    --reserved: min(
+      calc(var(--dock-w) + var(--dock-r) - 0.5rem),
+      clamp(0px, (50% - var(--dock-r) - var(--dock-w) / 2) * 10000, 100000px)
     );
+    --free: calc(100% - var(--reserved));
+    max-width: max(42.5rem, min(48rem, var(--free)));
+    margin-left: min(max(0px, calc((100% - 48rem) / 2)), max(0px, calc(var(--free) - 48rem)));
   }
 
   .chat,
@@ -627,7 +633,7 @@ import { ArrowDownRight, ArrowUp, ChevronLeft, ChevronRight, MessageCircle, Maxi
       animation: chat-fade 0.4s ease 0.5s forwards;
       transition: none;
     }
-    html body {
+    .chat-page {
       transition: none;
     }
     .chat-tab {
