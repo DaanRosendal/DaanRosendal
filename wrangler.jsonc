@@ -23,5 +23,5 @@
   ],
   // Every day at 03:17 UTC: chats older than 90 days lose the columns that point to a person (src/worker/log.ts).
   "triggers": { "crons": ["17 3 * * *"] },
-  "observability": { "enabled": true }
+  "observability": { "enabled": true, "issues": { "enabled": true } }
 }

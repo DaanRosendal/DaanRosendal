@@ -10,6 +10,10 @@ import { applyDock, attachDock, resetDock } from './dock';
 import { thinking } from './thinking';
 
 const SITEKEY = ['localhost', '127.0.0.1'].includes(location.hostname) ? '1x00000000000000000000AA' : '0x4AAAAAAF5IJpF-SESG-Kls';
+// Give up on the human check's script, on the answer's first words, and on a stream that goes quiet. The answer itself has no limit.
+const TURNSTILE_LOAD_MS = 15_000;
+const FIRST_WORDS_MS = 45_000;
+const QUIET_MS = 30_000;
 const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 const MAX_HISTORY = 6;
 const CONTACT = 'contact@daanrosendal.com';
@@ -167,15 +171,26 @@ function renderer(target: HTMLElement) {
 function loadTurnstile() {
   turnstileLoading ??= new Promise<void>((resolve, reject) => {
     if (window.turnstile) return resolve();
-    const script = el('script');
-    script.src = TURNSTILE_SRC;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => {
+    // A script from an earlier try that is still on its way is waited for again, not added twice.
+    let script = document.querySelector<HTMLScriptElement>('script[data-turnstile]');
+    if (!script) {
+      script = el('script');
+      script.src = TURNSTILE_SRC;
+      script.async = true;
+      script.dataset.turnstile = '';
+      document.head.append(script);
+    }
+    const timer = setTimeout(() => {
       turnstileLoading = undefined;
+      reject(new Error('The human check took too long to load. Please try again, or email me instead.'));
+    }, TURNSTILE_LOAD_MS);
+    script.addEventListener('load', () => (clearTimeout(timer), resolve()));
+    script.addEventListener('error', () => {
+      clearTimeout(timer);
+      turnstileLoading = undefined;
+      script!.remove();
       reject(new Error('The human check could not load. Please turn off content blockers for this page, or email me instead.'));
-    };
-    document.head.append(script);
+    });
   });
   return turnstileLoading;
 }
@@ -214,7 +229,7 @@ async function humanToken(slot: HTMLElement) {
 }
 
 // The server streams Server-Sent Events: lines like `data: {"choices":[{"delta":{"content":"..."}}]}`.
-async function readAnswer(response: Response, onPiece: (piece: string) => void) {
+async function readAnswer(response: Response, onPiece: (piece: string) => void, onRead: () => void) {
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
@@ -239,6 +254,7 @@ async function readAnswer(response: Response, onPiece: (piece: string) => void) 
   };
   for (;;) {
     const { done, value } = await reader.read();
+    onRead();
     buffer += decoder.decode(value, { stream: !done });
     let newline;
     while ((newline = buffer.indexOf('\n')) >= 0) {
@@ -663,10 +679,6 @@ async function build() {
   async function submit(raw: string, from?: 'pill') {
     const text = raw.trim();
     if (!text || busy) return;
-    if (!navigator.onLine) {
-      addMessage('note', `You seem to be offline. Please try again when you are back online, or email ${CONTACT}.`);
-      return;
-    }
     busy = true;
     send.disabled = true;
     input.value = draft = '';
@@ -684,11 +696,20 @@ async function build() {
     let markdown: ReturnType<typeof renderer> | undefined;
     // Screen readers wait for the whole answer instead of announcing every streamed chunk.
     log.setAttribute('aria-busy', 'true');
+    // One timer for the whole request: the first words may take FIRST_WORDS_MS, and then every piece restarts a shorter one.
+    const abort = new AbortController();
+    let watchdog: ReturnType<typeof setTimeout> | undefined;
+    const watch = (ms: number) => {
+      clearTimeout(watchdog);
+      watchdog = setTimeout(() => abort.abort(), ms);
+    };
     try {
       const turnstile = await humanToken(slot);
       const page = { path: location.pathname, title: document.title.replace(/ - Daan Rosendal$/, '') };
       conversation ||= crypto.randomUUID();
+      watch(FIRST_WORDS_MS);
       const response = await fetch('/api/chat', {
+        signal: abort.signal,
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ messages: turns.slice(-MAX_HISTORY), turnstile, page, client: clientInfo(from) }),
@@ -705,7 +726,7 @@ async function build() {
         markdown.write(piece);
         // Follow the answer only while the visitor is at its end: scrolling up to reread something is left alone.
         if (following) scroll();
-      });
+      }, () => watch(QUIET_MS));
       markdown?.end();
       settle([answerBubble]);
       if (!answer.trim()) throw new Error('No answer came back. Please try again.');
@@ -714,10 +735,12 @@ async function build() {
       turns.pop();
       markdown?.destroy();
       answerBubble.remove();
-      addMessage('note', error instanceof Error ? error.message : 'Something went wrong. Please try again.');
+      const timedOut = error instanceof DOMException && error.name === 'AbortError';
+      addMessage('note', timedOut ? `The answer took too long. Please try again, or email ${CONTACT}.` : error instanceof Error ? error.message : 'Something went wrong. Please try again.');
       input.value = draft = text;
       grow();
     } finally {
+      clearTimeout(watchdog);
       log.removeAttribute('aria-busy');
       busy = false;
       send.disabled = false;

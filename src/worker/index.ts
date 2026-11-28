@@ -1,7 +1,8 @@
 import context from './context.generated.txt';
 import { Limiter } from './limiter';
 import { describePing, pingTelegram } from './notify';
-import { clearOld,describeVisit, fingerprint, readClient, saveTurn, type Outcome, type TurnRecord } from './log';
+import { clearOld, describeVisit, fingerprint, readClient, saveTurn, type Outcome, type TurnRecord } from './log';
+import { runProbe } from './probe';
 import { SYSTEM_PROMPT, todayLine } from './prompt';
 
 export { Limiter };
@@ -15,7 +16,7 @@ const MAX_CHARS = { user: 800, assistant: 4000 };
 const MAX_ANSWER_TOKENS = 700;
 
 // Models change often, so the choice lives here. Neuron prices are per million tokens (input, output).
-// The second model is only tried when the first one is gone (deprecated) or no longer free.
+// The next model is tried whenever the one before it fails, except when the day's allowance is used up (all models share it).
 const MODELS = [
   { id: '@cf/google/gemma-4-26b-a4b-it', input: 9091, output: 27273, extra: { chat_template_kwargs: { enable_thinking: false } } },
   { id: '@cf/zai-org/glm-4.7-flash', input: 5500, output: 36400, extra: {} },
@@ -63,6 +64,8 @@ const reply = (status: number, reason: Reason, extra: Record<string, string> = {
   });
 
 const log = (fields: Record<string, unknown>) => console.log(JSON.stringify(fields));
+// Failures go through console.error, which Workers Issues (observability.issues in wrangler.jsonc) records and groups.
+const logError = (fields: Record<string, unknown>) => console.error(JSON.stringify(fields));
 
 const isLocal = (hostname: string) => hostname === 'localhost' || hostname === '127.0.0.1';
 
@@ -211,7 +214,7 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
   if (raw.length > MAX_BODY_CHARS) return reply(413, 'bad_request');
   let body: { messages?: unknown; turnstile?: unknown; page?: unknown; client?: unknown };
   try {
-    body = JSON.parse(raw);
+    body = JSON.parse(raw) ?? {};
   } catch {
     return reply(400, 'bad_request');
   }
@@ -250,13 +253,18 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
         };
         // A ping for every question and its answer, but none for a visitor who hit a limit (that could be a flood).
         if (!record.outcome.startsWith('ip_')) {
-          const turnNumber = history.filter((message) => message.role === 'user').length;
-          ctx.waitUntil(pingTelegram(env, describePing({ turnNumber, visit, client, turn: record })));
+          try {
+            const turnNumber = history.filter((message) => message.role === 'user').length;
+            ctx.waitUntil(pingTelegram(env, describePing({ turnNumber, visit, client, turn: record })));
+          } catch (error) {
+            // Nothing may keep the answer from being saved below.
+            logError({ outcome: 'ping_error', error: error instanceof Error ? error.name : 'unknown' });
+          }
         }
         try {
           await saveTurn(env.DB, client, visit, record);
         } catch (error) {
-          log({ outcome: 'db_error', error: String(error).slice(0, 200) });
+          logError({ outcome: 'db_error', error: String(error).slice(0, 200) });
         }
       })(),
     );
@@ -267,7 +275,7 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
     verdict = await limiter.reserve(key, estimate);
   } catch (error) {
     // The counter is unreachable, so refuse: better a resting chat than an unmetered one.
-    log({ outcome: 'limiter_error', error: String(error) });
+    logError({ outcome: 'limiter_error', error: String(error) });
     return reply(503, 'unavailable');
   }
   if (!verdict.ok) {
@@ -305,7 +313,12 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
           const seen = await readStream(toMeter, began);
           const { usage } = seen;
           const actual = usage ? (usage.neurons ?? (usage.prompt * model.input + usage.completion * model.output) / 1_000_000) : estimate;
-          await limiter.settle(key, estimate, actual);
+          try {
+            await limiter.settle(key, estimate, actual);
+          } catch (error) {
+            // The reservation then stays held, which is the careful side. The answer is still logged and saved below.
+            logError({ outcome: 'limiter_error', step: 'settle', error: String(error).slice(0, 200) });
+          }
           log({ outcome: 'answered', model: model.id, visitor: key.slice(0, 6), estimate: Math.round(estimate), actual: Math.round(actual), usage: !!usage, ms: Date.now() - started });
           const outcome: Outcome = !seen.answer ? 'ai_error' : seen.finish === 'length' ? 'truncated' : 'answered';
           save({
@@ -324,7 +337,7 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
       return new Response(toVisitor, { headers });
     } catch (error) {
       const message = String(error);
-      log({ outcome: 'ai_error', model: model.id, error: message.slice(0, 300) });
+      logError({ outcome: 'ai_error', model: model.id, error: message.slice(0, 300) });
       // Daily free allowance used up (error 3036): stop calling until the counters reset at 00:00 UTC.
       // Error 3040 (out of capacity) is momentary, so it only fails this one request.
       if (/3036|daily free allocation/i.test(message)) {
@@ -332,9 +345,9 @@ async function chat(request: Request, env: Env, ctx: ExecutionContext) {
         save({ outcome: 'global', model: model.id });
         return reply(429, 'global');
       }
-      // Model deprecated (5028) or not free anymore (5035): try the next one.
-      if (/5028|5035|deprecated|workers paid/i.test(message)) continue;
-      break;
+      // Anything else (a deprecated model 5028, no longer free 5035, out of capacity 3040, a server error, a stream that
+      // never came): the next model gets a go. When the last one fails too, the visitor gets the 502 below.
+      continue;
     }
   }
   ctx.waitUntil(limiter.settle(key, estimate, 0));
@@ -356,7 +369,9 @@ export default {
     ctx.waitUntil(
       clearOld(env.DB)
         .then((conversations) => log({ outcome: 'cleared', conversations }))
-        .catch((error) => log({ outcome: 'clear_error', error: String(error).slice(0, 200) })),
+        .catch((error) => logError({ outcome: 'clear_error', error: String(error).slice(0, 200) })),
     );
+    // The daily probe of the models: silent when all is well, a Telegram alert when not (probe.ts).
+    ctx.waitUntil(runProbe(env, MODELS, readStream));
   },
 } satisfies ExportedHandler<Env>;

@@ -3,7 +3,11 @@
 import type { ClientInfo, TurnRecord, Visit } from './log';
 
 const esc = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const cut = (value: string, max: number) => (value.length > max ? `${value.slice(0, max)}...` : value);
+// Cut by whole characters (an emoji is two UTF-16 units), so the text never ends in half a character.
+const cut = (value: string, max: number) => {
+  const chars = Array.from(value);
+  return chars.length > max ? `${chars.slice(0, Math.max(0, Math.floor(max))).join('')}...` : value;
+};
 
 export interface Ping {
   turnNumber: number;
@@ -32,7 +36,8 @@ export function describePing({ turnNumber, visit, client, turn }: Ping) {
       `<b>Answer</b>\n<blockquote>${turn.answer ? esc(cut(turn.answer, 2000 * scale)) : '(none)'}</blockquote>`,
       details,
     ].join('\n\n');
-    if (text.length <= 4000 || scale < 0.05) return text.slice(0, 4000);
+    // Cutting the text at a fixed length could split a tag or an entity, so the texts are cut before they are escaped instead.
+    if (text.length <= 4000 || scale < 0.01) return text;
   }
 }
 
@@ -46,9 +51,9 @@ export async function pingTelegram(env: Env, text: string) {
       signal: AbortSignal.timeout(5000),
     });
     // The response body can name the request, never the token, but only the status is logged anyway.
-    if (!response.ok) console.log(JSON.stringify({ outcome: 'telegram_error', status: response.status }));
+    if (!response.ok) console.error(JSON.stringify({ outcome: 'telegram_error', status: response.status }));
   } catch (error) {
     // The error text could contain the request URL, which holds the token, so log only its kind.
-    console.log(JSON.stringify({ outcome: 'telegram_error', error: error instanceof Error ? error.name : 'unknown' }));
+    console.error(JSON.stringify({ outcome: 'telegram_error', error: error instanceof Error ? error.name : 'unknown' }));
   }
 }
